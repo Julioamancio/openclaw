@@ -1,0 +1,16 @@
+[
+  {
+    "id": "oc-1",
+    "title": "Setup concluído: Kimi K2.5 primary + GPT-5.3 fallback",
+    "content": "Primary: nvidia-nim/moonshotai/kimi-k2.5 | Fallback: openai-codex/gpt-5.3-codex | NVIDIA API key configurada | Gateway local na porta 18789",
+    "createdAt": "2026-02-20",
+    "priority": "high"
+  },
+  {
+    "id": "oc-2",
+    "title": "Second Brain criado em NextJS",
+    "content": "Sistema de memória com tópicos organizados. Dashboard + páginas por categoria. Dados em JSON por tópico.",
+    "createdAt": "2026-02-20",
+    "priority": "high"
+  }
+]

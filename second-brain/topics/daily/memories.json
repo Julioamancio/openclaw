@@ -1,0 +1,9 @@
+[
+  {
+    "id": "daily-1",
+    "title": "Backup diário obrigatório",
+    "content": "22:00 America/Sao_Paulo - commit e push de: *.md, memory/, second-brain/data/ e second-brain/topics/",
+    "createdAt": "2026-02-20",
+    "priority": "critical"
+  }
+]

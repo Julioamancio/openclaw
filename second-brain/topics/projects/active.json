@@ -1,0 +1,16 @@
+[
+  {
+    "id": "proj-1",
+    "title": "Second Brain",
+    "status": "active",
+    "progress": 80,
+    "notes": "NextJS app com organização por tópicos. Falta: integração dinâmica de carregamento."
+  },
+  {
+    "id": "proj-2",
+    "title": "OTServer Setup",
+    "status": "pending",
+    "progress": 0,
+    "notes": "Instalação bare metal prevista para 2026-02-21."
+  }
+]

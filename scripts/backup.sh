@@ -18,7 +18,7 @@ if [ -d "$SECOND_BRAIN" ]; then
     echo "Verificando Second Brain..."
     cd "$SECOND_BRAIN"
     # Rebuild se necessário (simplificado)
-    if git diff --name-only | grep -q "data/"; then
+    if git diff --name-only | grep -q "topics/"; then
         echo "Dados do Second Brain alterados, rebuildando..."
         npm run build 2>/dev/null || echo "Build não executado (node_modules pode estar faltando)"
     fi
@@ -26,12 +26,11 @@ if [ -d "$SECOND_BRAIN" ]; then
 fi
 
 # Adicionar todos os arquivos
-# Inclui: *.md, memory/, second-brain/data/, second-brain/README.md
+# Inclui: *.md, memory/, second-brain/topics/
 git add AGENTS.md SOUL.md USER.md IDENTITY.md TOOLS.md MEMORY.md HEARTBEAT.md 2>/dev/null || true
 git add memory/ 2>/dev/null || true
-git add second-brain/data/ 2>/dev/null || true
+git add second-brain/topics/ 2>/dev/null || true
 git add second-brain/README.md 2>/dev/null || true
-git add second-brain/data/*.json 2>/dev/null || true
 
 # Commit se houver mudanças
 if git diff --cached --quiet; then
