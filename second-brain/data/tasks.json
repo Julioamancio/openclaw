@@ -1,0 +1,37 @@
+[
+  {
+    "id": "1",
+    "title": "Completar setup do Second Brain",
+    "completed": true,
+    "dueDate": "2026-02-20",
+    "priority": "high"
+  },
+  {
+    "id": "2",
+    "title": "Instalar OTServer",
+    "completed": false,
+    "dueDate": "2026-02-21",
+    "priority": "high"
+  },
+  {
+    "id": "3",
+    "title": "Backup diário às 22:00",
+    "completed": false,
+    "dueDate": "2026-02-20",
+    "priority": "medium"
+  },
+  {
+    "id": "4",
+    "title": "Testar modelos configurados",
+    "completed": true,
+    "dueDate": "2026-02-20",
+    "priority": "medium"
+  },
+  {
+    "id": "5",
+    "title": "Configurar backup automático do Second Brain",
+    "completed": true,
+    "dueDate": "2026-02-20",
+    "priority": "high"
+  }
+]

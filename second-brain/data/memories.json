@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "title": "Configuração OpenClaw concluída",
+    "content": "Setup do Mike com primary model nvidia-nim/moonshotai/kimi-k2.5 e fallback openai-codex/gpt-5.3-codex. Gateway funcionando em modo local.",
+    "createdAt": "2026-02-20",
+    "tags": ["setup", "openclaw", "ai", "infra"]
+  },
+  {
+    "id": "2",
+    "title": "Backup obrigatório diário",
+    "content": "Todo dia às 22:00 (America/Sao_Paulo) fazer commit e push do backup. Inclui: AGENTS.md, SOUL.md, USER.md, IDENTITY.md, MEMORY.md, HEARTBEAT.md, memory/*.md, e agora second-brain/",
+    "createdAt": "2026-02-20",
+    "tags": ["backup", "cron", "importante", "padrao"]
+  },
+  {
+    "id": "3",
+    "title": "Second Brain criado",
+    "content": "Sistema de memória ativa em NextJS. Dashboard com memórias, documentos e tarefas. Faz parte do backup diário. Local: /root/.openclaw/workspace/second-brain/",
+    "createdAt": "2026-02-20",
+    "tags": ["second-brain", "memoria", "nextjs", "projeto"]
+  },
+  {
+    "id": "4",
+    "title": "Instalação OTServer amanhã",
+    "content": "Instalar OTServer e site fora do Docker (bare metal). Preparar ambiente e configs.",
+    "createdAt": "2026-02-20",
+    "tags": ["otserver", "tibia", "infra", "pendente"]
+  }
+]
