@@ -207,6 +207,32 @@ Think of it like a human reviewing their journal and updating their mental model
 
 The goal: Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.
 
+## Second Brain — Uso Eficiente (Sem Custos)
+
+Objetivo: Recuperar contexto relevante sem carregar MEMORY.md inteiro.
+
+### Fluxo
+1. Receber pergunta do usuário
+2. Extrair keywords principais (1-3 termos)
+3. Buscar em `second-brain/data/memories.json` via `grep -i` ou `read` + filtro
+4. Injetar APENAS memórias relevantes no contexto da resposta
+5. Responder com base no contexto recuperado + histórico da conversa
+
+### Regras
+- Máximo 3 memórias por consulta (evita poluição de contexto)
+- Se nenhuma memória relevante: prosseguir sem (não forçar)
+- MEMORY.md continua existindo como fallback mínimo
+- Keyword search é suficiente enquanto houver < 100 memórias
+
+### Comando de busca (padrão)
+```bash
+grep -i "keyword" second-brain/data/memories.json -B2 -A4
+```
+
+Ou ler o JSON e filtrar por tags/title/content.
+
+---
+
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
