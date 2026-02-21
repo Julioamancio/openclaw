@@ -53,7 +53,7 @@ if git rev-parse --abbrev-ref HEAD@{upstream} >/dev/null 2>&1; then
         git pull --rebase || echo "Pull falhou"
     else
         echo "Enviando push..."
-        git push origin main && echo "Push concluído com sucesso" || echo "Push falhou"
+        git push origin main 2>/dev/null && echo "Push concluído com sucesso" || echo "Push falhou ou nada para enviar"
     fi
 else
     echo "Nenhum upstream configurado. Configurar com: git push -u origin main"

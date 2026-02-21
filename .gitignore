@@ -16,6 +16,9 @@ npm-debug.log*
 # Runtime data
 .openclaw/
 
+# Email monitor secrets
+email-monitor/.env
+
 # IDEs
 .vscode/
 .idea/

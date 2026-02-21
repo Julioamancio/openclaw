@@ -1,0 +1,3 @@
+📧 *Monitor de Emails*
+
+Nenhum email dos remetentes monitorados nas últimas 12h.
