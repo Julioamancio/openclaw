@@ -1,0 +1,32 @@
+{
+  "accounts": [
+    {
+      "name": "gmail-pessoal",
+      "email": "julioamancio2014@gmail.com",
+      "appPassword": "REDACTED_GMAIL_PERSONAL_APP_PASSWORD",
+      "imap": "imap.gmail.com:993"
+    },
+    {
+      "name": "gmail-csa",
+      "email": "julio.amancio@colegiosantoantonio.com.br",
+      "appPassword": "REDACTED_GMAIL_CSA_APP_PASSWORD",
+      "imap": "imap.gmail.com:993"
+    }
+  ],
+  "monitoredSenders": [
+    "carlos.fonseca@colegiosantoantonio.com.br",
+    "caroline.xavier@colegiosantoantonio.com.br",
+    "fernanda.campos@colegiosantoantonio.com.br",
+    "fernanda.horta@colegiosantoantonio.com.br",
+    "ivana.pinheiro@colegiosantoantonio.com.br",
+    "julio.amancio@colegiosantoantonio.com.br",
+    "natalia.mendes@colegiosantoantonio.com.br",
+    "renata.bahia@colegiosantoantonio.com.br",
+    "secretaria@csjbh.com.br"
+  ],
+  "schedule": {
+    "times": ["08:00", "16:00"],
+    "timezone": "America/Sao_Paulo"
+  },
+  "notificationChannel": "telegram"
+}
