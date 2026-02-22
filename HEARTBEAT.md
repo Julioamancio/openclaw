@@ -59,6 +59,7 @@ git push origin main || echo "Push falhou"
 - natalia.mendes@colegiosantoantonio.com.br
 - renata.bahia@colegiosantoantonio.com.br
 - secretaria@csjbh.com.br
+- juliana.furtado@csjbh.com.br
 
 ### Comando de Verificação
 ```bash
