@@ -3,162 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris Modern</title>
+    <title>Tetris Pro</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
-        }
-        .container {
-            background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
-            border-radius: 20px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;
-        }
-        h1 { color: #fff; font-size: 2.5rem; text-align: center; text-shadow: 0 0 20px rgba(229,57,53,0.5); }
-        .board { background: #0a0a0a; border-radius: 10px; padding: 10px; }
-        canvas { display: block; border-radius: 5px; }
-        .sidebar { display: flex; flex-direction: column; gap: 15px; min-width: 140px; }
-        .box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; text-align: center; }
-        .box h3 { color: #888; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 5px; }
-        .box .val { color: #fff; font-size: 1.5rem; font-weight: 700; }
-        #next { background: #0a0a0a; border-radius: 8px; }
-        .ctrl { font-size: 0.75rem; color: #888; line-height: 1.6; }
-        .ctrl span { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #fff; }
-        button {
-            background: linear-gradient(135deg, #e53935, #b71c1c); border: none; color: white;
-            padding: 12px 25px; font-size: 1rem; border-radius: 10px; cursor: pointer;
-            font-weight: 600; text-transform: uppercase;
-        }
-        button:hover { transform: translateY(-2px); }
-        .over { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95); color: #fff; padding: 30px 50px; border-radius: 15px;
-            text-align: center; display: none; border: 2px solid #e53935;
-        }
-        .over h2 { color: #e53935; font-size: 2rem; margin-bottom: 15px; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:system-ui,sans-serif;padding:20px}
+        .wrap{background:rgba(255,255,255,0.05);border-radius:20px;padding:30px;box-shadow:0 25px 50px rgba(0,0,0,0.4);display:flex;gap:25px;flex-wrap:wrap;justify-content:center}
+        h1{color:#fff;text-align:center;margin-bottom:15px;font-size:2.2rem;text-shadow:0 0 20px rgba(0,212,170,0.5)}
+        .board{background:#000;padding:10px;border-radius:10px;box-shadow:inset 0 0 20px rgba(0,0,0,0.8)}
+        #game{display:block;border-radius:5px}
+        .side{display:flex;flex-direction:column;gap:12px;min-width:140px;color:#fff}
+        .stat{background:rgba(255,255,255,0.1);border-radius:12px;padding:18px;text-align:center}
+        .stat h3{color:#888;font-size:0.75rem;text-transform:uppercase;margin-bottom:5px}
+        .stat .v{font-size:1.8rem;font-weight:bold;color:#fff}
+        #next{background:#000;border-radius:8px;display:block;margin:0 auto}
+        .btn{background:linear-gradient(135deg,#00d4aa,#00b894);border:none;color:#fff;padding:15px 30px;font-size:1.1rem;border-radius:10px;cursor:pointer;font-weight:bold;width:100%;margin-top:10px;transition:transform 0.2s}
+        .btn:active{transform:scale(0.95)}
+        .over{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);justify-content:center;align-items:center;z-index:1000}
+        .oc{background:#16213e;padding:40px 60px;border-radius:20px;text-align:center;border:3px solid #e53935}
+        .oc h2{color:#e53935;font-size:2.5rem;margin-bottom:15px}
+        .oc p{color:#fff;font-size:1.3rem;margin-bottom:25px}
+        .tc{display:none;margin-top:20px}
+        .tr{display:flex;justify-content:center;gap:12px;margin-bottom:12px}
+        .tb{width:70px;height:60px;border:none;border-radius:12px;font-size:1.4rem;cursor:pointer;background:rgba(255,255,255,0.2);color:#fff}
+        .tb:active{background:rgba(255,255,255,0.4)}
+        .tb.rot{background:linear-gradient(180deg,#9f7aea,#6b46c1)}
+        .tb.drop{background:linear-gradient(180deg,#48bb78,#276749)}
+        .tb.hard{background:linear-gradient(180deg,#f56565,#c53030)}
+        @media (max-width:600px){.wrap{flex-direction:column}.side{flex-direction:row;flex-wrap:wrap}.side>div{flex:1;min-width:90px}.tc{display:block}h1{font-size:1.6rem}}
     </style>
 </head>
 <body>
-    <div class="container">
-        <div>
-            <h1>🎮 TETRIS</h1>
-            <div class="board"><canvas id="game" width="300" height="600"></canvas></div>
-        </div>
-        <div class="sidebar">
-            <div class="box"><h3>Pontos</h3><div class="val" id="s">0</div></div>
-            <div class="box"><h3>Nível</h3><div class="val" id="l">1</div></div>
-            <div class="box"><h3>Linhas</h3><div class="val" id="ln">0</div></div>
-            <div class="box"><h3>Próxima</h3><canvas id="next" width="120" height="120"></canvas></div>
-            <div class="ctrl">
-                <span>←→</span> Mover<br>
-                <span>↑</span> Girar<br>
-                <span>↓</span> Acelerar<br>
-                <span>Espaço</span> Queda<br>
-                <span>P</span> Pausar
-            </div>
-            <button onclick="toggle()" id="btn">Iniciar</button>
-        </div>
+<div class="wrap">
+    <div><h1>🎮 TETRIS</h1><div class="board"><canvas id="game" width="300" height="600"></canvas></div>
+    <div class="tc">
+        <div class="tr"><button class="tb" id="L">◀</button><button class="tb rot" id="R">↻</button><button class="tb" id="Rt">▶</button></div>
+        <div class="tr"><button class="tb drop" id="S">↓</button><button class="tb hard" id="H">⤓</button></div>
+    </div></div>
+    <div class="side">
+        <div class="stat"><h3>Pontos</h3><div class="v" id="s">0</div></div>
+        <div class="stat"><h3>Nível</h3><div class="v" id="l">1</div></div>
+        <div class="stat"><h3>Linhas</h3><div class="v" id="ln">0</div></div>
+        <div class="stat"><h3>Próxima</h3><canvas id="next" width="100" height="100"></canvas></div>
+        <button class="btn" id="st">Iniciar</button>
     </div>
-    <div class="over" id="over"><h2>GAME OVER</h2><p>Pontos: <span id="fs">0</span></p><button onclick="reset()">Jogar</button></div>
+</div>
+<div class="over" id="ov"><div class="oc"><h2>GAME OVER</h2><p>Final: <span id="fs">0</span></p><button class="btn" id="rst">Jogar</button></div></div>
 
 <script>
-const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
-const nCanvas = document.getElementById('next'), nCtx = nCanvas.getContext('2d');
-const COLS=10, ROWS=20, BS=30;
-const C = { I:'#00f5d4', O:'#fee440', T:'#a855f7', S:'#22c55e', Z:'#ef4444', J:'#3b82f6', L:'#f97316', 0:'#1a1a1a' };
-const S = {
-    I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
-    O:[[1,1],[1,1]],
-    T:[[0,1,0],[1,1,1],[0,0,0]],
-    S:[[0,1,1],[1,1,0],[0,0,0]],
-    Z:[[1,1,0],[0,1,1],[0,0,0]],
-    J:[[1,0,0],[1,1,1],[0,0,0]],
-    L:[[0,0,1],[1,1,1],[0,0,0]]
-};
-let board = Array(ROWS).fill().map(()=>Array(COLS).fill(0));
-let cur, next, score=0, lines=0, level=1, loop, drop=1000, playing=false, paused=false;
-
-function create(t) { return {shape:S[t], color:C[t], x:3, y:0}; }
-function randPiece() { const k=Object.keys(S); return create(k[Math.floor(Math.random()*k.length)]); }
-
-function drawBlock(ctx, x, y, c, s=BS) {
-    ctx.fillStyle=c; ctx.fillRect(x*s,y*s,s,s); ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.strokeRect(x*s,y*s,s,s);
-    ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillRect(x*s+3,y*s+3,s*0.25,s*0.25);
-}
-function draw() {
-    ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(board[y][x])drawBlock(ctx,x,y,board[y][x]);
-    if(cur)cur.shape.forEach((r,dy)=>r.forEach((c,dx)=>{if(c)drawBlock(ctx,cur.x+dx,cur.y+dy,cur.color);}));
-}
-function drawNext() {
-    nCtx.fillStyle='#0a0a0a';nCtx.fillRect(0,0,120,120);
-    if(!next)return; const ox=(4-next.shape[0].length)/2,oy=(4-next.shape.length)/2;
-    next.shape.forEach((r,dy)=>r.forEach((c,dx)=>{if(c)drawBlock(nCtx,ox+dx,oy+dy,next.color,28);}));
-}
-
-function valid(p,dx=0,dy=0,ns=p.shape) {
-    for(let y=0;y<ns.length;y++)for(let x=0;x<ns[y].length;x++)if(ns[y][x]){
-        const nx=p.x+x+dx,ny=p.y+y+dy;
-        if(nx<0||nx>=COLS||ny>=ROWS)return false;
-        if(ny>=0&&board[ny][nx])return false;
-    }
-    return true;
-}
-function lock() {
-    cur.shape.forEach((r,dy)=>r.forEach((c,dx)=>{if(c){const y=cur.y+dy,x=cur.x+dx;if(y>=0)board[y][x]=cur.color;}}));
-    clearLines(); newPiece();
-}
-function rotate(sh) {
-    const N=sh.length,M=sh[0].length,rot=Array(N).fill().map(()=>Array(M).fill(0));
-    for(let y=0;y<N;y++)for(let x=0;x<M;x++)rot[x][N-1-y]=sh[y][x];
-    return rot;
-}
-function tryRotate(){
-    const rot=rotate(cur.shape);
-    if(valid(cur,0,0,rot)){cur.shape=rot;return;}
-    for(let dx of[-1,1,-2,2])if(valid(cur,dx,0,rot)){cur.shape=rot;cur.x+=dx;return;}
-}
-function clearLines(){
-    let cleared=0;
-    for(let y=ROWS-1;y>=0;y--){
-        if(board[y].every(c=>c!==0)){board.splice(y,1);board.unshift(Array(COLS).fill(0));y++;cleared++;}
-    }
-    if(cleared>0){lines+=cleared;score+=cleared*100*level;if(cleared===4)score+=400;level=Math.floor(lines/10)+1;drop=Math.max(100,1000-(level-1)*80);updateUI();}
-}
-function newPiece(){
-    cur=next||randPiece();next=randPiece();drawNext();if(!valid(cur)){gameOver();}
-}
-function dropPiece(){if(valid(cur,0,1)){cur.y++;}else{lock();}}
-
-function update(){draw();if(!isValid(cur,0,1)){lock();}else{cur.y++;} draw();}
-function gameOver(){playing=false;clearInterval(loop);document.getElementById('fs').textContent=score;document.getElementById('over').style.display='block';document.getElementById('btn').textContent='Iniciar';}
-function isValid(p,dx=0,dy=0,ns=p.shape){return valid(p,dx,dy,ns);}
-function updateUI(){document.getElementById('s').textContent=score;document.getElementById('l').textContent=level;document.getElementById('ln').textContent=lines;}
-
-function toggle(){
-    if(playing){paused=!paused;document.getElementById('btn').textContent=paused?'Continuar':'Pausar';return;}
-    playing=true;paused=false;document.getElementById('btn').textContent='Pausar';
-    document.getElementById('over').style.display='none';
-    board=Array(ROWS).fill().map(()=>Array(COLS).fill(0));score=0;lines=0;level=1;drop=1000;updateUI();
-    newPiece();loop=setInterval(()=>{if(!paused){dropPiece();draw();}},drop);
-}
-function reset(){document.getElementById('over').style.display='none';toggle();}
-
-let fastDrop=false;
-document.addEventListener('keydown',e=>{
-    if(!playing||paused)return;
-    switch(e.key){
-        case 'ArrowLeft':if(valid(cur,-1,0))cur.x--;break;
-        case 'ArrowRight':if(valid(cur,1,0))cur.x++;break;
-        case 'ArrowDown':fastDrop=true;dropInterval=50;break;
-        case 'ArrowUp':tryRotate();break;
-        case ' ':while(valid(cur,0,1))cur.y++;lock();break;
-        case 'p':case'P':paused=!paused;if(paused)clearInterval(loop);else loop=setInterval(()=>{if(!paused){dropPiece();draw();}},drop);break;
-    }
-    draw();
-});
-document.addEventListener('keyup',e=>{ if(e.key==='ArrowDown'){fastDrop=false;dropInterval=drop;}});
+const c=document.getElementById('game'),x=c.getContext('2d');
+const n=document.getElementById('next'),nx=n.getContext('2d');
+const COLS=10,ROWS=20,BS=30;
+const C={I:'#00f5d4',O:'#fee440',T:'#a855f7',S:'#22c55e',Z:'#ef4444',J:'#3b82f6',L:'#f97316'};
+const S={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[0,1,0],[1,1,1]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
+let board=[],pc=null,np=null,score=0,lines=0,level=1,loop=null,drop=800,playing=false,paused=false;
+function mk(t){return{shape:S[t].map(r=>[...r]),color:C[t],x:3,y:0}}
+function rand(){const k=Object.keys(S);return mk(k[Math.floor(Math.random()*k.length)])}
+function drawB(ctx,cx,cy,col,sz){ctx.fillStyle=col;ctx.fillRect(cx*sz,cy*sz,sz,sz);ctx.strokeStyle='#000';ctx.strokeRect(cx*sz,cy*sz,sz,sz);ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(cx*sz+4,cy*sz+4,sz*0.3,sz*0.3)}
+function draw(){x.fillStyle='#0a0a0a';x.fillRect(0,0,300,600);for(let y=0;y<ROWS;y++)for(let cx=0;cx<COLS;cx++)if(board[y][cx])drawB(x,cx,y,board[y][cx],BS);if(pc)pc.shape.forEach((r,dy)=>r.forEach((cell,dx)=>{if(cell)drawB(x,pc.x+dx,pc.y+dy,pc.color,BS)}))}
+function drawN(){nx.fillStyle='#000';nx.fillRect(0,0,100,100);if(!np)return;const ox=Math.floor((4-np.shape[0].length)/2),oy=Math.floor((4-np.shape.length)/2);np.shape.forEach((r,dy)=>r.forEach((cell,dx)=>{if(cell)drawB(nx,ox+dx,oy+dy,np.color,25)}))}
+function check(p,dx=0,dy=0,ns=null){const sh=ns||p.shape;for(let y=0;y<sh.length;y++)for(let cx=0;cx<sh[y].length;cx++)if(sh[y][cx]){const nx=p.x+cx+dx,ny=p.y+y+dy;if(nx<0||nx>=COLS||ny>=ROWS)return false;if(ny>=0&&board[ny][nx])return false}return true}
+function rot(){const rows=pc.shape.length,cols=pc.shape[0].length,rt=Array(cols).fill().map(()=>Array(rows).fill(0));for(let y=0;y<rows;y++)for(let cx=0;cx<cols;cx++)rt[cx][rows-1-y]=pc.shape[y][cx];if(check(pc,0,0,rt))pc.shape=rt;else if(check(pc,-1,0,rt))pc.shape=rt,pc.x--;else if(check(pc,1,0,rt))pc.shape=rt,pc.x++}
+function lock(){pc.shape.forEach((r,dy)=>r.forEach((cell,dx)=>{if(cell){const y=pc.y+dy,cx=pc.x+dx;if(y>=0)board[y][cx]=pc.color}}));clearLines();spwn()}
+function clearLines(){let cl=0;for(let y=ROWS-1;y>=0;y--){if(board[y].every(c=>c!==0)){board.splice(y,1);board.unshift(Array(COLS).fill(0));cl++}}if(cl>0){lines+=cl;score+=cl*100*level;if(cl===4)score+=400;level=Math.floor(lines/10)+1;drop=Math.max(100,800-(level-1)*60);upd()}}
+function spwn(){pc=np||rand();np=rand();drawN();if(!check(pc))gameOver()}
+function upd(){document.getElementById('s').textContent=score;document.getElementById('l').textContent=level;document.getElementById('ln').textContent=lines}
+function gameOver(){playing=false;clearInterval(loop);document.getElementById('fs').textContent=score;document.getElementById('ov').style.display='flex';document.getElementById('st').textContent='Iniciar'}
+function dropP(){if(check(pc,0,1))pc.y++;else lock()}
+function toggle(){if(playing){paused=!paused;document.getElementById('st').textContent=paused?'Continuar':'Pausar';return}playing=true;paused=false;document.getElementById('st').textContent='Pausar';document.getElementById('ov').style.display='none';board=Array(ROWS).fill().map(()=>Array(COLS).fill(0));score=0;lines=0;level=1;drop=800;upd();spwn();loop=setInterval(()=>{if(!paused){dropP();draw()}},drop)}
+function rst(){document.getElementById('ov').style.display='none';toggle()}
+document.getElementById('st').onclick=toggle;document.getElementById('rst').onclick=rst;
+document.addEventListener('keydown',e=>{if(!playing||paused)return;switch(e.key){case'ArrowLeft':if(check(pc,-1,0))pc.x--;break;case'ArrowRight':if(check(pc,1,0))pc.x++;break;case'ArrowDown':dropP();break;case'ArrowUp':rot();break;case' ':while(check(pc,0,1))pc.y++;lock();break}draw()});
+const btns={L:[-1,0],Rt:[1,0],R:[0,0,'rot'],S:[0,0,'drop'],H:[0,0,'hard']};
+Object.keys(btns).forEach(id=>{
+    const b=document.getElementById(id),a=btns[id];
+    const act=(e)=>{e.preventDefault();if(!playing||paused)return;
+        if(a[2]==='rot')rot();
+        else if(a[2]==='drop')dropP();
+        else if(a[2]==='hard'){while(check(pc,0,1))pc.y++;lock()}
+        else if(check(pc,a[0],a[1]))pc.x+=a[0];
+        draw()};
+    b.addEventListener('touchstart',act);b.addEventListener('click',act)});
 </script>
 </body>
 </html>
