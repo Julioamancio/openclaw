@@ -1,0 +1,12 @@
+# Rebuild archives from parts
+cat OTserver24-02.zip.part-* > OTserver24-02.zip
+cat site-24-02.zip.part-* > "site 24-02.zip"
+
+# Optional check
+python3 - <<'PY'
+import zipfile
+for f in ['OTserver24-02.zip','site 24-02.zip']:
+    with zipfile.ZipFile(f) as z:
+        bad = z.testzip()
+    print(f, 'OK' if bad is None else f'BAD:{bad}')
+PY
