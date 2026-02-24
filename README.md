@@ -63,6 +63,19 @@ Este workspace contém a configuração completa de um agente AI operando via [O
 
 ---
 
+## 🤖 Configuração de Modelos (AI Providers)
+
+### Modelo Principal
+- **Provider:** NVIDIA-NIM
+- **Modelo:** `nvidia-nim/moonshotai/kimi-k2.5`
+
+### Fallback Automático
+**Fallback padrão:** `openai-codex/gpt-5.3-codex`
+
+Se o NVIDIA-NIM Kimi falhar, o sistema cai automaticamente para o Codex 5.3 via OAuth (já configurado no ambiente). Não requer intervenção manual.
+
+---
+
 ## 🔧 Funcionalidades Implementadas
 
 ### 1. 📧 Monitoramento de E-mails (IMAP)
