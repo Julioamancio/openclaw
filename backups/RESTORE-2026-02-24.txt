@@ -1,0 +1,2 @@
+cat OTserver-2026-02-24.zip.part-* > OTserver-2026-02-24.zip
+cat site-2026-02-24.zip.part-* > site-2026-02-24.zip
