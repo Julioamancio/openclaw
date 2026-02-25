@@ -9,7 +9,7 @@
   {
     "id": "2",
     "title": "Instalar OTServer",
-    "completed": false,
+    "completed": true,
     "dueDate": "2026-02-21",
     "priority": "high"
   },
