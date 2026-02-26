@@ -77,3 +77,30 @@ echo -e "a login julioamancio2014@gmail.com 'REDACTED_GMAIL_PERSONAL_APP_PASSWOR
 # Gmail profissional (CSA) - não lidos
 echo -e "a login julio.amancio@colegiosantoantonio.com.br 'REDACTED_GMAIL_CSA_APP_PASSWORD'\na select inbox\na search unseen\na logout" | openssl s_client -connect imap.gmail.com:993 -crlf -quiet 2>/dev/null | grep "^\\* SEARCH" | grep -v "SEARCH$" && echo "[GMAIL CSA] Há e-mails não lidos!" || echo "[GMAIL CSA] Caixa de entrada limpa."
 ```
+
+---
+## Ideia de Negócio Diária 💡
+**Horário:** 08:00 BRT (11:00 UTC) - junto com check de remetentes
+**Objetivo:** Sugerir 1 ideia de app, webservice ou SaaS rentável
+
+### Processo de Pesquisa:
+1. **Tendências:** Google Trends (BR + Global), Product Hunt, Indie Hackers
+2. **Validação:** Verificar se há demanda real, concorrência, viabilidade
+3. **Análise:** Nicho + monetização + stack técnica + MVP
+
+### Output Esperado:
+```
+💡 Ideia do Dia: [Nome do Projeto]
+
+🎯 Problema: [Qual dor resolve]
+👥 Público: [Quem paga]
+💰 Monetização: [Modelo de receita]
+🛠️ Stack: [Tecnologias sugeridas]
+⏱️ MVP: [Tempo estimado]
+📈 Tendência: [Por que agora é bom momento]
+```
+
+### Exclusão de Use Cases:
+- Nada de trading bots já saturados
+- Nada que precise de regulamentação complexa (fintech, healthtech)
+- Foco em B2B SaaS, automação, produtividade, nichos específicos
