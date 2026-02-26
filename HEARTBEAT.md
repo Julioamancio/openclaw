@@ -39,7 +39,8 @@ git push origin main || echo "Push falhou"
 ## Verificações Periódicas (Heartbeat)
 - [ ] **Gateway:** `openclaw gateway status`
 - [ ] **Disco:** `df -h /`
-- [ ] **E-mails não lidos** (Gmail pessoal + profissional)
+- [ ] **E-mails não lidos** (Gmail pessoal + profissional) — check SIMPLES: há não lidos? (Sim/Não)
+  - [ ] **Remetentes específicos** — SÓ às 08:00 e 16:00 BRT (não rolar em heartbeats fora desses horários)
 - [ ] **Second Brain:** estado dos dados em `/root/.openclaw/workspace/second-brain/data/`
 
 ---
