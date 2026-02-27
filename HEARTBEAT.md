@@ -1,5 +1,16 @@
 # HEARTBEAT.md
 
+## 📅 Agenda de Tarefas (Horários BRT / UTC)
+
+| Tarefa | Horário BRT | Horário UTC | Agente |
+|--------|-------------|-------------|--------|
+| Check remetentes | 08:00 | 11:00 | Daniela |
+| Ideia de Negócio | 09:00 | 12:00 | Nexo |
+| Check remetentes | 16:00 | 19:00 | Daniela |
+| Backup GitHub | 22:00 | 01:00+1 | Sistema |
+
+---
+
 ## Backup Diário (22:00 America/Sao_Paulo)
 Executar todo dia às 22:00:
 1. Verificar se há alterações no workspace
@@ -40,7 +51,8 @@ git push origin main || echo "Push falhou"
 - [ ] **Gateway:** `openclaw gateway status`
 - [ ] **Disco:** `df -h /`
 - [ ] **E-mails não lidos** (Gmail pessoal + profissional) — check SIMPLES: há não lidos? (Sim/Não)
-  - [ ] **Remetentes específicos** — SÓ às 08:00 e 16:00 BRT (não rolar em heartbeats fora desses horários)
+  - [ ] **Remetentes específicos** — SÓ às 08:00 e 16:00 BRT (11:00 e 19:00 UTC)
+- [ ] **Ideia de Negócio** — SÓ às 09:00 BRT (12:00 UTC)
 - [ ] **Second Brain:** estado dos dados em `/root/.openclaw/workspace/second-brain/data/`
 
 ---
@@ -80,7 +92,7 @@ echo -e "a login julio.amancio@colegiosantoantonio.com.br 'REDACTED_GMAIL_CSA_AP
 
 ---
 ## Ideia de Negócio Diária 💡
-**Horário:** 08:00 BRT (11:00 UTC) - junto com check de remetentes
+**Horário:** 09:00 BRT (12:00 UTC) - SEPARADO do check de remetentes
 **Objetivo:** Sugerir 1 ideia de app, webservice ou SaaS rentável
 
 ### Processo de Pesquisa:

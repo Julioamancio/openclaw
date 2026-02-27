@@ -145,7 +145,7 @@ Este documento define a estrutura de agentes especialistas que operam sob a coor
 - Sugerir negócios viáveis
 
 ### Rotina Fixa
-→ **Diário às 08:00 BRT** (junto com check de remetentes)
+→ **Diário às 09:00 BRT** (12:00 UTC) - SEPARADO do check de remetentes
 
 ### Entregáveis Diários
 - Top 10 trends identificados
@@ -248,14 +248,14 @@ START ECOSYSTEM
 
 ## Agenda de Relatórios
 
-| Horário BRT | Evento | Agentes |
-|-------------|--------|---------|
-| 08:00 | Check remetentes + Ideia de Negócio | Daniela + Nexo |
-| 10:00 | Trends (se solicitado) | Nexo |
-| 16:00 | Check remetentes | Daniela |
-| 22:00 | Backup | Sistema |
-| Sob demanda | Análise cripto | Atlas |
-| Sob demanda | Instalação/config | Joe |
+| Horário BRT | Horário UTC | Evento | Agente |
+|-------------|-------------|--------|--------|
+| 08:00 | 11:00 | Check remetentes | Daniela |
+| 09:00 | 12:00 | Ideia de Negócio | Nexo |
+| 16:00 | 19:00 | Check remetentes | Daniela |
+| 22:00 | 01:00+1 | Backup | Sistema |
+| Sob demanda | - | Análise cripto | Atlas |
+| Sob demanda | - | Instalação/config | Joe |
 
 ---
 
