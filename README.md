@@ -6,7 +6,7 @@ Repositório de configuração do assistente AI pessoal ([@Julioamancio](https:/
 
 ## 📋 Sobre
 
-Este workspace contém a configuração completa de um agente AI operando via [OpenClaw](https://github.com/openclaw/openclaw), com integração ao Telegram para comunicação direta. O assistente foi projetado com foco em automação, monitoramento de infraestrutura e produtividade.
+Este workspace contém a configuração completa de um agente AI operando via [OpenClaw](https://github.com/openclaw/openclaw), com integração ao Telegram e preparação para Discord. O assistente foi projetado com foco em automação, monitoramento de infraestrutura e produtividade.
 
 ---
 
@@ -75,6 +75,39 @@ Este workspace contém a configuração completa de um agente AI operando via [O
 Se o NVIDIA-NIM Kimi falhar, o sistema cai automaticamente para o Codex 5.3 via OAuth (já configurado no ambiente). Não requer intervenção manual.
 
 ---
+
+## 💬 Operação Discord (Runbook)
+
+### Objetivo
+Manter o Mike/Jarvis-Prime operando também como assistente no Discord, sem perder contexto operacional.
+
+### Workspace/Canal alvo
+- **Servidor (Guild ID):** `922103561603645502`
+- **Canal principal (Destruitor OTServer):** `922103562052452363`
+- **Link de referência:** `https://discord.com/channels/922103561603645502/922103562052452363`
+
+### Checklist de continuidade
+1. Verificar se o canal Discord está habilitado no OpenClaw (`channels.discord.enabled = true`).
+2. Confirmar que o bot está no servidor e com permissões do canal.
+3. Garantir que o bot tenha ao menos:
+   - View Channels
+   - Send Messages
+   - Read Message History
+   - Embed Links
+   - Add Reactions
+4. Se falhar autenticação, renovar token no Discord Developer Portal e atualizar config local.
+5. Reiniciar gateway após mudança de credenciais/config.
+
+### Comandos úteis
+```bash
+openclaw gateway status
+openclaw status
+openclaw gateway restart
+```
+
+### Notas de segurança
+- **Não** armazenar token do bot em README, commits ou mensagens públicas.
+- Guardar credenciais apenas no arquivo de configuração/local env do OpenClaw.
 
 ## 🔧 Funcionalidades Implementadas
 
