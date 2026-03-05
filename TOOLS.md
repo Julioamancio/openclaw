@@ -40,21 +40,23 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 ### E-mail Check (IMAP)
 **Gmail (pessoal):**
 - E-mail: julioamancio2014@gmail.com
-- App Password: REDACTED_GMAIL_PERSONAL_APP_PASSWORD
+- App Password: definido em `.env.local` (não versionado)
 - IMAP: imap.gmail.com:993 (SSL)
 
 **Gmail (profissional - CSA):**
 - E-mail: julio.amancio@colegiosantoantonio.com.br
-- App Password: REDACTED_GMAIL_CSA_APP_PASSWORD
+- App Password: definido em `.env.local` (não versionado)
 - IMAP: imap.gmail.com:993 (SSL)
 
-**Comando de verificação (openssl):**
+**Comando recomendado:**
 ```bash
-# Gmail pessoal
-echo -e "a login julioamancio2014@gmail.com 'PASSWORD'\na select inbox\na search unseen\na logout" | openssl s_client -connect imap.gmail.com:993 -crlf 2>/dev/null | grep -E "^\* SEARCH|^a OK"
+/root/.openclaw/workspace/scripts/check-emails.sh
+```
 
-# Gmail CSA
-echo -e "a login julio.amancio@colegiosantoantonio.com.br 'PASSWORD'\na select inbox\na search unseen\na logout" | openssl s_client -connect imap.gmail.com:993 -crlf 2>/dev/null | grep -E "^\* SEARCH|^a OK"
+**Template de segredos:**
+```bash
+cp /root/.openclaw/workspace/.env.local.example /root/.openclaw/workspace/.env.local
+# editar .env.local localmente
 ```
 
 ---

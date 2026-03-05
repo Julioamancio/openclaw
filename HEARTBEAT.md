@@ -82,14 +82,9 @@ git push origin main || echo "Push falhou"
 ```
 
 ### Check de E-mails
-
-### Check de E-mails
 ```bash
-# Gmail pessoal - não lidos
-echo -e "a login julioamancio2014@gmail.com 'REDACTED_GMAIL_PERSONAL_APP_PASSWORD'\na select inbox\na search unseen\na logout" | openssl s_client -connect imap.gmail.com:993 -crlf -quiet 2>/dev/null | grep "^\\* SEARCH" | grep -v "SEARCH$" && echo "[GMAIL PESSOAL] Há e-mails não lidos!" || echo "[GMAIL PESSOAL] Caixa de entrada limpa."
-
-# Gmail profissional (CSA) - não lidos
-echo -e "a login julio.amancio@colegiosantoantonio.com.br 'REDACTED_GMAIL_CSA_APP_PASSWORD'\na select inbox\na search unseen\na logout" | openssl s_client -connect imap.gmail.com:993 -crlf -quiet 2>/dev/null | grep "^\\* SEARCH" | grep -v "SEARCH$" && echo "[GMAIL CSA] Há e-mails não lidos!" || echo "[GMAIL CSA] Caixa de entrada limpa."
+# Usa credenciais locais de .env.local
+/root/.openclaw/workspace/scripts/check-emails.sh
 ```
 
 ---

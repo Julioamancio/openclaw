@@ -44,10 +44,28 @@ fi
 
 # Adicionar todos os arquivos
 # Inclui: *.md, memory/, second-brain/topics/
-git add AGENTS.md SOUL.md USER.md IDENTITY.md TOOLS.md MEMORY.md HEARTBEAT.md 2>/dev/null || true
+git add AGENTS.md SOUL.md USER.md IDENTITY.md TOOLS.md MEMORY.md HEARTBEAT.md README.md 2>/dev/null || true
 git add memory/ 2>/dev/null || true
 git add second-brain/topics/ 2>/dev/null || true
 git add second-brain/README.md 2>/dev/null || true
+
+# Gate de segurança: bloquear push com segredos staged
+SECURITY_ISSUE=0
+if git diff --cached --name-only | grep -E '(^|/)\.env(\.|$)|secrets\.env|(^|/)id_rsa|(^|/)\.pem$|(^|/)\.p12$' >/dev/null 2>&1; then
+    echo "❌ Segurança: arquivo sensível staged detectado (.env/secrets/key). Abortando backup."
+    git diff --cached --name-only | grep -E '(^|/)\.env(\.|$)|secrets\.env|(^|/)id_rsa|(^|/)\.pem$|(^|/)\.p12$' || true
+    SECURITY_ISSUE=1
+fi
+
+if git diff --cached | grep -E 'GMAIL_.*APP_PASSWORD|APP_PASSWORD=|GITHUB_RECOVERY_KEY=|Authorization: Bearer|BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY' >/dev/null 2>&1; then
+    echo "❌ Segurança: padrão de segredo detectado no conteúdo staged. Abortando backup."
+    SECURITY_ISSUE=1
+fi
+
+if [ "$SECURITY_ISSUE" -ne 0 ]; then
+    echo "Backup interrompido pelo gate de segurança."
+    exit 1
+fi
 
 # Commit se houver mudanças
 if git diff --cached --quiet; then

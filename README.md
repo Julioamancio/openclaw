@@ -113,6 +113,8 @@ openclaw gateway restart
 
 ### 1. 📧 Monitoramento de E-mails (IMAP)
 
+> Segurança: credenciais IMAP foram movidas para `.env.local` (não versionado).
+
 **Descrição:** Verificação automatizada de e-mails não lidos de remetentes específicos.
 
 **Contas monitoradas:**
