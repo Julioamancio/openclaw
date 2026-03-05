@@ -13,10 +13,11 @@
 
 ## Backup Diário (22:00 America/Sao_Paulo)
 Executar todo dia às 22:00:
-1. Verificar se há alterações no workspace
-2. Verificar se há alterações no second-brain/data/
-3. Commit com formato: `backup(chatgpt): YYYY-MM-DD HH:mm -03`
-4. Push para main
+1. Forçar perfil **GUARDIAN**: `/root/.openclaw/workspace/scripts/auto-self-improving-profile.sh backup`
+2. Verificar se há alterações no workspace
+3. Verificar se há alterações no second-brain/data/
+4. Commit com formato: `backup(chatgpt): YYYY-MM-DD HH:mm -03`
+5. Push para main
 
 ### Arquivos de Backup
 **Root:**
@@ -48,6 +49,7 @@ git push origin main || echo "Push falhou"
 ---
 
 ## Verificações Periódicas (Heartbeat)
+- [ ] **Perfil Self-Improving (auto):** `/root/.openclaw/workspace/scripts/auto-self-improving-profile.sh heartbeat`
 - [ ] **Gateway:** `openclaw gateway status`
 - [ ] **Disco:** `df -h /`
 - [ ] **E-mails não lidos** (Gmail pessoal + profissional) — check SIMPLES: há não lidos? (Sim/Não)
@@ -89,6 +91,33 @@ echo -e "a login julioamancio2014@gmail.com 'REDACTED_GMAIL_PERSONAL_APP_PASSWOR
 # Gmail profissional (CSA) - não lidos
 echo -e "a login julio.amancio@colegiosantoantonio.com.br 'REDACTED_GMAIL_CSA_APP_PASSWORD'\na select inbox\na search unseen\na logout" | openssl s_client -connect imap.gmail.com:993 -crlf -quiet 2>/dev/null | grep "^\\* SEARCH" | grep -v "SEARCH$" && echo "[GMAIL CSA] Há e-mails não lidos!" || echo "[GMAIL CSA] Caixa de entrada limpa."
 ```
+
+---
+## Auto-Alternância de Perfil (Self-Improving)
+Script:
+```bash
+/root/.openclaw/workspace/scripts/auto-self-improving-profile.sh [contexto]
+```
+
+### Regras automáticas
+- **Contexto crítico** (`backup`, `deploy`, `migration`, `security`, etc.) → `GUARDIAN`
+- **Contexto rápido** (`quick`, `fast`, `chat`, `trivial`) → `FAST`
+- **Sem contexto especial:**
+  - 11:00–22:59 UTC → `DEFAULT`
+  - 23:00–10:59 UTC → `FAST`
+
+### Exemplos
+```bash
+# No heartbeat
+/root/.openclaw/workspace/scripts/auto-self-improving-profile.sh heartbeat
+
+# Antes de backup/deploy
+/root/.openclaw/workspace/scripts/auto-self-improving-profile.sh backup
+/root/.openclaw/workspace/scripts/auto-self-improving-profile.sh deploy
+```
+
+Estado atual do perfil:
+- `/root/.openclaw/workspace/SELF_IMPROVING_ACTIVE.md`
 
 ---
 ## Ideia de Negócio Diária 💡

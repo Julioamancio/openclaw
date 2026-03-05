@@ -145,6 +145,16 @@ openclaw gateway restart
 
 **Horário:** 22:00 America/Sao_Paulo
 
+**Novo fluxo de segurança (self-improving):**
+1. Força perfil `GUARDIAN` no início do backup
+2. Executa commit/push normalmente
+3. Restaura perfil automático de heartbeat ao finalizar
+
+**Scripts envolvidos:**
+- [`scripts/backup.sh`](scripts/backup.sh)
+- [`scripts/auto-self-improving-profile.sh`](scripts/auto-self-improving-profile.sh)
+- [`scripts/set-self-improving-profile.sh`](scripts/set-self-improving-profile.sh)
+
 **Arquivos incluídos:**
 - AGENTS.md, SOUL.md, USER.md, IDENTITY.md
 - TOOLS.md, MEMORY.md, HEARTBEAT.md
@@ -160,6 +170,7 @@ openclaw gateway restart
 
 Checklist executado em heartbeats periódicos:
 
+- [x] **Perfil Self-Improving (auto):** seleção por contexto/horário
 - [x] **Gateway:** Status do OpenClaw gateway
 - [x] **Disco:** Espaço em disco (`df -h /`)
 - [x] **E-mails:** Verificação de não lidos
@@ -275,7 +286,8 @@ df -h /
 |------------|--------|
 | Gateway OpenClaw | ✅ Running (127.0.0.1:18789) |
 | Monitoramento de E-mails | ✅ Ativo (10 remetentes) |
-| Backup Diário | ✅ Configurado (22:00) |
+| Backup Diário | ✅ Configurado (22:00, com GUARDIAN auto) |
+| Self-Improving Profiles | ✅ Fast / Default / Guardian + auto-switch |
 | Second Brain | ✅ Operational |
 | Heartbeat Checks | ✅ Programado |
 
@@ -298,6 +310,6 @@ df -h /
 
 ---
 
-*Última atualização: 2026-02-22*
+*Última atualização: 2026-03-05*
 
 *Maintainer: Mike (Jarvis-Prime) via OpenClaw*

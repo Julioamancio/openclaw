@@ -13,6 +13,23 @@ cd "$WORKSPACE" || exit 1
 
 echo "[$(date)] Iniciando backup diário..."
 
+# Força perfil GUARDIAN para operação crítica de backup/push
+if [ -x "$WORKSPACE/scripts/auto-self-improving-profile.sh" ]; then
+    PROFILE_SELECTED=$($WORKSPACE/scripts/auto-self-improving-profile.sh backup 2>/dev/null || echo "guardian")
+    echo "Perfil self-improving aplicado para backup: ${PROFILE_SELECTED^^}"
+fi
+
+# Ao finalizar (sucesso/erro), retorna para o perfil automático padrão de heartbeat
+restore_profile() {
+    if [ -x "$WORKSPACE/scripts/auto-self-improving-profile.sh" ]; then
+        RESTORED=$($WORKSPACE/scripts/auto-self-improving-profile.sh heartbeat 2>/dev/null || true)
+        if [ -n "$RESTORED" ]; then
+            echo "Perfil self-improving restaurado após backup: ${RESTORED^^}"
+        fi
+    fi
+}
+trap restore_profile EXIT
+
 # Verificar e adicionar changes no Second Brain
 if [ -d "$SECOND_BRAIN" ]; then
     echo "Verificando Second Brain..."
