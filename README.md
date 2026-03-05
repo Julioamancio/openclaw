@@ -299,8 +299,22 @@ df -h /
 
 - **Heartbeat Mode:** O agente realiza checks periódicos automaticamente
 - **Memory Management:** Daily logs em `memory/YYYY-MM-DD.md`, memória-longa em `MEMORY.md`
-- **Security:** Credenciais em `TOOLS.md` (não versionado em produção)
+- **Security:** credenciais IMAP/segredos locais em `.env.local` (não versionado)
 - **Updates:** Commits automáticos formato `backup(chatgpt): ...`
+
+---
+
+## 🔐 Atualização de Segurança (2026-03-05)
+
+Mudanças aplicadas após revisão de segurança:
+
+- Segredos removidos de arquivos versionados (`TOOLS.md` e `HEARTBEAT.md` já sem senhas em claro)
+- Fluxo de e-mail padronizado via `scripts/check-emails.sh` + `.env.local`
+- Template de ambiente adicionado: `.env.local.example`
+- Histórico Git sanitizado e `main` reescrito com force-push
+- Branch de recuperação criada: `backup/pre-sanitize-20260305-222330`
+
+> Nota operacional: rotação final das credenciais (Google App Passwords / token GitHub) deve ser concluída no ambiente do operador.
 
 ---
 

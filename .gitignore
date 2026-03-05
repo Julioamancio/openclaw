@@ -13,6 +13,10 @@ logs/
 *.log
 npm-debug.log*
 
+# Python cache
+__pycache__/
+*.pyc
+
 # Runtime data
 .openclaw/
 
