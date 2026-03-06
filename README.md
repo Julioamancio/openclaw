@@ -392,6 +392,11 @@ Mudanças aplicadas após revisão de segurança:
 - Digital Twin + Replay Library (`replay-library.json`, `twin-state.json`, `replay-runs.json`, `scripts/twin-capture.sh`, `scripts/replay-run.sh`, endpoints `/mc/replays*` e `/mc/twin`)
 - Control Tower UX (modo CEO) no Mission Control com controles de `observe/assist/autopilot`, `promote/rollback`, `approve high-risk` e `run mission`
 - Model FinOps Autônomo com budget por missão e auto downgrade/upgrade (`finops-policy.json`, `mission-budgets.json`, `scripts/finops-route.sh`, endpoints `/mc/finops*`)
+- Jarvis-Core v1 (model-agnostic hardening):
+  - Capability Contracts formais (`capability-contracts.json` + `POST /mc/contracts/validate`)
+  - Verifier Gate independente (`scripts/mission-verifier.sh` + `POST /mc/mission/verify`)
+  - DSL Executor determinístico (`scripts/mission-dsl-exec.sh` + `POST /mc/mission/execute-dsl`)
+  - Shadow Scoring por modelo (`scripts/shadow-score.sh` + `GET /mc/shadow-score`)
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual
 - Runbook registry com aprendizagem por taxa de sucesso (`runbooks.json`)

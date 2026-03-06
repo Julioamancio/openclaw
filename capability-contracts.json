@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "capabilities": {
+    "email-monitor.v2": {
+      "input": { "required": ["missionId"], "optional": ["notes"] },
+      "output": { "required": ["ok", "status", "note"] },
+      "risk": "medium"
+    },
+    "incident-recovery.v3": {
+      "input": { "required": ["missionId", "risk"], "optional": ["notes"] },
+      "output": { "required": ["ok", "status", "note"] },
+      "risk": "high"
+    },
+    "business-idea.v1": {
+      "input": { "required": ["missionId"], "optional": ["notes"] },
+      "output": { "required": ["ok", "status", "note"] },
+      "risk": "low"
+    },
+    "ops-summary.v1": {
+      "input": { "required": ["missionId"], "optional": ["notes"] },
+      "output": { "required": ["ok", "status", "note"] },
+      "risk": "low"
+    }
+  },
+  "dsl": {
+    "requiredStepFields": ["capabilityId", "intent"],
+    "optionalStepFields": ["risk", "slaMinutes", "entrypoint", "rollbackEntrypoint", "notes"]
+  }
+}

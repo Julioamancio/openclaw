@@ -582,7 +582,68 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, run);
     }
 
-    // 15) GET /mc/finops - autonomous FinOps summary
+    // 15) POST /mc/contracts/validate - validate plan DSL against contracts
+    if (req.method === 'POST' && pathname === '/mc/contracts/validate') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const payload = JSON.stringify({ steps: Array.isArray(incoming.steps) ? incoming.steps : [] });
+      const v = spawnSync('/root/.openclaw/workspace/scripts/contracts-validate.sh', [payload], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(v.stdout || v.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, v.status === 0 ? 200 : 400, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 16) POST /mc/mission/verify - verifier gate
+    if (req.method === 'POST' && pathname === '/mc/mission/verify') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const payload = JSON.stringify({
+        missionRisk: String(incoming.missionRisk || 'medium'),
+        steps: Array.isArray(incoming.steps) ? incoming.steps : []
+      });
+      const v = spawnSync('/root/.openclaw/workspace/scripts/mission-verifier.sh', [payload], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(v.stdout || v.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, v.status === 0 ? 200 : 400, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 17) POST /mc/mission/execute-dsl - deterministic DSL executor
+    if (req.method === 'POST' && pathname === '/mc/mission/execute-dsl') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const payload = JSON.stringify({ steps: Array.isArray(incoming.steps) ? incoming.steps : [] });
+
+      const verify = spawnSync('/root/.openclaw/workspace/scripts/mission-verifier.sh', [JSON.stringify({ missionRisk: String(incoming.missionRisk || 'medium'), steps: incoming.steps || [] })], {
+        encoding: 'utf8', timeout: 30000
+      });
+      if (verify.status !== 0) {
+        const t = String(verify.stdout || verify.stderr || '').trim();
+        let p = null;
+        try { p = JSON.parse(t.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+        return sendJson(res, 400, p || { ok: false, error: 'verifier blocked', output: t.slice(0, 500) });
+      }
+
+      const x = spawnSync('/root/.openclaw/workspace/scripts/mission-dsl-exec.sh', [payload, String(incoming.timeoutSec || 240)], {
+        encoding: 'utf8', timeout: 300000
+      });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 18) GET /mc/shadow-score - model shadow ranking
+    if (req.method === 'GET' && pathname === '/mc/shadow-score') {
+      const s = spawnSync('/root/.openclaw/workspace/scripts/shadow-score.sh', [], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(s.stdout || s.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, s.status === 0 ? 200 : 500, parsed || { error: 'shadow score failed', output: txt.slice(0, 500) });
+    }
+
+    // 19) GET /mc/finops - autonomous FinOps summary
     if (req.method === 'GET' && pathname === '/mc/finops') {
       const policy = readJson(FINOPS_POLICY_FILE, { version: 1, defaults: { missionBudgetUsd: 0.8 }, modelCostsUsdPer1k: {} });
       const ledger = readJson(MISSION_BUDGETS_FILE, { version: 1, items: [] });
