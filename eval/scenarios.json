@@ -1,0 +1,93 @@
+{
+  "version": 3,
+  "scenarios": [
+    {
+      "id": "incident_high_risk_gateway",
+      "type": "router",
+      "input": "ALERTA: [critical] Gateway monitor falhou",
+      "expect": {
+        "routeNameContains": "ops_incident",
+        "modelIn": [
+          "openai-codex/gpt-5.3-codex"
+        ],
+        "riskRequireConfirmation": 1
+      }
+    },
+    {
+      "id": "code_fix_request",
+      "type": "router",
+      "input": "corrigir bug no server.js e revisar cron",
+      "expect": {
+        "routeNameContains": "code_and_scripts",
+        "modelIn": [
+          "openai-codex/gpt-5.3-codex"
+        ]
+      }
+    },
+    {
+      "id": "research_request",
+      "type": "router",
+      "input": "me dê uma ideia de negócio b2b saas",
+      "expect": {
+        "routeNameContains": "research_and_brainstorm",
+        "modelIn": [
+          "nvidia-nim/moonshotai/kimi-k2.5",
+          "openai-codex/gpt-5.3-codex"
+        ]
+      }
+    },
+    {
+      "id": "provider_degraded_fallback",
+      "type": "router_degraded",
+      "input": "me dê uma ideia de negócio b2b saas",
+      "degradedModel": "nvidia-nim/moonshotai/kimi-k2.5",
+      "expect": {
+        "routeNameContains": "research_and_brainstorm_fallback",
+        "modelIn": [
+          "openai-codex/gpt-5.3-codex"
+        ]
+      }
+    },
+    {
+      "id": "dispatch_lock_contention",
+      "type": "shell",
+      "input": "dispatch_lock",
+      "expect": {
+        "contains": "lock ativo"
+      }
+    },
+    {
+      "id": "health_score_endpoint",
+      "type": "http",
+      "input": "GET /mc/health-score",
+      "expect": {
+        "status": 200,
+        "jsonKeys": [
+          "score",
+          "level",
+          "factors"
+        ]
+      }
+    },
+    {
+      "id": "runbooks_endpoint",
+      "type": "http",
+      "input": "GET /mc/runbooks",
+      "expect": {
+        "status": 200,
+        "jsonKeys": [
+          "version",
+          "tasks"
+        ]
+      }
+    },
+    {
+      "id": "policy_block_high_risk_no_approval",
+      "type": "shell",
+      "input": "policy_block_high_risk",
+      "expect": {
+        "contains": "POLICY_ALLOW=0"
+      }
+    }
+  ]
+}

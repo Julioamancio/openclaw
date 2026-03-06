@@ -380,6 +380,7 @@ Mudanças aplicadas após revisão de segurança:
 - Métricas por modelo + fallback automático por degradação: `router-metrics.json` + `scripts/router-metrics-update.sh`
 - Contratos de skill para consistência cross-model: `SKILL_CONTRACTS.md`
 - Router inteligente com métricas e fallback por degradação (latência + fail streak)
+- Policy Engine versionado (`policies.json` + `scripts/policy-check.sh`) com bloqueio de high-risk sem aprovação
 
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual

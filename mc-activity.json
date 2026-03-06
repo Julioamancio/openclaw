@@ -595,5 +595,27 @@
       "notes": "Nenhum e-mail novo",
       "severity": "info"
     }
+  },
+  {
+    "id": "act_1772824690765_xtm6o",
+    "timestamp": "2026-03-06T19:18:10.765Z",
+    "title": "Ops Job",
+    "message": "State Machine Test -> failed",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste phase C",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772824690780_vs5f2",
+    "timestamp": "2026-03-06T19:18:10.780Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [warning] State Machine Test falhou",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste phase C",
+      "severity": "warning"
+    }
   }
 ]

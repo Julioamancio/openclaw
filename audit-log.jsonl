@@ -9,3 +9,5 @@
 {"ts": "2026-03-06T19:00:27.807983+00:00", "type": "router_exec", "actor": "Mike", "task": "research_and_brainstorm", "risk": "medium", "strategy": "nvidia-nim/moonshotai/kimi-k2.5", "result": "routed", "notes": "ideia de negócio"}
 {"ts": "2026-03-06T19:01:32.345585+00:00", "type": "job_update", "actor": "Daniela", "task": "Check remetentes", "risk": "warning", "strategy": "ops-job-mark", "result": "done", "notes": "Nenhum e-mail novo"}
 {"ts": "2026-03-06T19:05:01.513149+00:00", "type": "auto_heal", "actor": "Mike", "task": "Health Score abaixo de 80 (atual 20)", "risk": "runtime", "strategy": "none/exploit", "result": "failed", "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 20)"}
+{"ts": "2026-03-06T19:18:10.809732+00:00", "type": "job_update", "actor": "Mike", "task": "State Machine Test", "risk": "warning", "strategy": "ops-job-mark", "result": "failed", "notes": "teste phase C"}
+{"ts": "2026-03-06T19:18:12.030668+00:00", "type": "auto_heal", "actor": "Mike", "task": "State Machine Test", "risk": "runtime", "strategy": "none/exploit", "result": "failed", "notes": "sem runbook para tarefa: State Machine Test"}

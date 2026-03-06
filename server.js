@@ -19,6 +19,7 @@ const ALERTS_FILE = path.join(ROOT, 'mc-alerts.json');
 const JOBS_FILE = path.join(ROOT, 'mc-jobs.json');
 const POSTMORTEMS_FILE = path.join(ROOT, 'mc-postmortems.json');
 const RUNBOOKS_FILE = path.join(ROOT, 'runbooks.json');
+const INCIDENT_STATE_FILE = path.join(ROOT, 'incident-state.json');
 
 const startedAt = Date.now();
 let lastRefreshTs = new Date().toISOString();
@@ -341,7 +342,17 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, rb);
     }
 
-    // 13) GET /mc/health-score - single executive score (0-100)
+    // 13) GET /mc/incidents - state machine snapshot
+    if (req.method === 'GET' && pathname === '/mc/incidents') {
+      const st = readJson(INCIDENT_STATE_FILE, { version: 1, incidents: {} });
+      const incidentsMap = st?.incidents && typeof st.incidents === 'object' ? st.incidents : {};
+      const list = Object.values(incidentsMap)
+        .sort((a, b) => Date.parse(String(b?.updatedAt || 0)) - Date.parse(String(a?.updatedAt || 0)))
+        .slice(0, 50);
+      return sendJson(res, 200, { version: st?.version || 1, total: list.length, incidents: list });
+    }
+
+    // 14) GET /mc/health-score - single executive score (0-100)
     if (req.method === 'GET' && pathname === '/mc/health-score') {
       const jobs = readJson(JOBS_FILE, { jobs: [], runs: [] });
       const pms = readJson(POSTMORTEMS_FILE, []);
@@ -390,6 +401,8 @@ const server = http.createServer(async (req, res) => {
       }
 
       const incident = String(pm.incident || '');
+      spawnSync('/root/.openclaw/workspace/scripts/incident-state.sh', ['transition', id, 'approved', 'manual high-risk approval'], { encoding: 'utf8', timeout: 30000 });
+
       const heal = spawnSync('/root/.openclaw/workspace/scripts/auto-heal.sh', [incident, id], {
         encoding: 'utf8',
         timeout: 240000
@@ -410,8 +423,11 @@ const server = http.createServer(async (req, res) => {
       if (healed) {
         pm.status = 'closed';
         pm.action_taken = `${pm.action_taken || ''} | approved_by_human:${nowIso} | level=${level} | ${notes}`.trim();
+        spawnSync('/root/.openclaw/workspace/scripts/incident-state.sh', ['transition', id, 'healed', notes], { encoding: 'utf8', timeout: 30000 });
+        spawnSync('/root/.openclaw/workspace/scripts/incident-state.sh', ['transition', id, 'closed', 'manual approval closed'], { encoding: 'utf8', timeout: 30000 });
       } else {
         pm.action_taken = `${pm.action_taken || ''} | approval_attempt:${nowIso} | level=${level} | ${notes}`.trim();
+        spawnSync('/root/.openclaw/workspace/scripts/incident-state.sh', ['transition', id, 'escalated', notes], { encoding: 'utf8', timeout: 30000 });
       }
 
       writeJson(POSTMORTEMS_FILE, list);
@@ -495,6 +511,7 @@ ensureJsonFile(ALERTS_FILE, []);
 ensureJsonFile(JOBS_FILE, { jobs: [], runs: [] });
 ensureJsonFile(POSTMORTEMS_FILE, []);
 ensureJsonFile(RUNBOOKS_FILE, { version: 1, tasks: {} });
+ensureJsonFile(INCIDENT_STATE_FILE, { version: 1, incidents: {} });
 
 server.listen(PORT, HOST, () => {
   console.log(`Mission Control server running at http://${HOST}:${PORT}`);

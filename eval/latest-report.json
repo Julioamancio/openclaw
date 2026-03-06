@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-03-06T19:24:49.207815+00:00",
+  "total": 8,
+  "passed": 7,
+  "score": 88,
+  "results": [
+    {
+      "id": "incident_high_risk_gateway",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "code_fix_request",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "research_request",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "provider_degraded_fallback",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "dispatch_lock_contention",
+      "ok": false,
+      "notes": "lock evidence missing"
+    },
+    {
+      "id": "health_score_endpoint",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "runbooks_endpoint",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "policy_block_high_risk_no_approval",
+      "ok": true,
+      "notes": ""
+    }
+  ],
+  "gate": "pass"
+}

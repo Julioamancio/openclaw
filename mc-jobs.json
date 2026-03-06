@@ -55,9 +55,24 @@
       "status": "pending",
       "lastRun": "2026-03-06T13:00:19.563368+00:00",
       "notes": "normalizado"
+    },
+    {
+      "task": "State Machine Test",
+      "schedule": "manual",
+      "agent": "Mike",
+      "status": "failed",
+      "lastRun": "2026-03-06T19:18:10.751583+00:00",
+      "notes": "teste phase C"
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-06T19:18:10.751583+00:00",
+      "task": "State Machine Test",
+      "status": "failed",
+      "agent": "Mike",
+      "notes": "teste phase C"
+    },
     {
       "ts": "2026-03-06T19:01:32.304944+00:00",
       "task": "Check remetentes",

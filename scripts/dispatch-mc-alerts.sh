@@ -75,6 +75,10 @@ for a in items:
     aid=a.get('id','na')
     created=a.get('created_at','--')
 
+    # state machine: detected -> assessed
+    subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','upsert',aid,'detected',msg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','transition',aid,'assessed','risk assessment start'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     # risk scoring
     risk_score='60'; risk_level='medium'; risk_require='0'
     try:
@@ -98,12 +102,34 @@ for a in items:
     heal_level='3'
     manual_required='1'
 
-    # high-risk require confirmation: do not auto-heal
-    if str(risk_require) == '1':
-        heal_notes=f'aguardando confirmação humana (risk={risk_level}:{risk_score})'
+    # policy engine gate for auto-heal
+    pol_allow='1'; pol_reason='';
+    try:
+        pc=subprocess.run([
+          '/root/.openclaw/workspace/scripts/policy-check.sh',
+          'auto_heal',
+          risk_level,
+          '0' if str(risk_require)=='1' else '1',
+          '1',
+          '1'
+        ], capture_output=True, text=True, timeout=15)
+        pvals={}
+        for ln in pc.stdout.splitlines():
+            if '=' in ln:
+                k,v=ln.split('=',1); pvals[k.strip()]=v.strip()
+        pol_allow=pvals.get('POLICY_ALLOW','1')
+        pol_reason=pvals.get('POLICY_REASON','')
+    except Exception:
+        pass
+
+    if str(pol_allow) != '1':
+        subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','transition',aid,'blocked',f'policy_block: {pol_reason}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(['/root/.openclaw/workspace/scripts/audit-event.sh','policy_block','PolicyEngine',msg,risk_level,'auto_heal','blocked',pol_reason], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        heal_notes=f'bloqueado por policy: {pol_reason} (risk={risk_level}:{risk_score})'
         manual_required='1'
         heal_level='3'
     else:
+        subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','transition',aid,'approved','policy check passed'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             p=subprocess.run([
                 '/root/.openclaw/workspace/scripts/auto-heal.sh',
@@ -125,6 +151,13 @@ for a in items:
 
     status='closed' if healed else 'open'
     action='Auto-heal aplicado com sucesso' if healed else 'Despacho de alerta + ACK em fila'
+
+    # state machine final
+    if healed:
+        subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','transition',aid,'healed',heal_notes], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','transition',aid,'closed','healed and closed'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    elif str(manual_required) == '1':
+        subprocess.run(['/root/.openclaw/workspace/scripts/incident-state.sh','transition',aid,'escalated',heal_notes], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     payload={
       'incident': msg,

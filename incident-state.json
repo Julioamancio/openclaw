@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "incidents": {
+    "alt_1772824690784_1ib2l": {
+      "id": "alt_1772824690784_1ib2l",
+      "state": "escalated",
+      "createdAt": "2026-03-06T19:18:11.923896+00:00",
+      "updatedAt": "2026-03-06T19:18:12.058421+00:00",
+      "history": [
+        {
+          "ts": "2026-03-06T19:18:11.923939+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "ALERTA: [warning] State Machine Test falhou"
+        },
+        {
+          "ts": "2026-03-06T19:18:11.950030+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "risk assessment start"
+        },
+        {
+          "ts": "2026-03-06T19:18:11.997720+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "approved",
+          "notes": "auto-approved risk low/medium"
+        },
+        {
+          "ts": "2026-03-06T19:18:12.058423+00:00",
+          "action": "transition",
+          "from": "approved",
+          "to": "escalated",
+          "notes": "sem runbook para tarefa: State Machine Test"
+        }
+      ]
+    }
+  }
+}

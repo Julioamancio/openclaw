@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "high-risk-needs-approval",
+      "action": "auto_heal",
+      "when": { "riskLevelIn": ["high"], "approved": false },
+      "effect": "deny",
+      "reason": "High-risk exige aprovação humana antes de auto-heal"
+    },
+    {
+      "id": "state-transition-invalid",
+      "action": "state_transition",
+      "when": { "validTransition": false },
+      "effect": "deny",
+      "reason": "Transição de estado inválida"
+    },
+    {
+      "id": "destructive-needs-snapshot",
+      "action": "destructive",
+      "when": { "hasSnapshot": false },
+      "effect": "deny",
+      "reason": "Ação destrutiva sem snapshot"
+    }
+  ],
+  "default": { "effect": "allow", "reason": "no blocking rule" }
+}

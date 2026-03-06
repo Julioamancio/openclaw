@@ -2464,6 +2464,7 @@
         const trends = await fetchJson(`${SERVER.base}/mc/slo-trends`);
         const healthScore = await fetchJson(`${SERVER.base}/mc/health-score`);
         const runbooks = await fetchJson(`${SERVER.base}/mc/runbooks`);
+        const incidents = await fetchJson(`${SERVER.base}/mc/incidents`);
         const post = await fetchJson(`${SERVER.base}/mc/postmortems`);
 
         const spark = (pct) => {
@@ -2549,6 +2550,34 @@
                 }
               });
             });
+
+            const inc = Array.isArray(incidents?.incidents) ? incidents.incidents.slice(0, 5) : [];
+            if (inc.length) {
+              const timeline = inc.map(i => {
+                const h = Array.isArray(i.history) ? i.history : [];
+                const last = h.length ? h[h.length - 1] : null;
+                const lastTxt = last ? `${last.from ? last.from + ' -> ' : ''}${last.to || i.state}` : (i.state || '--');
+                const st = i.state || '--';
+                return `<article class="ops-item incident-item" data-incident-state="${escapeAttr(st)}"><div class="ops-head"><strong>${escapeHtml(i.id || 'incident')}</strong><span class="pill ${st === 'closed' ? 'done' : (st === 'healed' ? 'done' : 'running')}">${escapeHtml(st)}</span></div><div class="ops-meta"><span>Atualizado: ${new Date(i.updatedAt || Date.now()).toLocaleString('pt-BR')}</span></div><div class="ops-meta"><span>Última transição: ${escapeHtml(lastTxt)}</span></div></article>`;
+              }).join('');
+              pmEl.innerHTML += `<article class="ops-item"><div class="ops-head"><strong>Incident State Timeline</strong><span class="pill running">${incidents.total || inc.length}</span></div><div class="ops-meta"><span>Fluxo: detected → assessed → approved/blocked → healed/escalated → closed</span></div><div class="ops-actions" style="margin-top:8px;"><button class="btn" data-inc-filter="all">all</button><button class="btn" data-inc-filter="open">open</button><button class="btn" data-inc-filter="blocked">blocked</button><button class="btn" data-inc-filter="escalated">escalated</button><button class="btn" data-inc-filter="closed">closed</button></div></article>${timeline}`;
+
+              pmEl.querySelectorAll('[data-inc-filter]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                  const f = btn.getAttribute('data-inc-filter');
+                  pmEl.querySelectorAll('.incident-item').forEach(it => {
+                    const st = (it.getAttribute('data-incident-state') || '').toLowerCase();
+                    if (f === 'all') {
+                      it.style.display = '';
+                    } else if (f === 'open') {
+                      it.style.display = (st !== 'closed') ? '' : 'none';
+                    } else {
+                      it.style.display = (st === f) ? '' : 'none';
+                    }
+                  });
+                });
+              });
+            }
           }
         }
       } catch {
