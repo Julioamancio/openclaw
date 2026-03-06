@@ -2463,6 +2463,7 @@
         const slo = await fetchJson(`${SERVER.base}/mc/slo`);
         const trends = await fetchJson(`${SERVER.base}/mc/slo-trends`);
         const healthScore = await fetchJson(`${SERVER.base}/mc/health-score`);
+        const compliance = await fetchJson(`${SERVER.base}/mc/compliance`);
         const runbooks = await fetchJson(`${SERVER.base}/mc/runbooks`);
         const incidents = await fetchJson(`${SERVER.base}/mc/incidents`);
         const post = await fetchJson(`${SERVER.base}/mc/postmortems`);
@@ -2492,6 +2493,11 @@
             <article class="ops-item">
               <div class="ops-head"><strong>Health Score</strong><span class="pill ${Number(healthScore?.score ?? 0) >= 80 ? 'done' : 'failed'}">${healthScore?.score ?? '--'}/100</span></div>
               <div class="ops-meta"><span>Nível: ${healthScore?.level || '--'}</span><span>Open PM: ${healthScore?.factors?.open_postmortems ?? '--'}</span><span>Failed Jobs: ${healthScore?.factors?.failed_jobs ?? '--'}</span><span>Run Success: ${healthScore?.factors?.run_success_rate_pct ?? '--'}%</span></div>
+            </article>
+            <article class="ops-item">
+              <div class="ops-head"><strong>Compliance Gate</strong><span class="pill ${compliance?.compliance_status === 'green' ? 'done' : 'failed'}">${compliance?.compliance_status || '--'}</span></div>
+              <div class="ops-meta"><span>Eval Gate: ${compliance?.eval_gate || '--'}</span><span>Eval Score: ${compliance?.eval_score ?? '--'}</span><span>Policy blocks 24h: ${compliance?.policy_blocks_24h ?? '--'}</span></div>
+              <div class="ops-meta"><span>Top policy rule: ${compliance?.top_policy_rule || '--'}</span></div>
             </article>
             <article class="ops-item">
               <div class="ops-head"><strong>Success rate</strong><span class="pill ${slo?.slo_status?.success_rate === 'pass' ? 'done' : 'failed'}">${slo?.slo_status?.success_rate || '--'}</span></div>

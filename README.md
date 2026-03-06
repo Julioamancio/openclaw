@@ -381,6 +381,9 @@ Mudanças aplicadas após revisão de segurança:
 - Contratos de skill para consistência cross-model: `SKILL_CONTRACTS.md`
 - Router inteligente com métricas e fallback por degradação (latência + fail streak)
 - Policy Engine versionado (`policies.json` + `scripts/policy-check.sh`) com bloqueio de high-risk sem aprovação
+- Compliance Dashboard (`GET /mc/compliance`) + gate de promoção (`scripts/promote-if-green.sh`)
+- Command Bus determinístico (`scripts/command-bus.sh`) + SRE Modes (`scripts/sre-mode.sh`) + Shadow Benchmark (`scripts/shadow-benchmark.sh`)
+- Consensus multi-model para high-risk (`consensus-policy.json` + `scripts/consensus-check.sh`)
 
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual

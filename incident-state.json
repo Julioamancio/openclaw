@@ -35,6 +35,104 @@
           "notes": "sem runbook para tarefa: State Machine Test"
         }
       ]
+    },
+    "inc_demo": {
+      "id": "inc_demo",
+      "state": "blocked",
+      "createdAt": "2026-03-06T19:49:30.029417+00:00",
+      "updatedAt": "2026-03-06T19:49:30.082617+00:00",
+      "history": [
+        {
+          "ts": "2026-03-06T19:49:30.029451+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "Gateway autoheal"
+        },
+        {
+          "ts": "2026-03-06T19:49:30.056364+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "policy check"
+        },
+        {
+          "ts": "2026-03-06T19:49:30.082619+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "blocked",
+          "notes": "policy deny: High-risk exige aprovação humana antes de auto-heal"
+        }
+      ]
+    },
+    "inc_demo2": {
+      "id": "inc_demo2",
+      "state": "closed",
+      "createdAt": "2026-03-06T19:49:30.221327+00:00",
+      "updatedAt": "2026-03-06T19:49:30.320674+00:00",
+      "history": [
+        {
+          "ts": "2026-03-06T19:49:30.221375+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "Heartbeat exec"
+        },
+        {
+          "ts": "2026-03-06T19:49:30.245603+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "policy allow"
+        },
+        {
+          "ts": "2026-03-06T19:49:30.270723+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "approved",
+          "notes": "execution allowed by mode=autopilot"
+        },
+        {
+          "ts": "2026-03-06T19:49:30.297812+00:00",
+          "action": "transition",
+          "from": "approved",
+          "to": "healed",
+          "notes": "command success"
+        },
+        {
+          "ts": "2026-03-06T19:49:30.320675+00:00",
+          "action": "transition",
+          "from": "healed",
+          "to": "closed",
+          "notes": "command bus closed"
+        }
+      ]
+    },
+    "inc_consensus": {
+      "id": "inc_consensus",
+      "state": "blocked",
+      "createdAt": "2026-03-06T19:53:54.654904+00:00",
+      "updatedAt": "2026-03-06T19:53:54.709570+00:00",
+      "history": [
+        {
+          "ts": "2026-03-06T19:53:54.654958+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "Gateway critical incident"
+        },
+        {
+          "ts": "2026-03-06T19:53:54.683966+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "policy check"
+        },
+        {
+          "ts": "2026-03-06T19:53:54.709571+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "blocked",
+          "notes": "policy deny: High-risk exige aprovação humana antes de auto-heal"
+        }
+      ]
     }
   }
 }

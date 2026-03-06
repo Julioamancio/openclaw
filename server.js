@@ -342,7 +342,49 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, rb);
     }
 
-    // 13) GET /mc/incidents - state machine snapshot
+    // 13) GET /mc/compliance - policy/eval compliance snapshot
+    if (req.method === 'GET' && pathname === '/mc/compliance') {
+      const evalReport = readJson(path.join(ROOT, 'eval', 'latest-report.json'), { gate: 'unknown', score: 0 });
+      const auditPath = path.join(ROOT, 'audit-log.jsonl');
+      let policyBlocks24h = 0;
+      let totalAudit24h = 0;
+      let topPolicyRule = 'none';
+      const now = Date.now();
+      const d24 = now - 24 * 60 * 60 * 1000;
+      const ruleCount = {};
+      try {
+        if (fs.existsSync(auditPath)) {
+          const lines = fs.readFileSync(auditPath, 'utf8').split(/\r?\n/).filter(Boolean);
+          for (const ln of lines) {
+            try {
+              const e = JSON.parse(ln);
+              const t = Date.parse(String(e.ts || ''));
+              if (!Number.isFinite(t) || t < d24) continue;
+              totalAudit24h += 1;
+              if (String(e.type || '') === 'policy_block') {
+                policyBlocks24h += 1;
+                const r = String(e.notes || 'policy_block');
+                ruleCount[r] = (ruleCount[r] || 0) + 1;
+              }
+            } catch {}
+          }
+        }
+      } catch {}
+      const top = Object.entries(ruleCount).sort((a,b) => b[1]-a[1])[0];
+      if (top) topPolicyRule = top[0];
+
+      return sendJson(res, 200, {
+        generated_at: new Date().toISOString(),
+        eval_gate: evalReport?.gate || 'unknown',
+        eval_score: evalReport?.score ?? 0,
+        policy_blocks_24h: policyBlocks24h,
+        total_audit_events_24h: totalAudit24h,
+        top_policy_rule: topPolicyRule,
+        compliance_status: (String(evalReport?.gate || '') === 'pass' && policyBlocks24h === 0) ? 'green' : 'attention'
+      });
+    }
+
+    // 14) GET /mc/incidents - state machine snapshot
     if (req.method === 'GET' && pathname === '/mc/incidents') {
       const st = readJson(INCIDENT_STATE_FILE, { version: 1, incidents: {} });
       const incidentsMap = st?.incidents && typeof st.incidents === 'object' ? st.incidents : {};

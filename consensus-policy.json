@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "enabled": true,
+  "highRisk": {
+    "requiredModels": 2,
+    "minAgreement": 0.66,
+    "minScore": 70
+  }
+}
