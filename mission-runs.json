@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "runs": [
+    {
+      "id": "mission_1772829631484",
+      "mission": "status ops",
+      "missionRisk": "low",
+      "requestedBy": "ControlTower",
+      "dryRun": true,
+      "startedAt": "2026-03-06T20:40:31.484Z",
+      "endedAt": "2026-03-06T20:40:31.484Z",
+      "status": "done",
+      "finops": {
+        "model": "nvidia-nim/moonshotai/kimi-k2.5",
+        "action": "keep",
+        "reason": "base-route",
+        "budgetUsd": 0.02,
+        "estimatedTokens": 500,
+        "estimatedCostUsd": 0.0015
+      },
+      "sla": {
+        "total": 1,
+        "breaches": 0,
+        "met": 1
+      },
+      "steps": [
+        {
+          "capabilityId": "ops-summary.v1",
+          "owner": "Mike",
+          "risk": "low",
+          "intent": "Gerar resumo executivo operacional",
+          "entrypoint": "scripts/daily-executive-summary.sh",
+          "rollbackEntrypoint": "",
+          "slaMinutes": 120,
+          "startedAt": "2026-03-06T20:40:31.484Z",
+          "endedAt": "2026-03-06T20:40:31.484Z",
+          "durationSec": 0,
+          "slaOk": true,
+          "ok": true,
+          "note": "dry_run: scripts/daily-executive-summary.sh"
+        }
+      ],
+      "rollback": []
+    },
+    {
+      "id": "mission_1772829187210",
+      "mission": "status ops",
+      "missionRisk": "low",
+      "requestedBy": "ControlTower",
+      "dryRun": true,
+      "startedAt": "2026-03-06T20:33:07.210Z",
+      "endedAt": "2026-03-06T20:33:07.210Z",
+      "status": "done",
+      "sla": {
+        "total": 1,
+        "breaches": 0,
+        "met": 1
+      },
+      "steps": [
+        {
+          "capabilityId": "ops-summary.v1",
+          "owner": "Mike",
+          "risk": "low",
+          "intent": "Gerar resumo executivo operacional",
+          "entrypoint": "scripts/daily-executive-summary.sh",
+          "rollbackEntrypoint": "",
+          "slaMinutes": 120,
+          "startedAt": "2026-03-06T20:33:07.210Z",
+          "endedAt": "2026-03-06T20:33:07.210Z",
+          "durationSec": 0,
+          "slaOk": true,
+          "ok": true,
+          "note": "dry_run: scripts/daily-executive-summary.sh"
+        }
+      ],
+      "rollback": []
+    },
+    {
+      "id": "mission_1772828550312",
+      "mission": "resumo ops",
+      "missionRisk": "low",
+      "requestedBy": "Mike",
+      "dryRun": true,
+      "startedAt": "2026-03-06T20:22:30.312Z",
+      "endedAt": "2026-03-06T20:22:30.312Z",
+      "status": "done",
+      "sla": {
+        "total": 1,
+        "breaches": 0,
+        "met": 1
+      },
+      "steps": [
+        {
+          "capabilityId": "ops-summary.v1",
+          "owner": "Mike",
+          "risk": "low",
+          "intent": "Gerar resumo executivo operacional",
+          "entrypoint": "scripts/daily-executive-summary.sh",
+          "rollbackEntrypoint": "",
+          "slaMinutes": 120,
+          "startedAt": "2026-03-06T20:22:30.312Z",
+          "endedAt": "2026-03-06T20:22:30.312Z",
+          "durationSec": 0,
+          "slaOk": true,
+          "ok": true,
+          "note": "dry_run: scripts/daily-executive-summary.sh"
+        }
+      ],
+      "rollback": []
+    }
+  ]
+}

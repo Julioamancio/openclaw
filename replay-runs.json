@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "runs": [
+    {
+      "id": "replay_gateway-degraded_1772828848",
+      "scenarioId": "gateway-degraded",
+      "name": "Gateway degraded",
+      "risk": "medium",
+      "dryRun": true,
+      "status": "done",
+      "ts": "2026-03-06T20:27:28.609870+00:00",
+      "notes": "dry_run: echo simulate: openclaw gateway restart"
+    }
+  ]
+}

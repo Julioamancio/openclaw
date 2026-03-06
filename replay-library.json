@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "otserver-port-flap",
+      "name": "OTServer port flap",
+      "mission": "recover otserver login/game ports",
+      "risk": "high",
+      "command": "echo simulate: restart otserver services"
+    },
+    {
+      "id": "gateway-degraded",
+      "name": "Gateway degraded",
+      "mission": "recover openclaw gateway degraded",
+      "risk": "medium",
+      "command": "echo simulate: openclaw gateway restart"
+    },
+    {
+      "id": "email-monitor-stuck",
+      "name": "Email monitor stuck",
+      "mission": "recover email monitor pipeline",
+      "risk": "low",
+      "command": "echo simulate: restart check-emails flow"
+    }
+  ]
+}

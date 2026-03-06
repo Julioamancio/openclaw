@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-03-06T20:25:07.872130+00:00",
+  "total": 13,
+  "passed": 13,
+  "score": 100,
+  "gate": "pass",
+  "results": [
+    {
+      "id": "json:policies.json",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "json:runbooks.json",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "json:model-router.json",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "json:risk-policy.json",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "json:capabilities.json",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "schema:policies.rules",
+      "ok": true,
+      "notes": "rules must be array"
+    },
+    {
+      "id": "schema:runbooks.tasks",
+      "ok": true,
+      "notes": "tasks must be object"
+    },
+    {
+      "id": "schema:model-router.routes",
+      "ok": true,
+      "notes": "routes must be array"
+    },
+    {
+      "id": "shell:scripts/policy-check.sh",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "shell:scripts/eval-harness.sh",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "shell:scripts/promote-if-green.sh",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "shell:scripts/mission-exec.sh",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "node:server.js",
+      "ok": true,
+      "notes": ""
+    }
+  ]
+}

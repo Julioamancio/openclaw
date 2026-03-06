@@ -1019,6 +1019,24 @@
           <div id="opsAgentRuns" class="ops-list"></div>
         </section>
 
+        <section class="card panel" style="margin-top:1rem" data-search="control tower ceo observe assist autopilot promote rollback missão">
+          <h3 class="section-title">Control Tower (CEO)</h3>
+          <div class="ops-actions" style="margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button id="ctModeObserveBtn" class="btn">Observe</button>
+            <button id="ctModeAssistBtn" class="btn">Assist</button>
+            <button id="ctModeAutopilotBtn" class="btn">Autopilot</button>
+            <button id="ctPromoteBtn" class="btn">Promote</button>
+            <button id="ctRollbackBtn" class="btn">Rollback</button>
+            <button id="ctApproveRiskBtn" class="btn">Approve High-Risk</button>
+          </div>
+          <div class="ops-actions" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <input id="ctMissionInput" class="input" placeholder="Ex: recover gateway degraded + resumo ops" style="min-width:320px;max-width:560px;" />
+            <label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;opacity:.9;"><input id="ctMissionDryRun" type="checkbox" checked /> dry-run</label>
+            <button id="ctRunMissionBtn" class="btn">Run Mission</button>
+          </div>
+          <div id="ctStatus" class="ops-list" style="margin-top:.7rem;"></div>
+        </section>
+
         <section class="card panel" style="margin-top:1rem" data-search="slo sli postmortem">
           <h3 class="section-title">SLO / SLI + Postmortems</h3>
           <div id="opsSlo" class="ops-list"></div>
@@ -2351,11 +2369,20 @@
       document.getElementById('opsSaveRunBtn').addEventListener('click', saveOpsRun);
       document.getElementById('opsRunBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='opsRunBackdrop') e.currentTarget.classList.remove('open'); });
 
+      document.getElementById('ctModeObserveBtn').addEventListener('click', () => setControlTowerMode('observe'));
+      document.getElementById('ctModeAssistBtn').addEventListener('click', () => setControlTowerMode('assist'));
+      document.getElementById('ctModeAutopilotBtn').addEventListener('click', () => setControlTowerMode('autopilot'));
+      document.getElementById('ctPromoteBtn').addEventListener('click', runControlTowerPromote);
+      document.getElementById('ctRollbackBtn').addEventListener('click', runControlTowerRollback);
+      document.getElementById('ctRunMissionBtn').addEventListener('click', runControlTowerMission);
+      document.getElementById('ctApproveRiskBtn').addEventListener('click', runControlTowerApproveHighRisk);
+
       renderOps();
       setInterval(() => {
         syncOpsFromServer();
         syncAgentTimelineFromServer();
         syncSloPostmortems();
+        syncControlTower();
         refreshCronAutoStatus();
         renderOpsCrons();
         checkOtServerHealth();
@@ -2368,6 +2395,98 @@
       syncSloPostmortems();
       refreshCronAutoStatus();
       checkOtServerHealth();
+      syncControlTower();
+    }
+
+    async function syncControlTower() {
+      try {
+        const d = await fetchJson(`${SERVER.base}/mc/control-tower`);
+        const el = document.getElementById('ctStatus');
+        if (!el) return;
+        const lm = d?.latestMission;
+        el.innerHTML = `
+          <article class="ops-item">
+            <div class="ops-head"><strong>Modo operacional</strong><span class="pill running">${escapeHtml(d?.mode || '--')}</span></div>
+            <div class="ops-meta"><span>Promotion green: ${d?.promotionGreen ? 'yes' : 'no'}</span></div>
+          </article>
+          <article class="ops-item">
+            <div class="ops-head"><strong>Última missão</strong><span class="pill ${(lm?.status === 'done') ? 'done' : (lm?.status === 'failed' ? 'failed' : 'running')}">${escapeHtml(lm?.status || '--')}</span></div>
+            <div class="ops-meta"><span>${escapeHtml(lm?.mission || 'sem missão recente')}</span></div>
+            <div class="ops-meta"><span>ID: ${escapeHtml(lm?.id || '--')}</span><span>Risco: ${escapeHtml(lm?.missionRisk || '--')}</span></div>
+          </article>
+        `;
+      } catch {
+        const el = document.getElementById('ctStatus');
+        if (el) el.innerHTML = '<div class="ops-item">Control Tower offline.</div>';
+      }
+    }
+
+    async function setControlTowerMode(mode) {
+      try {
+        await fetchJson(`${SERVER.base}/mc/control-tower/mode`, {
+          method: 'POST',
+          body: JSON.stringify({ mode })
+        });
+        addActivity(`Control Tower mode -> ${mode}`);
+      } catch {
+        alert('Falha ao mudar modo.');
+      }
+      await syncControlTower();
+    }
+
+    async function runControlTowerPromote() {
+      try {
+        const r = await fetchJson(`${SERVER.base}/mc/control-tower/promote`, { method: 'POST' });
+        addActivity(`Control Tower promote: ${r?.status || 'ok'}`);
+      } catch {
+        addActivity('Control Tower promote bloqueado');
+      }
+      await syncControlTower();
+    }
+
+    async function runControlTowerRollback() {
+      try {
+        const r = await fetchJson(`${SERVER.base}/mc/control-tower/rollback`, { method: 'POST' });
+        addActivity(`Control Tower rollback: ${r?.revoked ? 'revoked' : 'no marker'}`);
+      } catch {
+        alert('Falha no rollback');
+      }
+      await syncControlTower();
+    }
+
+    async function runControlTowerMission() {
+      const input = document.getElementById('ctMissionInput');
+      const dry = document.getElementById('ctMissionDryRun');
+      const mission = (input?.value || '').trim();
+      if (!mission) return alert('Informe a missão.');
+      try {
+        const r = await fetchJson(`${SERVER.base}/mc/mission-execute`, {
+          method: 'POST',
+          body: JSON.stringify({ mission, dryRun: !!dry?.checked, requestedBy: 'ControlTower' })
+        });
+        addActivity(`Control Tower mission: ${r?.status || 'done'} (${mission})`);
+      } catch {
+        addActivity(`Control Tower mission failed (${mission})`);
+      }
+      await syncControlTower();
+      await syncSloPostmortems();
+    }
+
+    async function runControlTowerApproveHighRisk() {
+      try {
+        const post = await fetchJson(`${SERVER.base}/mc/postmortems`);
+        const openHigh = (Array.isArray(post) ? post : []).find(p => String(p?.status || '').toLowerCase() === 'open');
+        if (!openHigh?.id) return alert('Sem postmortem aberto para aprovação.');
+        await fetchJson(`${SERVER.base}/mc/high-risk/approve`, {
+          method: 'POST',
+          body: JSON.stringify({ id: openHigh.id })
+        });
+        addActivity(`Control Tower aprovou high-risk (${openHigh.id})`);
+      } catch {
+        alert('Falha em approve high-risk');
+      }
+      await syncControlTower();
+      await syncSloPostmortems();
     }
 
     function saveOpsRun() {

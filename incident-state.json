@@ -133,6 +133,41 @@
           "notes": "policy deny: High-risk exige aprovação humana antes de auto-heal"
         }
       ]
+    },
+    "alt_1772827204147_x94q0": {
+      "id": "alt_1772827204147_x94q0",
+      "state": "escalated",
+      "createdAt": "2026-03-06T20:05:01.290666+00:00",
+      "updatedAt": "2026-03-06T20:05:01.453326+00:00",
+      "history": [
+        {
+          "ts": "2026-03-06T20:05:01.290718+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "ALERTA: Health Score abaixo de 80 (atual 0)"
+        },
+        {
+          "ts": "2026-03-06T20:05:01.316891+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "risk assessment start"
+        },
+        {
+          "ts": "2026-03-06T20:05:01.390096+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "approved",
+          "notes": "policy check passed"
+        },
+        {
+          "ts": "2026-03-06T20:05:01.453328+00:00",
+          "action": "transition",
+          "from": "approved",
+          "to": "escalated",
+          "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 0)"
+        }
+      ]
     }
   }
 }

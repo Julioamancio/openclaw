@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "capabilities": [
+    {
+      "id": "email-monitor.v2",
+      "name": "Email Monitor",
+      "owner": "Daniela",
+      "slaMinutes": 30,
+      "risk": "medium",
+      "entrypoint": "scripts/check-emails.sh",
+      "rollback": "true"
+    },
+    {
+      "id": "incident-recovery.v3",
+      "name": "Incident Recovery",
+      "owner": "Mike",
+      "slaMinutes": 15,
+      "risk": "high",
+      "entrypoint": "scripts/command-bus.sh",
+      "rollback": "true"
+    },
+    {
+      "id": "business-idea.v1",
+      "name": "Business Idea Generator",
+      "owner": "Nexo",
+      "slaMinutes": 60,
+      "risk": "low",
+      "entrypoint": "scripts/run-nexo-task.sh",
+      "rollback": "true"
+    },
+    {
+      "id": "ops-summary.v1",
+      "name": "Ops Executive Summary",
+      "owner": "Mike",
+      "slaMinutes": 120,
+      "risk": "low",
+      "entrypoint": "scripts/daily-executive-summary.sh",
+      "rollback": "true"
+    }
+  ]
+}

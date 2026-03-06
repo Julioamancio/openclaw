@@ -617,5 +617,23 @@
       "notes": "teste phase C",
       "severity": "warning"
     }
+  },
+  {
+    "id": "act_1772827204146_lhqgy",
+    "timestamp": "2026-03-06T20:00:04.146Z",
+    "title": "Health Score Guard",
+    "message": "ALERTA: Health Score abaixo de 80 (atual 0)",
+    "meta": null
+  },
+  {
+    "id": "act_1772829211587_mbmx5",
+    "timestamp": "2026-03-06T20:33:31.587Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
   }
 ]

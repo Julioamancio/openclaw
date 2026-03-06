@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "defaults": {
+    "missionBudgetUsd": 0.8,
+    "targetLatencyMs": 5000,
+    "minQuality": "medium"
+  },
+  "modelCostsUsdPer1k": {
+    "nvidia-nim/moonshotai/kimi-k2.5": 0.003,
+    "openai-codex/gpt-5.3-codex": 0.03
+  },
+  "qualityRank": {
+    "nvidia-nim/moonshotai/kimi-k2.5": "medium",
+    "openai-codex/gpt-5.3-codex": "high"
+  },
+  "downgradeOrder": [
+    "openai-codex/gpt-5.3-codex",
+    "nvidia-nim/moonshotai/kimi-k2.5"
+  ],
+  "upgradeOrder": [
+    "nvidia-nim/moonshotai/kimi-k2.5",
+    "openai-codex/gpt-5.3-codex"
+  ]
+}

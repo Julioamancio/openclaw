@@ -96,5 +96,12 @@
     "sent": true,
     "message": "ALERTA: [warning] State Machine Test falhou",
     "source": "Ops Job"
+  },
+  {
+    "id": "alt_1772827204147_x94q0",
+    "created_at": "2026-03-06T20:00:04.147Z",
+    "sent": true,
+    "message": "ALERTA: Health Score abaixo de 80 (atual 0)",
+    "source": "Health Score Guard"
   }
 ]

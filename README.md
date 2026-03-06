@@ -384,7 +384,14 @@ Mudanças aplicadas após revisão de segurança:
 - Compliance Dashboard (`GET /mc/compliance`) + gate de promoção (`scripts/promote-if-green.sh`)
 - Command Bus determinístico (`scripts/command-bus.sh`) + SRE Modes (`scripts/sre-mode.sh`) + Shadow Benchmark (`scripts/shadow-benchmark.sh`)
 - Consensus multi-model para high-risk (`consensus-policy.json` + `scripts/consensus-check.sh`)
+- Capability Registry + Mission API (`capabilities.json`, `scripts/mission-api.sh`, `/mc/capabilities`, `/mc/mission-plan`)
 
+### Lote 3 (industrialização executiva)
+- Mission Executor completo com trilha de execução, SLA por step e rollback reverso (`POST /mc/mission-execute` + `scripts/mission-exec.sh`)
+- Policy-as-Code CI unificado (`scripts/policy-ci.sh`) com `eval-harness` + `conformance-check` + `promote-if-green`
+- Digital Twin + Replay Library (`replay-library.json`, `twin-state.json`, `replay-runs.json`, `scripts/twin-capture.sh`, `scripts/replay-run.sh`, endpoints `/mc/replays*` e `/mc/twin`)
+- Control Tower UX (modo CEO) no Mission Control com controles de `observe/assist/autopilot`, `promote/rollback`, `approve high-risk` e `run mission`
+- Model FinOps Autônomo com budget por missão e auto downgrade/upgrade (`finops-policy.json`, `mission-budgets.json`, `scripts/finops-route.sh`, endpoints `/mc/finops*`)
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual
 - Runbook registry com aprendizagem por taxa de sucesso (`runbooks.json`)

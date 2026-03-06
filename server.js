@@ -20,6 +20,13 @@ const JOBS_FILE = path.join(ROOT, 'mc-jobs.json');
 const POSTMORTEMS_FILE = path.join(ROOT, 'mc-postmortems.json');
 const RUNBOOKS_FILE = path.join(ROOT, 'runbooks.json');
 const INCIDENT_STATE_FILE = path.join(ROOT, 'incident-state.json');
+const CAPABILITIES_FILE = path.join(ROOT, 'capabilities.json');
+const MISSION_RUNS_FILE = path.join(ROOT, 'mission-runs.json');
+const REPLAY_LIBRARY_FILE = path.join(ROOT, 'replay-library.json');
+const TWIN_STATE_FILE = path.join(ROOT, 'twin-state.json');
+const REPLAY_RUNS_FILE = path.join(ROOT, 'replay-runs.json');
+const FINOPS_POLICY_FILE = path.join(ROOT, 'finops-policy.json');
+const MISSION_BUDGETS_FILE = path.join(ROOT, 'mission-budgets.json');
 
 const startedAt = Date.now();
 let lastRefreshTs = new Date().toISOString();
@@ -105,6 +112,42 @@ function checkTcp(host, port, timeoutMs = 1200) {
     socket.once('error', () => finish(false));
     socket.connect(port, host);
   });
+}
+
+function getSreMode() {
+  const d = readJson(path.join(ROOT, 'sre-mode.json'), { version: 1, mode: 'assist' });
+  const mode = String(d?.mode || 'assist').toLowerCase();
+  return ['observe', 'assist', 'autopilot'].includes(mode) ? mode : 'assist';
+}
+
+function buildMissionPlan(mission, capList) {
+  const lower = String(mission || '').toLowerCase();
+  const selected = [];
+
+  const pushById = (id, intent) => {
+    const c = capList.find((x) => x.id === id) || { id, owner: 'Mike', risk: 'medium', slaMinutes: 60, entrypoint: '' };
+    selected.push({
+      capabilityId: id,
+      intent,
+      owner: c.owner || 'Mike',
+      risk: c.risk || 'medium',
+      slaMinutes: c.slaMinutes || 60,
+      entrypoint: c.entrypoint || '',
+      rollbackEntrypoint: c.rollbackEntrypoint || ''
+    });
+  };
+
+  if (/email|remetente|inbox|imap/.test(lower)) pushById('email-monitor.v2', 'Monitorar e reportar e-mails relevantes');
+  if (/incident|falha|alerta|outage|recover|recovery/.test(lower)) pushById('incident-recovery.v3', 'Diagnosticar e recuperar incidente');
+  if (/ideia|negócio|saas|business/.test(lower)) pushById('business-idea.v1', 'Gerar ideia validada de negócio');
+  if (/resumo|executivo|ops|status/.test(lower)) pushById('ops-summary.v1', 'Gerar resumo executivo operacional');
+  if (!selected.length) pushById('ops-summary.v1', 'Interpretar objetivo e iniciar plano padrão');
+
+  const missionRisk = selected.some((s) => s.risk === 'high')
+    ? 'high'
+    : (selected.some((s) => s.risk === 'medium') ? 'medium' : 'low');
+
+  return { mission, missionRisk, plan: selected };
 }
 
 const server = http.createServer(async (req, res) => {
@@ -342,7 +385,368 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, rb);
     }
 
-    // 13) GET /mc/compliance - policy/eval compliance snapshot
+    // 13) GET /mc/mission-runs - latest mission executions
+    if (req.method === 'GET' && pathname === '/mc/mission-runs') {
+      const mr = readJson(MISSION_RUNS_FILE, { version: 1, runs: [] });
+      const runs = Array.isArray(mr?.runs) ? mr.runs.slice(0, 30) : [];
+      return sendJson(res, 200, { version: mr?.version || 1, total: runs.length, runs });
+    }
+
+    // 14) GET /mc/capabilities - capability registry
+    if (req.method === 'GET' && pathname === '/mc/capabilities') {
+      const caps = readJson(CAPABILITIES_FILE, { version: 1, capabilities: [] });
+      return sendJson(res, 200, caps);
+    }
+
+    // 14) POST /mc/mission-plan - objective to executable plan
+    if (req.method === 'POST' && pathname === '/mc/mission-plan') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mission = String(incoming.mission || '').trim();
+      if (!mission) return sendJson(res, 400, { error: 'mission is required' });
+
+      const caps = readJson(CAPABILITIES_FILE, { version: 1, capabilities: [] });
+      const capList = Array.isArray(caps?.capabilities) ? caps.capabilities : [];
+      const built = buildMissionPlan(mission, capList);
+      return sendJson(res, 200, {
+        generatedAt: new Date().toISOString(),
+        mission: built.mission,
+        missionRisk: built.missionRisk,
+        plan: built.plan,
+        nextAction: built.plan[0]?.entrypoint || null
+      });
+    }
+
+    // 15) POST /mc/mission-execute - plan -> execute -> rollback -> audit payload
+    if (req.method === 'POST' && pathname === '/mc/mission-execute') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mission = String(incoming.mission || '').trim();
+      if (!mission) return sendJson(res, 400, { error: 'mission is required' });
+
+      const dryRun = Boolean(incoming.dryRun);
+      const requestedBy = String(incoming.requestedBy || 'Mike');
+      const timeoutSec = Math.max(30, Math.min(900, Number(incoming.timeoutSec || 240)));
+
+      const caps = readJson(CAPABILITIES_FILE, { version: 1, capabilities: [] });
+      const capList = Array.isArray(caps?.capabilities) ? caps.capabilities : [];
+      const built = (Array.isArray(incoming.plan) && incoming.plan.length)
+        ? {
+            mission,
+            missionRisk: String(incoming.missionRisk || 'medium'),
+            plan: incoming.plan
+          }
+        : buildMissionPlan(mission, capList);
+
+      const finopsProc = spawnSync('/root/.openclaw/workspace/scripts/finops-route.sh', [mission, built.missionRisk, String(incoming.budgetUsd || '')], {
+        encoding: 'utf8', timeout: 30000
+      });
+      const finopsVals = {};
+      String(finopsProc.stdout || '').split(/\r?\n/).forEach((ln) => {
+        const i = ln.indexOf('=');
+        if (i > 0) finopsVals[ln.slice(0, i)] = ln.slice(i + 1);
+      });
+
+      const run = {
+        id: `mission_${Date.now()}`,
+        mission,
+        missionRisk: built.missionRisk,
+        requestedBy,
+        dryRun,
+        startedAt: new Date().toISOString(),
+        endedAt: null,
+        status: 'running',
+        finops: {
+          model: finopsVals.FINOPS_MODEL || null,
+          action: finopsVals.FINOPS_ACTION || 'keep',
+          reason: finopsVals.FINOPS_REASON || 'n/a',
+          budgetUsd: Number(finopsVals.FINOPS_BUDGET_USD || 0),
+          estimatedTokens: Number(finopsVals.FINOPS_EST_TOKENS || 0),
+          estimatedCostUsd: Number(finopsVals.FINOPS_EST_COST_USD || 0)
+        },
+        sla: { total: built.plan.length, breaches: 0, met: 0 },
+        steps: [],
+        rollback: []
+      };
+
+      const completed = [];
+
+      for (const step of built.plan) {
+        const startedAt = new Date();
+        const capabilityId = String(step.capabilityId || 'unknown');
+        const cap = capList.find((x) => x.id === capabilityId) || {};
+        const entrypoint = String(step.entrypoint || cap.entrypoint || '').trim();
+        const rollbackEntrypoint = String(step.rollbackEntrypoint || cap.rollbackEntrypoint || '').trim();
+        const slaMinutes = Number(step.slaMinutes || cap.slaMinutes || 60);
+
+        let ok = false;
+        let note = '';
+
+        if (dryRun) {
+          ok = true;
+          note = `dry_run: ${entrypoint || 'no entrypoint'}`;
+        } else if (!entrypoint) {
+          ok = false;
+          note = 'missing entrypoint';
+        } else {
+          const execRes = spawnSync('/bin/sh', ['-lc', `cd ${ROOT} && ${entrypoint}`], {
+            encoding: 'utf8',
+            timeout: timeoutSec * 1000,
+            maxBuffer: 1024 * 1024
+          });
+          ok = execRes.status === 0;
+          note = String(execRes.stdout || execRes.stderr || '').trim().slice(0, 500);
+          if (execRes.error) note = String(execRes.error.message || note || 'execution error').slice(0, 500);
+        }
+
+        const endedAt = new Date();
+        const durationSec = Number(((endedAt.getTime() - startedAt.getTime()) / 1000).toFixed(2));
+        const slaOk = durationSec <= (slaMinutes * 60);
+        if (slaOk) run.sla.met += 1;
+        else run.sla.breaches += 1;
+
+        run.steps.push({
+          capabilityId,
+          owner: step.owner || cap.owner || 'Mike',
+          risk: step.risk || cap.risk || 'medium',
+          intent: step.intent || '',
+          entrypoint,
+          rollbackEntrypoint,
+          slaMinutes,
+          startedAt: startedAt.toISOString(),
+          endedAt: endedAt.toISOString(),
+          durationSec,
+          slaOk,
+          ok,
+          note
+        });
+
+        if (!ok) {
+          run.status = 'failed';
+
+          for (const prev of completed.reverse()) {
+            if (!prev.rollbackEntrypoint) {
+              run.rollback.push({ capabilityId: prev.capabilityId, attempted: false, ok: false, note: 'rollback entrypoint not set' });
+              continue;
+            }
+
+            if (dryRun) {
+              run.rollback.push({ capabilityId: prev.capabilityId, attempted: true, ok: true, note: `dry_run: ${prev.rollbackEntrypoint}` });
+              continue;
+            }
+
+            const rb = spawnSync('/bin/sh', ['-lc', `cd ${ROOT} && ${prev.rollbackEntrypoint}`], {
+              encoding: 'utf8',
+              timeout: timeoutSec * 1000,
+              maxBuffer: 1024 * 1024
+            });
+            run.rollback.push({
+              capabilityId: prev.capabilityId,
+              attempted: true,
+              ok: rb.status === 0,
+              note: String(rb.stdout || rb.stderr || '').trim().slice(0, 300)
+            });
+          }
+          break;
+        }
+
+        completed.push({ capabilityId, rollbackEntrypoint });
+      }
+
+      if (run.status === 'running') run.status = 'done';
+      run.endedAt = new Date().toISOString();
+
+      const mr = readJson(MISSION_RUNS_FILE, { version: 1, runs: [] });
+      mr.runs = Array.isArray(mr.runs) ? mr.runs : [];
+      mr.runs.unshift(run);
+      mr.runs = mr.runs.slice(0, 200);
+      writeJson(MISSION_RUNS_FILE, mr);
+
+      const ledger = readJson(MISSION_BUDGETS_FILE, { version: 1, items: [] });
+      ledger.items = Array.isArray(ledger.items) ? ledger.items : [];
+      ledger.items.unshift({
+        id: run.id,
+        mission: run.mission,
+        risk: run.missionRisk,
+        ts: run.endedAt,
+        model: run.finops?.model || null,
+        action: run.finops?.action || 'keep',
+        estimatedTokens: Number(run.finops?.estimatedTokens || 0),
+        estimatedCostUsd: Number(run.finops?.estimatedCostUsd || 0),
+        budgetUsd: Number(run.finops?.budgetUsd || 0),
+        status: run.status
+      });
+      ledger.items = ledger.items.slice(0, 500);
+      writeJson(MISSION_BUDGETS_FILE, ledger);
+
+      return sendJson(res, 200, run);
+    }
+
+    // 15) GET /mc/finops - autonomous FinOps summary
+    if (req.method === 'GET' && pathname === '/mc/finops') {
+      const policy = readJson(FINOPS_POLICY_FILE, { version: 1, defaults: { missionBudgetUsd: 0.8 }, modelCostsUsdPer1k: {} });
+      const ledger = readJson(MISSION_BUDGETS_FILE, { version: 1, items: [] });
+      const items = Array.isArray(ledger?.items) ? ledger.items : [];
+      const totalSpent = items.reduce((acc, x) => acc + Number(x?.estimatedCostUsd || 0), 0);
+      const totalMissions = items.length;
+      const avgPerMission = totalMissions ? Number((totalSpent / totalMissions).toFixed(4)) : 0;
+      return sendJson(res, 200, {
+        generatedAt: new Date().toISOString(),
+        defaultBudgetUsd: Number(policy?.defaults?.missionBudgetUsd || 0.8),
+        totalMissions,
+        totalEstimatedSpendUsd: Number(totalSpent.toFixed(4)),
+        avgEstimatedSpendUsd: avgPerMission,
+        recent: items.slice(0, 20)
+      });
+    }
+
+    // 16) POST /mc/finops/route - cost+latency+quality route decision
+    if (req.method === 'POST' && pathname === '/mc/finops/route') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mission = String(incoming.mission || '').trim();
+      if (!mission) return sendJson(res, 400, { error: 'mission is required' });
+      const risk = String(incoming.risk || 'medium').toLowerCase();
+      const budget = incoming.budgetUsd != null ? String(incoming.budgetUsd) : '';
+
+      const f = spawnSync('/root/.openclaw/workspace/scripts/finops-route.sh', [mission, risk, budget], { encoding: 'utf8', timeout: 30000 });
+      if (f.status !== 0) return sendJson(res, 500, { error: 'finops route failed', output: String(f.stderr || f.stdout || '').trim().slice(0, 500) });
+
+      const out = String(f.stdout || '');
+      const vals = {};
+      out.split(/\r?\n/).forEach((ln) => {
+        const i = ln.indexOf('=');
+        if (i > 0) vals[ln.slice(0, i)] = ln.slice(i + 1);
+      });
+      return sendJson(res, 200, {
+        mission,
+        risk,
+        model: vals.FINOPS_MODEL || null,
+        action: vals.FINOPS_ACTION || 'keep',
+        reason: vals.FINOPS_REASON || 'n/a',
+        budgetUsd: Number(vals.FINOPS_BUDGET_USD || 0),
+        estimatedTokens: Number(vals.FINOPS_EST_TOKENS || 0),
+        estimatedCostUsd: Number(vals.FINOPS_EST_COST_USD || 0)
+      });
+    }
+
+    // 17) GET /mc/control-tower - executive control state
+    if (req.method === 'GET' && pathname === '/mc/control-tower') {
+      const mode = getSreMode();
+      const mr = readJson(MISSION_RUNS_FILE, { version: 1, runs: [] });
+      const runs = Array.isArray(mr?.runs) ? mr.runs : [];
+      const latestMission = runs[0] || null;
+      const marker = fs.existsSync(path.join(ROOT, '.promotion-green'));
+      return sendJson(res, 200, {
+        mode,
+        promotionGreen: marker,
+        latestMission
+      });
+    }
+
+    // 16) POST /mc/control-tower/mode - observe|assist|autopilot
+    if (req.method === 'POST' && pathname === '/mc/control-tower/mode') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mode = String(incoming.mode || '').toLowerCase();
+      if (!['observe', 'assist', 'autopilot'].includes(mode)) return sendJson(res, 400, { error: 'invalid mode' });
+
+      const modePath = path.join(ROOT, 'sre-mode.json');
+      const curr = readJson(modePath, { version: 1, mode: 'assist' });
+      curr.mode = mode;
+      curr.updatedAt = new Date().toISOString();
+      writeJson(modePath, curr);
+      return sendJson(res, 200, { ok: true, mode });
+    }
+
+    // 17) POST /mc/control-tower/promote - promote-if-green
+    if (req.method === 'POST' && pathname === '/mc/control-tower/promote') {
+      const p = spawnSync('/root/.openclaw/workspace/scripts/promote-if-green.sh', [], { encoding: 'utf8', timeout: 60000 });
+      const ok = p.status === 0;
+      return sendJson(res, ok ? 200 : 409, {
+        ok,
+        status: ok ? 'promoted' : 'blocked',
+        output: String(p.stdout || p.stderr || '').trim().slice(0, 500)
+      });
+    }
+
+    // 18) POST /mc/control-tower/rollback - revoke green promotion marker
+    if (req.method === 'POST' && pathname === '/mc/control-tower/rollback') {
+      const marker = path.join(ROOT, '.promotion-green');
+      const existed = fs.existsSync(marker);
+      if (existed) fs.unlinkSync(marker);
+      return sendJson(res, 200, { ok: true, revoked: existed, marker: '.promotion-green' });
+    }
+
+    // 19) POST /mc/control-tower/mission - deprecated proxy (use /mc/mission-execute directly)
+    if (req.method === 'POST' && pathname === '/mc/control-tower/mission') {
+      return sendJson(res, 501, { error: 'use /mc/mission-execute directly' });
+    }
+
+    // 20) GET /mc/replays - replay library
+    if (req.method === 'GET' && pathname === '/mc/replays') {
+      const lib = readJson(REPLAY_LIBRARY_FILE, { version: 1, scenarios: [] });
+      const scenarios = Array.isArray(lib?.scenarios) ? lib.scenarios : [];
+      return sendJson(res, 200, { version: lib?.version || 1, total: scenarios.length, scenarios });
+    }
+
+    // 16) POST /mc/replays/run - execute one replay scenario in digital twin mode
+    if (req.method === 'POST' && pathname === '/mc/replays/run') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const id = String(incoming.id || '').trim();
+      if (!id) return sendJson(res, 400, { error: 'id is required' });
+
+      const dryRun = incoming.dryRun !== false;
+      const captureTwin = incoming.captureTwin !== false;
+
+      if (captureTwin) {
+        spawnSync('/root/.openclaw/workspace/scripts/twin-capture.sh', ['before-replay'], { encoding: 'utf8', timeout: 30000 });
+      }
+
+      const rr = spawnSync('/root/.openclaw/workspace/scripts/replay-run.sh', [id, dryRun ? '1' : '0'], {
+        encoding: 'utf8',
+        timeout: 240000
+      });
+
+      const output = String(rr.stdout || rr.stderr || '').trim();
+      let parsed = null;
+      try {
+        parsed = JSON.parse(output.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}');
+      } catch {}
+
+      const runs = readJson(REPLAY_RUNS_FILE, { version: 1, runs: [] });
+      runs.runs = Array.isArray(runs.runs) ? runs.runs : [];
+      runs.runs.unshift(parsed || {
+        id: `replay_${Date.now()}`,
+        scenarioId: id,
+        status: rr.status === 0 ? 'done' : 'failed',
+        note: output.slice(-500),
+        ts: new Date().toISOString()
+      });
+      runs.runs = runs.runs.slice(0, 200);
+      writeJson(REPLAY_RUNS_FILE, runs);
+
+      if (captureTwin) {
+        spawnSync('/root/.openclaw/workspace/scripts/twin-capture.sh', ['after-replay'], { encoding: 'utf8', timeout: 30000 });
+      }
+
+      return sendJson(res, rr.status === 0 ? 200 : 500, parsed || { ok: rr.status === 0, output });
+    }
+
+    // 17) GET /mc/twin - current digital twin snapshot metadata
+    if (req.method === 'GET' && pathname === '/mc/twin') {
+      const twin = readJson(TWIN_STATE_FILE, { version: 1, snapshots: [] });
+      const snaps = Array.isArray(twin?.snapshots) ? twin.snapshots : [];
+      return sendJson(res, 200, {
+        version: twin?.version || 1,
+        total: snaps.length,
+        latest: snaps[0] || null,
+        snapshots: snaps.slice(0, 20)
+      });
+    }
+
+    // 18) GET /mc/compliance - policy/eval compliance snapshot
     if (req.method === 'GET' && pathname === '/mc/compliance') {
       const evalReport = readJson(path.join(ROOT, 'eval', 'latest-report.json'), { gate: 'unknown', score: 0 });
       const auditPath = path.join(ROOT, 'audit-log.jsonl');
@@ -554,6 +958,13 @@ ensureJsonFile(JOBS_FILE, { jobs: [], runs: [] });
 ensureJsonFile(POSTMORTEMS_FILE, []);
 ensureJsonFile(RUNBOOKS_FILE, { version: 1, tasks: {} });
 ensureJsonFile(INCIDENT_STATE_FILE, { version: 1, incidents: {} });
+ensureJsonFile(CAPABILITIES_FILE, { version: 1, capabilities: [] });
+ensureJsonFile(MISSION_RUNS_FILE, { version: 1, runs: [] });
+ensureJsonFile(REPLAY_LIBRARY_FILE, { version: 1, scenarios: [] });
+ensureJsonFile(TWIN_STATE_FILE, { version: 1, snapshots: [] });
+ensureJsonFile(REPLAY_RUNS_FILE, { version: 1, runs: [] });
+ensureJsonFile(FINOPS_POLICY_FILE, { version: 1, defaults: { missionBudgetUsd: 0.8 }, modelCostsUsdPer1k: {} });
+ensureJsonFile(MISSION_BUDGETS_FILE, { version: 1, items: [] });
 
 server.listen(PORT, HOST, () => {
   console.log(`Mission Control server running at http://${HOST}:${PORT}`);
