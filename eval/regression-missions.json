@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "missions": [
+    {
+      "id": "reg_ops_summary_low",
+      "input": { "mission": "status ops", "dryRun": true, "budgetUsd": 0.02 },
+      "expect": { "status": "done", "missionRisk": "low" }
+    },
+    {
+      "id": "reg_incident_high_budget_guard",
+      "input": { "mission": "incident rollback policy", "dryRun": true, "budgetUsd": 0.01 },
+      "expect": { "status": "done", "finopsActionIn": ["downgrade", "keep", "upgrade"] }
+    }
+  ]
+}

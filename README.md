@@ -397,6 +397,11 @@ Mudanças aplicadas após revisão de segurança:
   - Verifier Gate independente (`scripts/mission-verifier.sh` + `POST /mc/mission/verify`)
   - DSL Executor determinístico (`scripts/mission-dsl-exec.sh` + `POST /mc/mission/execute-dsl`)
   - Shadow Scoring por modelo (`scripts/shadow-score.sh` + `GET /mc/shadow-score`)
+- Jarvis-Core v2 (autonomia robusta):
+  - State Store canônico com eventos/snapshots (`jarvis-state.json`, `scripts/state-event.sh`, `/mc/jarvis/state`, `/mc/jarvis/event`)
+  - Planner competitivo com arbitragem (`scripts/planner-competitive.sh`, `/mc/planner/competitive`)
+  - Policy formal declarativa + testes (`policy-formal.json`, `scripts/policy-formal-*.sh`, `/mc/policy-formal/eval`, `/mc/policy-formal/test`)
+  - Regression Suite de missões (`eval/regression-missions.json`, `scripts/regression-suite.sh`, `/mc/regression/run`)
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual
 - Runbook registry com aprendizagem por taxa de sucesso (`runbooks.json`)

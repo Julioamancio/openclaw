@@ -27,6 +27,8 @@ const TWIN_STATE_FILE = path.join(ROOT, 'twin-state.json');
 const REPLAY_RUNS_FILE = path.join(ROOT, 'replay-runs.json');
 const FINOPS_POLICY_FILE = path.join(ROOT, 'finops-policy.json');
 const MISSION_BUDGETS_FILE = path.join(ROOT, 'mission-budgets.json');
+const JARVIS_STATE_FILE = path.join(ROOT, 'jarvis-state.json');
+const POLICY_FORMAL_FILE = path.join(ROOT, 'policy-formal.json');
 
 const startedAt = Date.now();
 let lastRefreshTs = new Date().toISOString();
@@ -582,7 +584,75 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, run);
     }
 
-    // 15) POST /mc/contracts/validate - validate plan DSL against contracts
+    // 15) GET /mc/jarvis/state - canonical event+snpashot state
+    if (req.method === 'GET' && pathname === '/mc/jarvis/state') {
+      const st = readJson(JARVIS_STATE_FILE, { version: 1, events: [], snapshots: [] });
+      return sendJson(res, 200, {
+        version: st?.version || 1,
+        events: Array.isArray(st?.events) ? st.events.slice(-100) : [],
+        snapshots: Array.isArray(st?.snapshots) ? st.snapshots.slice(0, 20) : []
+      });
+    }
+
+    // 16) POST /mc/jarvis/event - append event to canonical store
+    if (req.method === 'POST' && pathname === '/mc/jarvis/event') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const type = String(incoming.type || 'event');
+      const entity = String(incoming.entity || 'system');
+      const payload = JSON.stringify(incoming.payload || {});
+      const x = spawnSync('/root/.openclaw/workspace/scripts/state-event.sh', [type, entity, payload], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 17) POST /mc/planner/competitive - multi-planner arbitration
+    if (req.method === 'POST' && pathname === '/mc/planner/competitive') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mission = String(incoming.mission || '').trim();
+      if (!mission) return sendJson(res, 400, { error: 'mission is required' });
+      const risk = String(incoming.risk || 'medium');
+      const budget = String(incoming.budgetUsd != null ? incoming.budgetUsd : 0.8);
+      const x = spawnSync('/root/.openclaw/workspace/scripts/planner-competitive.sh', [mission, risk, budget], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { error: 'planner failed', output: txt.slice(0, 500) });
+    }
+
+    // 18) POST /mc/policy-formal/eval - formal policy decision
+    if (req.method === 'POST' && pathname === '/mc/policy-formal/eval') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const x = spawnSync('/root/.openclaw/workspace/scripts/policy-formal-eval.sh', [JSON.stringify(incoming || {})], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 403, parsed || { allow: false, output: txt.slice(0, 500) });
+    }
+
+    // 19) POST /mc/policy-formal/test - formal policy unit tests
+    if (req.method === 'POST' && pathname === '/mc/policy-formal/test') {
+      const x = spawnSync('/root/.openclaw/workspace/scripts/policy-formal-test.sh', [], { encoding: 'utf8', timeout: 60000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { gate: 'fail', output: txt.slice(0, 500) });
+    }
+
+    // 20) POST /mc/regression/run - mission regression suite
+    if (req.method === 'POST' && pathname === '/mc/regression/run') {
+      const x = spawnSync('/root/.openclaw/workspace/scripts/regression-suite.sh', [], { encoding: 'utf8', timeout: 300000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { gate: 'fail', output: txt.slice(0, 500) });
+    }
+
+    // 21) POST /mc/contracts/validate - validate plan DSL against contracts
     if (req.method === 'POST' && pathname === '/mc/contracts/validate') {
       const raw = await getRequestBody(req);
       const incoming = raw ? JSON.parse(raw) : {};
@@ -1026,6 +1096,8 @@ ensureJsonFile(TWIN_STATE_FILE, { version: 1, snapshots: [] });
 ensureJsonFile(REPLAY_RUNS_FILE, { version: 1, runs: [] });
 ensureJsonFile(FINOPS_POLICY_FILE, { version: 1, defaults: { missionBudgetUsd: 0.8 }, modelCostsUsdPer1k: {} });
 ensureJsonFile(MISSION_BUDGETS_FILE, { version: 1, items: [] });
+ensureJsonFile(JARVIS_STATE_FILE, { version: 1, events: [], snapshots: [] });
+ensureJsonFile(POLICY_FORMAL_FILE, { version: 1, rules: [], default: { effect: 'allow', reason: 'default' } });
 
 server.listen(PORT, HOST, () => {
   console.log(`Mission Control server running at http://${HOST}:${PORT}`);

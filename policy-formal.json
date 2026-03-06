@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "deny_high_risk_without_approval",
+      "when": { "risk": ["high"], "approved": false },
+      "effect": "deny",
+      "reason": "High-risk requer aprovação explícita"
+    },
+    {
+      "id": "deny_missing_snapshot",
+      "when": { "risk": ["high", "medium"], "hasSnapshot": false },
+      "effect": "deny",
+      "reason": "Mudança exige snapshot/twin"
+    }
+  ],
+  "default": { "effect": "allow", "reason": "No matching deny rule" }
+}
