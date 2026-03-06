@@ -911,9 +911,107 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, revoked: existed, marker: '.promotion-green' });
     }
 
-    // 19) POST /mc/control-tower/mission - deprecated proxy (use /mc/mission-execute directly)
+    // 19) POST /mc/control-tower/mission - smart pipeline (proof -> simulate -> judge -> execute)
     if (req.method === 'POST' && pathname === '/mc/control-tower/mission') {
-      return sendJson(res, 501, { error: 'use /mc/mission-execute directly' });
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mission = String(incoming.mission || '').trim();
+      if (!mission) return sendJson(res, 400, { error: 'mission is required' });
+
+      const risk = String(incoming.risk || 'medium').toLowerCase();
+      const budget = String(incoming.budgetUsd != null ? incoming.budgetUsd : 0.8);
+      const timeoutSec = Math.max(30, Math.min(900, Number(incoming.timeoutSec || 240)));
+      const dryRun = Boolean(incoming.dryRun);
+      const windowAllowed = incoming.windowAllowed !== false;
+
+      const arb = spawnSync('/root/.openclaw/workspace/scripts/planner-arbiter.sh', [mission, risk, budget], { encoding: 'utf8', timeout: 30000 });
+      if (arb.status !== 0) return sendJson(res, 500, { error: 'arbiter failed', output: String(arb.stderr || arb.stdout || '').trim().slice(0, 500) });
+      const arbTxt = String(arb.stdout || '').trim();
+      let arbData = null;
+      try { arbData = JSON.parse(arbTxt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      if (!arbData) return sendJson(res, 500, { error: 'invalid arbiter output' });
+
+      const sim = spawnSync('/root/.openclaw/workspace/scripts/plan-simulator.sh', [JSON.stringify({ candidates: arbData.candidates || [] })], { encoding: 'utf8', timeout: 30000 });
+      const simTxt = String(sim.stdout || sim.stderr || '').trim();
+      let simData = null;
+      try { simData = JSON.parse(simTxt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+
+      const judge = spawnSync('/root/.openclaw/workspace/scripts/ensemble-judge.sh', [JSON.stringify({ candidates: arbData.candidates || [] })], { encoding: 'utf8', timeout: 30000 });
+      const judgeTxt = String(judge.stdout || judge.stderr || '').trim();
+      let judgeData = null;
+      try { judgeData = JSON.parse(judgeTxt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+
+      const winnerPlanner = String(judgeData?.winner?.planner || arbData?.winner?.planner || '');
+      const selectedCandidate = (Array.isArray(arbData?.candidates) ? arbData.candidates : []).find(c => String(c.planner || '') === winnerPlanner) || arbData?.winner || {};
+      const selectedPlan = Array.isArray(selectedCandidate?.plan) ? selectedCandidate.plan : [];
+      if (!selectedPlan.length) return sendJson(res, 500, { error: 'no selected plan' });
+
+      const caps = readJson(CAPABILITIES_FILE, { version: 1, capabilities: [] });
+      const capList = Array.isArray(caps?.capabilities) ? caps.capabilities : [];
+      const hydratedSteps = selectedPlan.map((s) => {
+        const cap = capList.find((x) => x.id === s.capabilityId) || {};
+        const stepRisk = String(s.risk || cap.risk || risk || 'medium');
+        const rollback = String(s.rollbackEntrypoint || cap.rollbackEntrypoint || '').trim();
+        return {
+          capabilityId: String(s.capabilityId || ''),
+          intent: String(s.intent || ''),
+          risk: stepRisk,
+          slaMinutes: Number(s.slaMinutes || cap.slaMinutes || 60),
+          entrypoint: String(s.entrypoint || cap.entrypoint || '').trim(),
+          rollbackEntrypoint: rollback || (stepRisk === 'high' ? 'scripts/backup.sh' : '')
+        };
+      });
+
+      const snap = spawnSync('/root/.openclaw/workspace/scripts/twin-capture.sh', ['before-control-tower-mission'], { encoding: 'utf8', timeout: 30000 });
+      const hasSnapshot = snap.status === 0;
+
+      const prePayload = JSON.stringify({ missionRisk: risk, steps: hydratedSteps, hasSnapshot, windowAllowed });
+      const pre = spawnSync('/root/.openclaw/workspace/scripts/preflight-proof.sh', [prePayload], { encoding: 'utf8', timeout: 30000 });
+      const preTxt = String(pre.stdout || pre.stderr || '').trim();
+      let preData = null;
+      try { preData = JSON.parse(preTxt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      if (pre.status !== 0) {
+        return sendJson(res, 400, {
+          ok: false,
+          stage: 'preflight',
+          arbiter: arbData,
+          simulation: simData,
+          judge: judgeData,
+          preflight: preData || { output: preTxt.slice(0, 500) }
+        });
+      }
+
+      if (dryRun) {
+        return sendJson(res, 200, {
+          ok: true,
+          stage: 'dry_run_ready',
+          arbiter: arbData,
+          simulation: simData,
+          judge: judgeData,
+          preflight: preData,
+          selectedSteps: hydratedSteps
+        });
+      }
+
+      const execPayload = JSON.stringify({ missionRisk: risk, steps: hydratedSteps, timeoutSec });
+      const ex = spawnSync('/root/.openclaw/workspace/scripts/mission-dsl-exec.sh', [execPayload, String(timeoutSec)], { encoding: 'utf8', timeout: (timeoutSec + 30) * 1000 });
+      const exTxt = String(ex.stdout || ex.stderr || '').trim();
+      let exData = null;
+      try { exData = JSON.parse(exTxt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+
+      spawnSync('/root/.openclaw/workspace/scripts/state-event.sh', ['control_tower_mission', 'mission', JSON.stringify({ mission, risk, dryRun, winnerPlanner, status: exData?.status || 'unknown' })], { encoding: 'utf8', timeout: 30000 });
+
+      return sendJson(res, ex.status === 0 ? 200 : 500, {
+        ok: ex.status === 0,
+        stage: 'executed',
+        mission,
+        risk,
+        arbiter: arbData,
+        simulation: simData,
+        judge: judgeData,
+        preflight: preData,
+        execution: exData || { output: exTxt.slice(0, 700) }
+      });
     }
 
     // 20) GET /mc/replays - replay library

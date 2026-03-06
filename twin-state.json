@@ -2,6 +2,92 @@
   "version": 1,
   "snapshots": [
     {
+      "id": "twin_1772832530",
+      "label": "before-control-tower-mission",
+      "ts": "2026-03-06T21:28:50.168021+00:00",
+      "files": [
+        {
+          "path": "mc-jobs.json",
+          "exists": true,
+          "sha256": "d65704d7f61b41568db1e90e1aa4cf1ac7f71a393efbeccacef1550fe8d1bd7e",
+          "size": 11289
+        },
+        {
+          "path": "mc-activity.json",
+          "exists": true,
+          "sha256": "f5e62081ef134eb7f65c409f64900e2ae6d999a91745046717eb3f4a7cdfe45f",
+          "size": 17080
+        },
+        {
+          "path": "mc-alerts.json",
+          "exists": true,
+          "sha256": "dde94b699c365ea5bfa3c60641ed5b913cd44e86dfe6ed3576d00332acb4c2e0",
+          "size": 3139
+        },
+        {
+          "path": "mc-postmortems.json",
+          "exists": true,
+          "sha256": "723eda198a4687ae3440eca90e18c42f3809bd4c7d35251ffba687150a6cbd02",
+          "size": 6678
+        },
+        {
+          "path": "incident-state.json",
+          "exists": true,
+          "sha256": "6100dac626826cedc805f7bf5c32fb2b0ebaf82e085ec1d82d593cef3112639d",
+          "size": 6217
+        },
+        {
+          "path": "mission-runs.json",
+          "exists": true,
+          "sha256": "6e4e2d56f5d31b27e6c4bb8040f84184f1de685286fd07b3a977a8d510484372",
+          "size": 5498
+        }
+      ]
+    },
+    {
+      "id": "twin_1772832509",
+      "label": "before-control-tower-mission",
+      "ts": "2026-03-06T21:28:29.718969+00:00",
+      "files": [
+        {
+          "path": "mc-jobs.json",
+          "exists": true,
+          "sha256": "d65704d7f61b41568db1e90e1aa4cf1ac7f71a393efbeccacef1550fe8d1bd7e",
+          "size": 11289
+        },
+        {
+          "path": "mc-activity.json",
+          "exists": true,
+          "sha256": "f5e62081ef134eb7f65c409f64900e2ae6d999a91745046717eb3f4a7cdfe45f",
+          "size": 17080
+        },
+        {
+          "path": "mc-alerts.json",
+          "exists": true,
+          "sha256": "dde94b699c365ea5bfa3c60641ed5b913cd44e86dfe6ed3576d00332acb4c2e0",
+          "size": 3139
+        },
+        {
+          "path": "mc-postmortems.json",
+          "exists": true,
+          "sha256": "723eda198a4687ae3440eca90e18c42f3809bd4c7d35251ffba687150a6cbd02",
+          "size": 6678
+        },
+        {
+          "path": "incident-state.json",
+          "exists": true,
+          "sha256": "6100dac626826cedc805f7bf5c32fb2b0ebaf82e085ec1d82d593cef3112639d",
+          "size": 6217
+        },
+        {
+          "path": "mission-runs.json",
+          "exists": true,
+          "sha256": "6e4e2d56f5d31b27e6c4bb8040f84184f1de685286fd07b3a977a8d510484372",
+          "size": 5498
+        }
+      ]
+    },
+    {
       "id": "twin_1772828848",
       "label": "after-replay",
       "ts": "2026-03-06T20:27:28.643707+00:00",

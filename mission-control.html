@@ -2720,11 +2720,12 @@
       const mission = (input?.value || '').trim();
       if (!mission) return alert('Informe a missão.');
       try {
-        const r = await fetchJson(`${SERVER.base}/mc/mission-execute`, {
+        const r = await fetchJson(`${SERVER.base}/mc/control-tower/mission`, {
           method: 'POST',
-          body: JSON.stringify({ mission, dryRun: !!dry?.checked, requestedBy: 'ControlTower' })
+          body: JSON.stringify({ mission, dryRun: !!dry?.checked, requestedBy: 'ControlTower', risk: 'medium', windowAllowed: true })
         });
-        addActivity(`Control Tower mission: ${r?.status || 'done'} (${mission})`);
+        const st = r?.execution?.status || r?.stage || r?.status || 'done';
+        addActivity(`Control Tower mission: ${st} (${mission})`);
       } catch {
         addActivity(`Control Tower mission failed (${mission})`);
       }
