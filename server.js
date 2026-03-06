@@ -29,6 +29,7 @@ const FINOPS_POLICY_FILE = path.join(ROOT, 'finops-policy.json');
 const MISSION_BUDGETS_FILE = path.join(ROOT, 'mission-budgets.json');
 const JARVIS_STATE_FILE = path.join(ROOT, 'jarvis-state.json');
 const POLICY_FORMAL_FILE = path.join(ROOT, 'policy-formal.json');
+const SAFETY_INVARIANTS_FILE = path.join(ROOT, 'safety-invariants.json');
 
 const startedAt = Date.now();
 let lastRefreshTs = new Date().toISOString();
@@ -641,7 +642,51 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, x.status === 0 ? 200 : 500, parsed || { error: 'arbiter failed', output: txt.slice(0, 500) });
     }
 
-    // 19) POST /mc/autonomy/evaluate - compute target mode from confidence stats
+    // 19) POST /mc/preflight/proof - invariant proof before execution
+    if (req.method === 'POST' && pathname === '/mc/preflight/proof') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const payload = JSON.stringify({
+        missionRisk: String(incoming.missionRisk || 'medium'),
+        steps: Array.isArray(incoming.steps) ? incoming.steps : [],
+        hasSnapshot: Boolean(incoming.hasSnapshot),
+        windowAllowed: Boolean(incoming.windowAllowed)
+      });
+      const x = spawnSync('/root/.openclaw/workspace/scripts/preflight-proof.sh', [payload], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 400, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 20) POST /mc/planner/ensemble-judge - blind judge over candidate plans
+    if (req.method === 'POST' && pathname === '/mc/planner/ensemble-judge') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const payload = JSON.stringify({ candidates: Array.isArray(incoming.candidates) ? incoming.candidates : [] });
+      const x = spawnSync('/root/.openclaw/workspace/scripts/ensemble-judge.sh', [payload], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 400, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 21) POST /mc/planner/simulate - counterfactual plan scoring
+    if (req.method === 'POST' && pathname === '/mc/planner/simulate') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const payload = JSON.stringify({
+        candidates: Array.isArray(incoming.candidates) ? incoming.candidates : [],
+        steps: Array.isArray(incoming.steps) ? incoming.steps : []
+      });
+      const x = spawnSync('/root/.openclaw/workspace/scripts/plan-simulator.sh', [payload], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 400, parsed || { ok: false, output: txt.slice(0, 500) });
+    }
+
+    // 22) POST /mc/autonomy/evaluate - compute target mode from confidence stats
     if (req.method === 'POST' && pathname === '/mc/autonomy/evaluate') {
       const x = spawnSync('/root/.openclaw/workspace/scripts/autonomy-mode-eval.sh', [], { encoding: 'utf8', timeout: 30000 });
       const txt = String(x.stdout || x.stderr || '').trim();
@@ -1155,6 +1200,7 @@ ensureJsonFile(FINOPS_POLICY_FILE, { version: 1, defaults: { missionBudgetUsd: 0
 ensureJsonFile(MISSION_BUDGETS_FILE, { version: 1, items: [] });
 ensureJsonFile(JARVIS_STATE_FILE, { version: 1, events: [], snapshots: [] });
 ensureJsonFile(POLICY_FORMAL_FILE, { version: 1, rules: [], default: { effect: 'allow', reason: 'default' } });
+ensureJsonFile(SAFETY_INVARIANTS_FILE, { version: 1, invariants: [] });
 
 server.listen(PORT, HOST, () => {
   console.log(`Mission Control server running at http://${HOST}:${PORT}`);

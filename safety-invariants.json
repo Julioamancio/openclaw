@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "invariants": [
+    {
+      "id": "inv_snapshot_required",
+      "when": { "missionRiskIn": ["medium", "high"] },
+      "check": "hasSnapshot",
+      "reason": "Missão medium/high exige snapshot válido"
+    },
+    {
+      "id": "inv_window_required_for_high",
+      "when": { "missionRiskIn": ["high"] },
+      "check": "windowAllowed",
+      "reason": "Missão high-risk exige janela aprovada"
+    },
+    {
+      "id": "inv_rollback_for_high_steps",
+      "when": { "missionRiskIn": ["high"] },
+      "check": "highRiskStepsHaveRollback",
+      "reason": "Steps high-risk exigem rollbackEntrypoint"
+    }
+  ]
+}
