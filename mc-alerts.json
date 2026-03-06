@@ -82,5 +82,12 @@
     "sent": true,
     "message": "ALERTA: Health Score abaixo de 80 (atual 32)",
     "source": "Health Score Guard"
+  },
+  {
+    "id": "alt_1772823604894_tltcs",
+    "created_at": "2026-03-06T19:00:04.894Z",
+    "sent": true,
+    "message": "ALERTA: Health Score abaixo de 80 (atual 20)",
+    "source": "Health Score Guard"
   }
 ]

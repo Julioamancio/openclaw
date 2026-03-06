@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "default": "nvidia-nim/moonshotai/kimi-k2.5",
+  "fallback": "openai-codex/gpt-5.3-codex",
+  "routes": [
+    {
+      "name": "ops_incident",
+      "match": "incident|postmortem|alerta|health score|slo|runbook|outage|falha",
+      "model": "openai-codex/gpt-5.3-codex",
+      "reason": "Maior confiabilidade para operações críticas"
+    },
+    {
+      "name": "code_and_scripts",
+      "match": "script|bash|python|regex|refactor|bug|fix|server.js|cron|deploy",
+      "model": "openai-codex/gpt-5.3-codex",
+      "reason": "Precisão em código/edição"
+    },
+    {
+      "name": "research_and_brainstorm",
+      "match": "ideia|trend|pesquisa|resumo|estratégia|mercado|nexo",
+      "model": "nvidia-nim/moonshotai/kimi-k2.5",
+      "reason": "Boa síntese e custo menor"
+    }
+  ]
+}

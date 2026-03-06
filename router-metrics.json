@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "models": {
+    "openai-codex/gpt-5.3-codex": {
+      "attempts": 1,
+      "success": 1,
+      "failed": 0,
+      "failStreak": 0,
+      "avgLatencyMs": 38,
+      "lastStatus": "routed",
+      "lastRoute": "code_and_scripts",
+      "lastAt": "2026-03-06T19:00:27.685273+00:00"
+    },
+    "nvidia-nim/moonshotai/kimi-k2.5": {
+      "attempts": 1,
+      "success": 1,
+      "failed": 0,
+      "failStreak": 0,
+      "avgLatencyMs": 37,
+      "lastStatus": "routed",
+      "lastRoute": "research_and_brainstorm",
+      "lastAt": "2026-03-06T19:00:27.781788+00:00"
+    }
+  }
+}

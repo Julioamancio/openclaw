@@ -375,6 +375,11 @@ Mudanças aplicadas após revisão de segurança:
 - Detecção de anomalia por horário (`scripts/anomaly-hourly-guard.sh`)
 - Audit trail estruturado (`audit-log.jsonl` + `scripts/audit-event.sh`)
 - Auto-documentação contínua (`OPERATIONS_CHANGELOG.md` + `scripts/auto-doc-ops.sh`)
+- Model Router inicial (model-agnostic): `model-router.json` + `scripts/model-route.sh`
+- Orquestrador de roteamento com trilha de auditoria: `scripts/router-exec.sh`
+- Métricas por modelo + fallback automático por degradação: `router-metrics.json` + `scripts/router-metrics-update.sh`
+- Contratos de skill para consistência cross-model: `SKILL_CONTRACTS.md`
+- Router inteligente com métricas e fallback por degradação (latência + fail streak)
 
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual

@@ -566,5 +566,34 @@
     "title": "Health Score Guard",
     "message": "ALERTA: Health Score abaixo de 80 (atual 32)",
     "meta": null
+  },
+  {
+    "id": "act_1772823602052_1p2ds",
+    "timestamp": "2026-03-06T19:00:02.052Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772823604894_iwnzh",
+    "timestamp": "2026-03-06T19:00:04.894Z",
+    "title": "Health Score Guard",
+    "message": "ALERTA: Health Score abaixo de 80 (atual 20)",
+    "meta": null
+  },
+  {
+    "id": "act_1772823692316_xslq2",
+    "timestamp": "2026-03-06T19:01:32.316Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
   }
 ]

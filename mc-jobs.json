@@ -5,7 +5,7 @@
       "schedule": "08:00 e 16:00 BRT",
       "agent": "Daniela",
       "status": "done",
-      "lastRun": "2026-03-06T12:16:08.908533+00:00",
+      "lastRun": "2026-03-06T19:01:32.304944+00:00",
       "notes": "Nenhum e-mail novo"
     },
     {
@@ -58,6 +58,20 @@
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-06T19:01:32.304944+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-06T19:00:02.000976+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
     {
       "ts": "2026-03-06T16:45:49.406674+00:00",
       "task": "Heartbeat técnico",
