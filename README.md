@@ -194,6 +194,43 @@ Sistema de gerenciamento de conhecimento pessoal:
 
 ---
 
+### 5. 🖥️ Mission Control Dashboard (HTML único + Server local)
+
+Painel premium local para operação diária, com persistência local e backup no servidor Node.
+
+**Frontend:** [`mission-control.html`](mission-control.html)
+
+**Backend local:** [`server.js`](server.js) (porta `8899`)
+
+**Persistência local/server:**
+- `localStorage` (camada primária)
+- `mc-data.json` (backup de estado)
+- `mc-activity.json` (log de atividades)
+
+**Abas implementadas:**
+- 📊 Painel (métricas, atividade, prioridades)
+- 📋 Projetos (kanban)
+- 📅 Roadmap
+- 📝 Notas
+- 💰 Receita (MRR, clientes, projeções)
+- 🏢 Command Center (agentes/subagentes + decisões executivas)
+- 🎬 YouTube (pipeline, growth tracker, calendário)
+- 📞 Meetings (upcoming/past, agenda, notas, ações)
+- 📡 Intel (categorias, filtros, daily brief)
+- 🧭 Ops (crons/tarefas diárias, OTServer, execuções por agentes)
+
+**Integrações do Mission Control com servidor local:**
+- `GET /mc/data` no load com merge (server backup + localStorage primário)
+- `POST /mc/data` a cada 5 minutos (backup automático)
+- `GET /mc/weather?city=Belo Horizonte/MG` no header
+- `POST /mc/activity` em mudanças de dados
+- Indicador visual de conectividade (`Server: Online/Offline`)
+
+**Auto-start macOS (opcional):**
+- Template: [`com.missioncontrol.server.plist`](com.missioncontrol.server.plist)
+
+---
+
 ## 🛡️ Segurança
 
 ### Guardian Layer (Camada de Proteção)

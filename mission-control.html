@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta caractereset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050508;
+      --bg-soft: #0b0b10;
+      --card: rgba(255, 255, 255, 0.05);
+      --card-strong: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.06);
+      --text: #f5f7ff;
+      --muted: #9ba3b4;
+      --accent: #7c5cff; /* Replace with [COLOR_ACCENT] */
+      --success: #2ed573;
+      --warn: #ffb020;
+      --danger: #ff5f7a;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --space: 1rem;
+      --shadow: 0 12px 50px rgba(0, 0, 0, 0.45);
+      --glow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent), 0 0 20px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 15% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent),
+                  radial-gradient(900px 500px at 95% 0%, rgba(80, 120, 255, 0.08), transparent),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100%;
+    }
+
+    .app { min-height: 100dvh; }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(10,10,14,0.85), rgba(10,10,14,0.55));
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.95rem 2.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), #5fd3ff);
+      box-shadow: var(--glow);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem;
+    }
+
+    .tab-btn {
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      background: transparent;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      transition: 180ms ease;
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: color-mix(in srgb, var(--accent) 18%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent);
+    }
+
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: min(320px, 100%);
+    }
+
+    .search {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 0.62rem 0.9rem 0.62rem 2.2rem;
+      outline: none;
+      transition: border-color 200ms, box-shadow 200ms;
+    }
+
+    .search:focus {
+      border-color: color-mix(in srgb, var(--accent) 52%, #fff 10%);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.72rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+      white-space: nowrap;
+      flex-wrap: wrap;
+    }
+
+    .weather-info {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border-radius: 999px;
+      padding: 0.12rem 0.5rem;
+      color: #dce4f6;
+      font-size: 0.78rem;
+    }
+
+    .server-badge {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border-radius: 999px;
+      padding: 0.12rem 0.5rem;
+      font-size: 0.78rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.55); }
+      70% { box-shadow: 0 0 0 12px rgba(46, 213, 115, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); }
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2.5rem;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: fadeInUp 420ms ease both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin: 0 0 0.85rem;
+      font-weight: 700;
+    }
+
+    /* Dashboard */
+    .welcome {
+      padding: 1.1rem 1.3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .welcome h1 {
+      margin: 0;
+      font-size: clamp(1.15rem, 1.8vw, 1.6rem);
+      font-weight: 700;
+    }
+
+    .welcome .time {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 500;
+    }
+
+    .metrics {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .metric-card {
+      position: relative;
+      padding: 1rem 1rem 1.1rem;
+    }
+
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 40%, #fff));
+    }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.88rem;
+      align-items: center;
+    }
+
+    .metric-value {
+      margin-top: 0.45rem;
+      font-size: clamp(1.3rem, 2.2vw, 1.95rem);
+      font-weight: 800;
+    }
+
+    .trend {
+      margin-top: 0.35rem;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .trend.up { color: var(--success); }
+    .trend.down { color: var(--danger); }
+
+    .dash-grid {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1rem;
+    }
+
+    .panel {
+      padding: 1rem;
+    }
+
+    .activity-list {
+      max-height: 360px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding-right: 0.15rem;
+    }
+
+    .activity-item {
+      padding: 0.72rem 0.8rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .activity-item .meta {
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.35rem;
+    }
+
+    .priority-item {
+      display: flex;
+      align-items: center;
+      gap: 0.62rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      padding: 0.62rem 0.75rem;
+      border-radius: 12px;
+    }
+
+    .priority-item input[type="text"] {
+      flex: 1;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      outline: none;
+      font-size: 0.92rem;
+    }
+
+    .priority-item.done input[type="text"] {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 0.55rem 0.8rem;
+      cursor: pointer;
+      transition: 180ms ease;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.1);
+      box-shadow: var(--glow);
+    }
+
+    /* Projects */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .column {
+      padding: 0.95rem;
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .column-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .column h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .task-list {
+      margin-top: 0.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .task {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.035);
+      border-radius: 12px;
+      padding: 0.72rem;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .task:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+    }
+
+    .task-title { font-weight: 700; font-size: 0.92rem; margin: 0 0 0.35rem; }
+    .task-desc { margin: 0; color: var(--muted); font-size: 0.84rem; line-height: 1.35; }
+
+    .task-meta {
+      margin-top: 0.55rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+    .badge.high { color: #ffd6de; background: rgba(255,95,122,0.14); border-color: rgba(255,95,122,0.35); }
+    .badge.medium { color: #ffe7be; background: rgba(255,176,32,0.14); border-color: rgba(255,176,32,0.35); }
+    .badge.low { color: #ccf5df; background: rgba(46,213,115,0.14); border-color: rgba(46,213,115,0.35); }
+
+    /* Timeline */
+    .timeline-wrap { padding: 1rem; }
+    .timeline {
+      position: relative;
+      margin-left: 1rem;
+      border-left: 2px solid rgba(255,255,255,0.1);
+      padding-left: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .phase {
+      position: relative;
+      padding: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .phase::before {
+      content: "";
+      position: absolute;
+      left: -1.73rem;
+      top: 1.15rem;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #888;
+      border: 2px solid #181821;
+    }
+
+    .phase.current {
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      box-shadow: var(--glow);
+      background: color-mix(in srgb, var(--accent) 7%, rgba(255,255,255,0.02));
+    }
+
+    .phase.current::before { background: var(--accent); }
+
+    .phase h4 { margin: 0; font-size: 1rem; }
+    .phase .range { color: var(--muted); font-size: 0.82rem; margin: 0.25rem 0 0.5rem; }
+    .phase p { margin: 0 0 0.55rem; color: #c9d1e0; font-size: 0.89rem; }
+
+    .milestones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+    .milestones li { font-size: 0.86rem; color: #dbe2f1; }
+    .milestones .done { color: #b6f3cf; }
+
+    /* Notes */
+    .notes-card { padding: 1rem; }
+    .notes {
+      width: 100%;
+      min-height: 460px;
+      resize: vertical;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 0.95rem;
+      font: 500 0.94rem/1.6 Inter, sans-serif;
+      outline: none;
+    }
+
+    .notes:focus {
+      border-color: color-mix(in srgb, var(--accent) 46%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    .notes-meta {
+      margin-top: 0.55rem;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 150;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(560px, 96vw);
+      background: #101019;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .modal h3 { margin: 0 0 0.8rem; }
+    .field { display: grid; gap: 0.35rem; margin-bottom: 0.7rem; }
+    .field label { font-size: 0.84rem; color: var(--muted); }
+
+    .input, .textarea, .select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 0.58rem 0.7rem;
+      outline: none;
+    }
+
+    .textarea { min-height: 100px; resize: vertical; }
+    .modal-actions { display: flex; justify-content: space-between; gap: 0.7rem; margin-top: 0.85rem; }
+    .danger { border-color: rgba(255,95,122,0.35); color: #ffd6de; background: rgba(255,95,122,0.13); }
+
+    .hidden { display: none !important; }
+
+    /* Command Center */
+    .agent-grid { margin-top:.8rem; display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap:.8rem; }
+    .agent-card { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.75rem; cursor:pointer; transition:180ms ease; }
+    .agent-card:hover { transform:translateY(-1px); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+    .agent-top { display:flex; justify-content:space-between; gap:.5rem; align-items:center; }
+    .agent-role { color:var(--muted); font-size:.82rem; }
+    .agent-meta { margin-top:.35rem; color:var(--muted); font-size:.8rem; display:grid; gap:.2rem; }
+    .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:.35rem; }
+    .status-online { background:#2ed573; }
+    .status-busy { background:#ffb020; }
+    .status-offline { background:#8b93a7; }
+
+    .agent-drawer {
+      position: fixed; top:0; right:-460px; width:min(440px,95vw); height:100dvh; z-index:180;
+      background: rgba(12,12,18,.96); backdrop-filter: blur(14px);
+      border-left:1px solid var(--border); box-shadow: var(--shadow);
+      transition: right 260ms ease;
+      display:flex; flex-direction:column;
+    }
+    .agent-drawer.open { right:0; }
+    .agent-drawer-head { padding:1rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .agent-drawer-body { padding:1rem; overflow:auto; display:grid; gap:.55rem; }
+    .agent-drawer-body h4 { margin:.5rem 0 .2rem; font-size:.9rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+    .drawer-list { margin:0; padding-left:1rem; color:#dce4f6; }
+    .drawer-activity { display:grid; gap:.45rem; }
+    .drawer-activity-item { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:10px; padding:.55rem; font-size:.85rem; }
+    .muted { color:var(--muted); }
+
+    .decision-list { margin-top:.8rem; display:grid; gap:.6rem; }
+    .decision-item { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.7rem; }
+    .decision-item .meta { margin-top:.25rem; font-size:.8rem; color:var(--muted); }
+
+    @media (max-width: 1400px) { .agent-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 700px) { .agent-grid { grid-template-columns: 1fr; } }
+
+    /* Ops */
+    .ops-list { margin-top:.75rem; display:grid; gap:.6rem; }
+    .ops-item { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.7rem; }
+    .ops-head { display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .ops-meta { margin-top:.3rem; color:var(--muted); font-size:.82rem; display:flex; gap:.65rem; flex-wrap:wrap; }
+    .ops-actions { margin-top:.45rem; display:flex; gap:.45rem; flex-wrap:wrap; }
+    .pill { border-radius:999px; padding:.12rem .48rem; font-size:.72rem; border:1px solid var(--border); }
+    .pill.done { color:#ccf5df; background:rgba(46,213,115,.14); border-color:rgba(46,213,115,.35); }
+    .pill.failed { color:#ffd6de; background:rgba(255,95,122,.14); border-color:rgba(255,95,122,.35); }
+    .pill.running { color:#ffe7be; background:rgba(255,176,32,.14); border-color:rgba(255,176,32,.35); }
+
+    /* Intel */
+    .intel-filters { display:flex; gap:.6rem; flex-wrap:wrap; }
+    .intel-list { margin-top:.8rem; display:grid; gap:.6rem; }
+    .intel-item { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.7rem; }
+    .intel-meta { margin-top:.3rem; color:var(--muted); font-size:.82rem; display:flex; gap:.55rem; flex-wrap:wrap; }
+    .tag { border-radius:999px; padding:.14rem .5rem; font-size:.72rem; border:1px solid var(--border); }
+    .tag.hot { color:#ffd6de; background:rgba(255,95,122,.14); border-color:rgba(255,95,122,.35); }
+    .tag.notable { color:#ffe7be; background:rgba(255,176,32,.14); border-color:rgba(255,176,32,.35); }
+    .tag.reference { color:#ccf5df; background:rgba(46,213,115,.14); border-color:rgba(46,213,115,.35); }
+
+    /* Meetings */
+    .meeting-list { margin-top:.8rem; display:grid; gap:.6rem; }
+    .meeting-card { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.7rem; }
+    .meeting-head { display:flex; justify-content:space-between; align-items:flex-start; gap:.6rem; cursor:pointer; }
+    .meeting-meta { color:var(--muted); font-size:.82rem; display:flex; gap:.65rem; flex-wrap:wrap; margin-top:.25rem; }
+    .meeting-expand { margin-top:.55rem; border-top:1px solid var(--border); padding-top:.55rem; display:none; }
+    .meeting-card.open .meeting-expand { display:block; }
+    .agenda-list { display:grid; gap:.35rem; margin-top:.3rem; }
+    .agenda-item { display:flex; gap:.45rem; align-items:center; }
+    .agenda-item input[type="text"] { flex:1; background:transparent; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:.3rem .5rem; }
+    .meeting-notes { width:100%; min-height:84px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:.45rem; }
+    .countdown { color: var(--accent); font-weight:700; font-size:.82rem; }
+    .today-highlight { box-shadow: var(--glow); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+    /* YouTube */
+    .yt-grid { display:grid; grid-template-columns: 1.3fr .9fr; gap:1rem; }
+    .video-board { margin-top:.8rem; display:grid; gap:.7rem; }
+    .video-card { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.7rem; cursor:pointer; }
+    .video-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+    .video-meta { margin-top:.3rem; color:var(--muted); font-size:.82rem; display:flex; gap:.6rem; flex-wrap:wrap; }
+    .status-chip { border-radius:999px; padding:.14rem .5rem; font-size:.7rem; font-weight:700; border:1px solid var(--border); text-transform:uppercase; }
+    .xp-wrap { width:100%; height:10px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:.4rem; }
+    .xp-bar { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#5fd3ff); transition:width .25s ease; }
+    .calendar { display:grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap:.35rem; }
+    .cal-cell { min-height:72px; border:1px solid var(--border); background:rgba(255,255,255,.02); border-radius:10px; padding:.35rem; font-size:.76rem; color:var(--muted); }
+    .cal-day { color:#dce4f6; font-weight:700; }
+    .cal-dot { margin-top:.2rem; display:block; width:7px; height:7px; border-radius:50%; background:var(--accent); }
+    @media (max-width: 1200px) { .yt-grid { grid-template-columns:1fr; } }
+
+    /* Revenue */
+    .revenue-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1rem;
+    }
+    .gauge-wrap { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .gauge {
+      --p: 0;
+      width: 150px; height: 150px; border-radius: 50%;
+      background: conic-gradient(var(--accent) calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+      display:grid; place-items:center;
+      position: relative;
+      box-shadow: var(--glow);
+    }
+    .gauge::after {
+      content:""; position:absolute; inset:12px; border-radius:50%;
+      background: rgba(10,10,15,0.95); border:1px solid var(--border);
+    }
+    .gauge span { position:relative; z-index:1; font-weight:800; font-size:1.1rem; }
+    .gauge-meta { color: var(--muted); display:grid; gap:.35rem; }
+    .gauge-meta strong { color: var(--text); }
+    #revenueChart { width:100%; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; }
+
+    .client-list { margin-top:.8rem; display:grid; gap:.6rem; }
+    .client-item {
+      border:1px solid var(--border); background:rgba(255,255,255,0.03);
+      border-radius:12px; padding:.7rem; display:grid; gap:.45rem; cursor:pointer;
+      transition:180ms ease;
+    }
+    .client-item:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); transform:translateY(-1px); }
+    .client-top { display:flex; justify-content:space-between; gap:.7rem; align-items:center; }
+    .client-meta { display:flex; gap:.8rem; color:var(--muted); font-size:.83rem; flex-wrap:wrap; }
+    .status-pill { border-radius:999px; padding:.15rem .55rem; font-size:.72rem; font-weight:700; border:1px solid transparent; }
+    .status-pill.active { color:#ccf5df; background:rgba(46,213,115,.14); border-color:rgba(46,213,115,.35); }
+    .status-pill.pending { color:#ffe7be; background:rgba(255,176,32,.14); border-color:rgba(255,176,32,.35); }
+    .status-pill.churned { color:#ffd6de; background:rgba(255,95,122,.14); border-color:rgba(255,95,122,.35); }
+
+    .projection-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:.8rem; }
+    .projection-item { border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:12px; padding:.75rem; display:grid; gap:.3rem; }
+    .projection-item span { color:var(--muted); font-size:.84rem; }
+    .projection-item strong { font-size:1.1rem; }
+
+    @media (max-width: 1200px) {
+      .revenue-grid { grid-template-columns: 1fr; }
+      .projection-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 1200px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .dash-grid { grid-template-columns: 1fr; }
+      .kanban { grid-template-columns: 1fr; }
+      .column { min-height: auto; }
+    }
+
+    @media (max-width: 900px) {
+      .header-inner {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        padding: 0.8rem 1rem;
+      }
+      .tabs { justify-self: center; overflow-x: auto; max-width: 100%; }
+      .header-right { justify-content: stretch; flex-wrap: wrap; }
+      .search-wrap { width: 100%; }
+      .container { padding: 1rem; }
+      .welcome { flex-direction: column; align-items: flex-start; }
+      .metrics { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sticky Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="brand" title="Mission Control">
+          <div class="logo"></div>
+          <span>Mission Control</span>
+        </div>
+
+        <nav class="tabs" aria-label="Main tabs">
+          <button class="tab-btn active" data-tab="dashboard">📊 Painel</button>
+          <button class="tab-btn" data-tab="projects">📋 Projetos</button>
+          <button class="tab-btn" data-tab="timeline">📅 Roadmap</button>
+          <button class="tab-btn" data-tab="notes">📝 Notas</button>
+          <button class="tab-btn" data-tab="revenue">💰 Receita</button>
+          <button class="tab-btn" data-tab="command">🏢 Command Center</button>
+          <button class="tab-btn" data-tab="youtube">🎬 YouTube</button>
+          <button class="tab-btn" data-tab="meetings">📞 Meetings</button>
+          <button class="tab-btn" data-tab="intel">📡 Intel</button>
+          <button class="tab-btn" data-tab="ops">🧭 Ops</button>
+        </nav>
+
+        <div class="header-right">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="searchInput" class="search" placeholder="Buscar (Ctrl/Cmd+K)" />
+          </div>
+          <div class="status"><span class="dot" id="serverDot"></span><span id="serverText">Sistema Online</span><span id="weatherInfo" class="weather-info">--</span><span id="serverBadge" class="server-badge">Server: --</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Dashboard -->
+      <section id="dashboard" class="tab-content active">
+        <div class="card welcome">
+          <h1 id="welcomeText">Boa noite, Julio</h1>
+          <div class="time" id="liveDateTime">--</div>
+        </div>
+
+        <div class="metrics">
+          <article class="card metric-card">
+            <div class="metric-top"><span>🎯 [GOAL_METRIC]</span><span id="goalPct">0%</span></div>
+            <div class="metric-value" id="goalValue">0%</div>
+            <div class="trend up" id="goalTrend">▲ +0% vs semana anterior</div>
+          </article>
+
+          <article class="card metric-card">
+            <div class="metric-top"><span>🚀 Projetos Ativos</span><span>Agora</span></div>
+            <div class="metric-value" id="activeProjects">0</div>
+            <div class="trend" id="activeProjectsTrend">Total em todas as colunas</div>
+          </article>
+
+          <article class="card metric-card">
+            <div class="metric-top"><span>✅ Tarefas Hoje</span><span>Hoje</span></div>
+            <div class="metric-value" id="tasksToday">0</div>
+            <div class="trend" id="tasksTodayTrend">Concluídas criadas hoje</div>
+          </article>
+
+          <article class="card metric-card">
+            <div class="metric-top"><span>⏳ Dias para Meta</span><span id="goalDeadlineTag">--</span></div>
+            <div class="metric-value" id="daysToGoal">0</div>
+            <div class="trend" id="daysTrend">Até a data-alvo</div>
+          </article>
+        </div>
+
+        <div class="dash-grid">
+          <section class="card panel" data-search="activity feed updates logs">
+            <h3 class="section-title">Feed de Atividade</h3>
+            <div id="activityList" class="activity-list"></div>
+          </section>
+
+          <section class="card panel" data-search="top priorities checklist">
+            <h3 class="section-title">Top Prioridades</h3>
+            <div id="priorityList" class="priority-list"></div>
+            <button id="addPriorityBtn" class="btn" style="margin-top:0.75rem">+ Nova Prioridade</button>
+          </section>
+        </div>
+      </section>
+
+      <!-- Projects -->
+      <section id="projects" class="tab-content">
+        <div class="kanban">
+          <section class="card column" data-search="backlog tasks">
+            <div class="column-head">
+              <h3>Backlog</h3>
+              <button class="btn" data-add-task="backlog">+ Tarefa</button>
+            </div>
+            <div id="backlogList" class="task-list"></div>
+          </section>
+
+          <section class="card column" data-search="in progress tasks">
+            <div class="column-head">
+              <h3>Em Progresso</h3>
+              <button class="btn" data-add-task="inProgress">+ Tarefa</button>
+            </div>
+            <div id="inProgressList" class="task-list"></div>
+          </section>
+
+          <section class="card column" data-search="done tasks complete">
+            <div class="column-head">
+              <h3>Concluído</h3>
+              <button class="btn" data-add-task="done">+ Tarefa</button>
+            </div>
+            <div id="doneList" class="task-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Timeline -->
+      <section id="timeline" class="tab-content">
+        <div class="card timeline-wrap" data-search="timeline roadmap phases milestones">
+          <h3 class="section-title">Timeline Estratégica</h3>
+          <div id="timelineContainer" class="timeline"></div>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section id="notes" class="tab-content">
+        <div class="card notes-card" data-search="notes markdown">
+          <h3 class="section-title">Notas (estilo Markdown)</h3>
+          <textarea id="notesInput" class="notes" placeholder="# Ideias\n- Capturar insights\n- Planejar execuções\n- Manter contexto operacional..."></textarea>
+          <div class="notes-meta">
+            <span id="charCount">0 caracteres</span>
+            <span id="lastSaved">Último salvamento: --</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Revenue -->
+      <section id="revenue" class="tab-content">
+        <div class="revenue-grid">
+          <section class="card panel" data-search="receita meta mrr">
+            <h3 class="section-title">Meta de Receita Mensal</h3>
+            <div class="gauge-wrap">
+              <div class="gauge" id="revenueGauge"><span id="gaugeValue">0%</span></div>
+              <div class="gauge-meta">
+                <div><strong id="currentMrr">R$ 0</strong> MRR atual</div>
+                <div><span id="goalMrr">R$ 0</span> meta mensal</div>
+              </div>
+            </div>
+            <div class="field" style="margin-top:.8rem;">
+              <label>Meta mensal (R$)</label>
+              <input id="revenueGoalInput" class="input" type="number" min="0" step="100" placeholder="Ex: 50000" />
+            </div>
+            <button id="saveRevenueGoalBtn" class="btn">Salvar meta</button>
+          </section>
+
+          <section class="card panel" data-search="gráfico receita 6 meses">
+            <h3 class="section-title">Receita — últimos 6 meses</h3>
+            <canvas id="revenueChart" height="220"></canvas>
+          </section>
+        </div>
+
+        <section class="card panel" style="margin-top:1rem" data-search="clientes mrr">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Clientes (MRR)</h3>
+            <button id="addClientBtn" class="btn">+ Novo Cliente</button>
+          </div>
+          <div id="clientList" class="client-list"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="projeção anual crescimento">
+          <h3 class="section-title">Projeções de Receita</h3>
+          <div class="projection-grid">
+            <div class="projection-item"><span>Anual projetado (run-rate)</span><strong id="projectedAnnual">R$ 0</strong></div>
+            <div class="projection-item"><span>Crescimento mensal necessário</span><strong id="neededGrowth">0%</strong></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Command Center -->
+      <section id="command" class="tab-content">
+        <section class="card panel" data-search="agents equipe ai">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Agentes & Equipe AI</h3>
+          </div>
+          <div id="agentGrid" class="agent-grid"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="decisões executivas">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Decisões Executivas</h3>
+            <button id="addDecisionBtn" class="btn">+ Nova Decisão</button>
+          </div>
+          <div id="decisionList" class="decision-list"></div>
+        </section>
+      </section>
+
+      <!-- YouTube -->
+      <section id="youtube" class="tab-content">
+        <div class="yt-grid">
+          <section class="card panel" data-search="youtube ideias pipeline">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+              <h3 class="section-title" style="margin:0;">Pipeline de Vídeos</h3>
+              <button id="addVideoIdeaBtn" class="btn">+ Nova Ideia</button>
+            </div>
+            <div id="videoBoard" class="video-board"></div>
+          </section>
+
+          <section class="card panel" data-search="youtube crescimento inscritos">
+            <h3 class="section-title">Growth Tracker</h3>
+            <div class="field"><label>Inscritos atuais</label><input id="subCountInput" class="input" type="number" min="0" step="1" /></div>
+            <button id="saveSubsBtn" class="btn">Salvar inscritos</button>
+            <div style="margin-top:.8rem" class="projection-item">
+              <span id="milestoneLabel">Próximo marco</span>
+              <strong id="milestoneTitle">-</strong>
+              <div class="xp-wrap"><div id="xpBar" class="xp-bar"></div></div>
+              <div class="meta" id="xpMeta">0%</div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card panel" style="margin-top:1rem" data-search="calendário conteúdo youtube">
+          <h3 class="section-title">Calendário de Conteúdo</h3>
+          <div id="ytCalendar" class="calendar"></div>
+        </section>
+      </section>
+
+      <!-- Meetings -->
+      <section id="meetings" class="tab-content">
+        <section class="card panel" data-search="meetings hoje countdown">
+          <h3 class="section-title">Reuniões de Hoje</h3>
+          <div id="todayMeetings" class="meeting-list"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="upcoming meetings">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Próximas Reuniões</h3>
+            <button id="addMeetingBtn" class="btn">+ Nova Reunião</button>
+          </div>
+          <div id="upcomingMeetings" class="meeting-list"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="past meetings archive">
+          <h3 class="section-title">Arquivo (Passadas)</h3>
+          <div id="pastMeetings" class="meeting-list"></div>
+        </section>
+      </section>
+
+      <!-- Intel -->
+      <section id="intel" class="tab-content">
+        <section class="card panel" data-search="daily brief intel">
+          <h3 class="section-title">Daily Brief</h3>
+          <div id="dailyBrief" class="intel-list"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="filtros intel">
+          <div class="intel-filters">
+            <select id="intelCategoryFilter" class="select">
+              <option value="all">Todas categorias</option>
+              <option value="AI News">AI News</option>
+              <option value="Industry Trends">Industry Trends</option>
+              <option value="Competitor Watch">Competitor Watch</option>
+              <option value="Opportunities">Opportunities</option>
+            </select>
+            <select id="intelImportanceFilter" class="select">
+              <option value="all">Todas importâncias</option>
+              <option value="hot">🔥 hot</option>
+              <option value="notable">⚡ notable</option>
+              <option value="reference">📌 reference</option>
+            </select>
+            <button id="addIntelBtn" class="btn">+ Novo Intel</button>
+          </div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="ai news industry trends competitor watch opportunities">
+          <h3 class="section-title">Intel Feed</h3>
+          <div id="intelList" class="intel-list"></div>
+        </section>
+      </section>
+
+      <!-- Ops -->
+      <section id="ops" class="tab-content">
+        <section class="card panel" data-search="crons tarefas diárias backup heartbeat">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Tarefas Diárias / Cron</h3>
+            <div style="display:flex;gap:.5rem;">
+              <button id="opsSyncNowBtn" class="btn">Sync now</button>
+              <button id="opsRestoreBtn" class="btn">Restore backup</button>
+            </div>
+          </div>
+          <div id="opsCronList" class="ops-list"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="otserver verificacao">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Verificação OTServer</h3>
+            <button id="opsMarkOtCheckedBtn" class="btn">Marcar verificação agora</button>
+          </div>
+          <div id="opsOtserver" class="ops-list"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="agentes subagentes execuções">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
+            <h3 class="section-title" style="margin:0;">Execuções por Agentes/Subagentes</h3>
+            <button id="opsAddAgentRunBtn" class="btn">+ Registrar execução</button>
+          </div>
+          <div id="opsAgentRuns" class="ops-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Task Modal -->
+  <div id="taskModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="modalTitle">Nova Tarefa</h3>
+
+      <div class="field">
+        <label>Título</label>
+        <input id="taskTitle" class="input" placeholder="Título da tarefa" />
+      </div>
+
+      <div class="field">
+        <label>Descrição</label>
+        <textarea id="taskDesc" class="textarea" placeholder="Descrição curta"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Prioridade</label>
+        <select id="taskPriority" class="select">
+          <option value="high">Alta</option>
+          <option value="medium" selected>Média</option>
+          <option value="low">Baixa</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Coluna</label>
+        <select id="taskColumn" class="select">
+          <option value="backlog">Backlog</option>
+          <option value="inProgress">Em Progresso</option>
+          <option value="done">Concluído</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <div>
+          <button id="deleteTaskBtn" class="btn danger hidden">Excluir</button>
+        </div>
+        <div style="display:flex; gap:0.6rem;">
+          <button id="cancelTaskBtn" class="btn">Cancelar</button>
+          <button id="saveTaskBtn" class="btn">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Modal -->
+  <div id="clientModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="clientModalTitle">Novo Cliente</h3>
+      <div class="field"><label>Nome</label><input id="clientName" class="input" placeholder="Nome do cliente" /></div>
+      <div class="field"><label>Valor mensal (R$)</label><input id="clientValue" class="input" type="number" min="0" step="100" placeholder="Ex: 3500" /></div>
+      <div class="field"><label>Status</label>
+        <select id="clientStatus" class="select">
+          <option value="active">Ativo</option>
+          <option value="pending">Pendente</option>
+          <option value="churned">Churned</option>
+        </select>
+      </div>
+      <div class="field"><label>Data de início</label><input id="clientStart" class="input" type="date" /></div>
+      <div class="modal-actions">
+        <div><button id="deleteClientBtn" class="btn danger hidden">Excluir</button></div>
+        <div style="display:flex; gap:0.6rem;">
+          <button id="cancelClientBtn" class="btn">Cancelar</button>
+          <button id="saveClientBtn" class="btn">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Detail Drawer -->
+  <aside id="agentDrawer" class="agent-drawer">
+    <div class="agent-drawer-head">
+      <h3 id="drawerName">Agente</h3>
+      <button id="closeDrawerBtn" class="btn">Fechar</button>
+    </div>
+    <div class="agent-drawer-body">
+      <p id="drawerRole" class="muted"></p>
+      <p id="drawerDesc"></p>
+      <h4>Capacidades</h4>
+      <ul id="drawerCaps" class="drawer-list"></ul>
+      <h4>Atividade recente</h4>
+      <div id="drawerActivity" class="drawer-activity"></div>
+      <h4>Notas de performance</h4>
+      <p id="drawerPerf"></p>
+      <button id="sendTaskBtn" class="btn">Enviar Tarefa</button>
+    </div>
+  </aside>
+
+  <!-- Send Task Modal -->
+  <div id="taskToAgentBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3>Enviar Tarefa</h3>
+      <div class="field">
+        <label>Tarefa para <span id="taskAgentName">agente</span></label>
+        <textarea id="taskToAgentText" class="textarea" placeholder="Descreva a tarefa..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <div></div>
+        <div style="display:flex; gap:0.6rem;">
+          <button id="cancelSendTaskBtn" class="btn">Cancelar</button>
+          <button id="confirmSendTaskBtn" class="btn">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decision Modal -->
+  <div id="decisionBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3>Nova Decisão Executiva</h3>
+      <div class="field"><label>Pergunta</label><input id="decisionQuestion" class="input" placeholder="Qual foi a pergunta-chave?" /></div>
+      <div class="field"><label>Resumo da decisão</label><textarea id="decisionSummary" class="textarea" placeholder="Resumo objetivo da decisão"></textarea></div>
+      <div class="field"><label>Agentes consultados</label><input id="decisionAgents" class="input" placeholder="Ex: Mike, Nexo, Daniela" /></div>
+      <div class="modal-actions">
+        <div></div>
+        <div style="display:flex; gap:0.6rem;">
+          <button id="cancelDecisionBtn" class="btn">Cancelar</button>
+          <button id="saveDecisionBtn" class="btn">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Idea Modal -->
+  <div id="videoIdeaBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="videoModalTitle">Nova Ideia de Vídeo</h3>
+      <div class="field"><label>Título</label><input id="videoTitle" class="input" placeholder="Título do vídeo" /></div>
+      <div class="field"><label>Tópico</label><input id="videoTopic" class="input" placeholder="Tema do vídeo" /></div>
+      <div class="field"><label>Status</label>
+        <select id="videoStatus" class="select">
+          <option value="idea">idea</option>
+          <option value="scripting">scripting</option>
+          <option value="filming">filming</option>
+          <option value="editing">editing</option>
+          <option value="published">published</option>
+        </select>
+      </div>
+      <div class="field"><label>Data alvo de publicação</label><input id="videoDate" class="input" type="date" /></div>
+      <div class="modal-actions">
+        <div><button id="deleteVideoBtn" class="btn danger hidden">Excluir</button></div>
+        <div style="display:flex;gap:.6rem;"><button id="cancelVideoBtn" class="btn">Cancelar</button><button id="saveVideoBtn" class="btn">Salvar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meeting Modal -->
+  <div id="meetingBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="meetingModalTitle">Nova Reunião</h3>
+      <div class="field"><label>Título</label><input id="meetingTitle" class="input" placeholder="Título da reunião" /></div>
+      <div class="field"><label>Data e hora</label><input id="meetingDateTime" class="input" type="datetime-local" /></div>
+      <div class="field"><label>Participantes</label><input id="meetingAttendees" class="input" placeholder="Ex: Julio, Carla" /></div>
+      <div class="field"><label>Tipo</label>
+        <select id="meetingType" class="select">
+          <option value="call">Call</option>
+          <option value="zoom">Zoom</option>
+          <option value="in-person">Presencial</option>
+        </select>
+      </div>
+      <div class="field"><label>Prep notes</label><textarea id="meetingPrep" class="textarea" placeholder="Pontos de preparação"></textarea></div>
+      <div class="modal-actions">
+        <div><button id="deleteMeetingBtn" class="btn danger hidden">Excluir</button></div>
+        <div style="display:flex;gap:.6rem;"><button id="cancelMeetingBtn" class="btn">Cancelar</button><button id="saveMeetingBtn" class="btn">Salvar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intel Modal -->
+  <div id="intelBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3>Novo Item de Intel</h3>
+      <div class="field"><label>Título</label><input id="intelTitle" class="input" placeholder="Título" /></div>
+      <div class="field"><label>Resumo</label><textarea id="intelSummary" class="textarea" placeholder="Resumo objetivo"></textarea></div>
+      <div class="field"><label>Fonte (URL)</label><input id="intelSource" class="input" placeholder="https://..." /></div>
+      <div class="field"><label>Categoria</label>
+        <select id="intelCategory" class="select">
+          <option>AI News</option><option>Industry Trends</option><option>Competitor Watch</option><option>Opportunities</option>
+        </select>
+      </div>
+      <div class="field"><label>Importância</label>
+        <select id="intelImportance" class="select">
+          <option value="hot">🔥 hot</option><option value="notable">⚡ notable</option><option value="reference">📌 reference</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <div></div>
+        <div style="display:flex;gap:.6rem;"><button id="cancelIntelBtn" class="btn">Cancelar</button><button id="saveIntelBtn" class="btn">Salvar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Run Modal -->
+  <div id="opsRunBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3>Registrar execução de agente</h3>
+      <div class="field"><label>Agente/Subagente</label><input id="opsRunAgent" class="input" placeholder="Ex: Daniela / subagent-backup" /></div>
+      <div class="field"><label>Tarefa</label><input id="opsRunTask" class="input" placeholder="Ex: Check remetentes" /></div>
+      <div class="field"><label>Status</label>
+        <select id="opsRunStatus" class="select"><option value="done">Concluído</option><option value="failed">Falhou</option><option value="running">Em execução</option></select>
+      </div>
+      <div class="field"><label>Notas</label><textarea id="opsRunNotes" class="textarea" placeholder="Notas rápidas"></textarea></div>
+      <div class="modal-actions">
+        <div></div>
+        <div style="display:flex;gap:.6rem;"><button id="opsCancelRunBtn" class="btn">Cancelar</button><button id="opsSaveRunBtn" class="btn">Salvar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*******************************
+     * Mission Config (Edit Here)
+     *******************************/
+    const CONFIG = {
+      name: "Julio",
+      business: "OpenClaw AI Infrastructure",
+      role: "System Architect",
+      mainGoal: "Deploy a fully autonomous AI workflow stack for education, SaaS platforms, and automation.",
+      goalDeadline: "2026-12-31",
+      goalMetric: "Deploys/week + active users",
+      accent: "#00E5A8",
+      goalProgress: 42,
+      goalTrend: "+6%"
+    };
+
+    /*******************************
+     * Storage Keys
+     *******************************/
+    const KEYS = {
+      state: "mc_state_v1",
+      notes: "mc_notes_v1"
+    };
+
+    const SERVER = {
+      base: "http://localhost:8899",
+      weatherCity: "Belo Horizonte/MG"
+    };
+
+    /*******************************
+     * Default App State
+     *******************************/
+    const DEFAULT_STATE = {
+      tasks: {
+        backlog: [],
+        inProgress: [],
+        done: []
+      },
+      priorities: [
+        { id: id(), text: "Estabilizar stack OpenClaw em produção", done: false },
+        { id: id(), text: "Acompanhar deploys/week + usuários ativos", done: false },
+        { id: id(), text: "Blindar rotina de foco e automação", done: true }
+      ],
+      activity: [
+        { id: id(), text: "Mission Control inicializado para operação real", ts: Date.now() }
+      ],
+      revenue: {
+        goalMonthly: 50000,
+        clients: [],
+        history6m: [12000, 15000, 17000, 21000, 26000, 31000]
+      },
+      ops: {
+        crons: [
+          { id: id(), task: "Check remetentes", schedule: "08:00 e 16:00 BRT", agent: "Daniela", status: "pending", lastRun: null },
+          { id: id(), task: "Ideia de Negócio", schedule: "09:00 BRT", agent: "Nexo", status: "pending", lastRun: null },
+          { id: id(), task: "Backup GitHub", schedule: "22:00 BRT", agent: "Sistema", status: "pending", lastRun: null },
+          { id: id(), task: "Heartbeat técnico (gateway/disco/email)", schedule: "Periódico", agent: "Mike", status: "pending", lastRun: null }
+        ],
+        otserver: {
+          lastCheck: null,
+          status: "pending",
+          notes: "Sem verificação registrada."
+        },
+        runs: []
+      },
+      intel: {
+        items: [
+          { id: id(), title: "OpenAI/Anthropic shipping cadence", summary: "Lançamentos acelerando competição em agentes.", source: "https://openai.com", category: "AI News", importance: "hot", dateAdded: Date.now() },
+          { id: id(), title: "SMB automation demand up", summary: "Pequenas empresas priorizando automação com baixo custo.", source: "https://www.mckinsey.com", category: "Industry Trends", importance: "notable", dateAdded: Date.now()-86400000 },
+          { id: id(), title: "Competitor launched ops dashboard", summary: "Concorrente focando observabilidade para times enxutos.", source: "https://producthunt.com", category: "Competitor Watch", importance: "reference", dateAdded: Date.now()-172800000 }
+        ]
+      },
+      meetings: {
+        items: [
+          {
+            id: id(),
+            title: "Weekly Ops Sync",
+            dateTime: "",
+            attendees: "Julio, Mike",
+            type: "zoom",
+            prepNotes: "Revisar KPIs e backlog crítico",
+            agenda: [{ id: id(), text: "Status da semana", done: false }, { id: id(), text: "Riscos", done: false }],
+            notes: "",
+            actions: ""
+          }
+        ]
+      },
+      youtube: {
+        subs: 0,
+        ideas: [
+          { id: id(), title: "Como escalar automações com IA", topic: "AI Ops", status: "idea", targetDate: "" },
+          { id: id(), title: "OpenClaw na prática: setup real", topic: "Tutorial", status: "scripting", targetDate: "" },
+          { id: id(), title: "Workflow autônomo para SaaS", topic: "Case", status: "filming", targetDate: "" }
+        ]
+      },
+      command: {
+        agents: [
+          {
+            id: id(),
+            name: "Mike",
+            role: "System Architect",
+            status: "online",
+            model: "Claude 3.7 Sonnet",
+            lastActive: Date.now(),
+            description: "Orquestra arquitetura, guardrails e execução de alto impacto.",
+            capabilities: ["Infra Strategy", "Automation Design", "Risk Review"],
+            activity: ["Painel inicializado"],
+            performanceNotes: "Forte em estabilidade e decisões técnicas críticas."
+          },
+          {
+            id: id(),
+            name: "Nexo",
+            role: "Business Intelligence Agent",
+            status: "busy",
+            model: "Kimi K2.5",
+            lastActive: Date.now() - 1000*60*18,
+            description: "Pesquisa tendências, valida oportunidades e gera planos de monetização.",
+            capabilities: ["Trend Analysis", "Market Validation", "SaaS Ideation"],
+            activity: ["Ideia de negócio diária gerada"],
+            performanceNotes: "Excelente para síntese de mercado e oportunidades." 
+          },
+          {
+            id: id(),
+            name: "Daniela",
+            role: "Ops Monitoring Agent",
+            status: "online",
+            model: "GPT-5 Codex",
+            lastActive: Date.now() - 1000*60*6,
+            description: "Monitora e-mail, rotinas periódicas e sinais operacionais.",
+            capabilities: ["Email Monitoring", "Heartbeat Checks", "Operational Alerts"],
+            activity: ["Check de remetentes concluído"],
+            performanceNotes: "Confiável para vigilância contínua e alertas." 
+          },
+          {
+            id: id(),
+            name: "Atlas",
+            role: "Delivery Agent",
+            status: "offline",
+            model: "Gemini 2.5 Pro",
+            lastActive: Date.now() - 1000*60*60*5,
+            description: "Executa entregas, organiza backlog e acelera shipping.",
+            capabilities: ["Task Delivery", "Backlog Grooming", "Release Support"],
+            activity: ["Sem atividade recente"],
+            performanceNotes: "Bom para throughput quando acionado." 
+          }
+        ],
+        decisions: [
+          {
+            id: id(),
+            date: new Date().toISOString().slice(0,10),
+            question: "Qual stack priorizar para autonomia?",
+            summary: "Priorizar OpenClaw + automações modulares com foco em reprodutibilidade.",
+            consulted: ["Mike", "Nexo"]
+          }
+        ]
+      }
+    };
+
+    /*******************************
+     * Timeline Data (JS Config)
+     *******************************/
+    const TIMELINE_PHASES = [
+      {
+        title: "Fundação da Infra",
+        range: "Q1 2026",
+        description: "Consolidar base OpenClaw, segurança, observabilidade e rituais operacionais.",
+        current: false,
+        milestones: [
+          { text: "Padronizar configs e perfis", done: true },
+          { text: "Mapear fluxos críticos", done: true },
+          { text: "Fechar checklist de hardening", done: false }
+        ]
+      },
+      {
+        title: "Autonomia de Workflows",
+        range: "Q2-Q3 2026",
+        description: "Implantar workflows autônomos para educação, SaaS e automação com loops de melhoria.",
+        current: true,
+        milestones: [
+          { text: "Deploy contínuo de agentes", done: true },
+          { text: "Atingir meta de deploys/semana", done: false },
+          { text: "Playbook reprodutível por domínio", done: false }
+        ]
+      },
+      {
+        title: "Escala e Monetização",
+        range: "Q4 2026",
+        description: "Escalar sistemas estáveis, reduzir fricção operacional e aumentar base ativa.",
+        current: false,
+        milestones: [
+          { text: "Expandir usuários ativos", done: false },
+          { text: "Otimizar custo/benefício da IA", done: false },
+          { text: "Fechar meta anual", done: false }
+        ]
+      }
+    ];
+
+    /*******************************
+     * State
+     *******************************/
+    let state = loadState();
+    let editingTask = null;
+    let serverOnline = false;
+    let syncTimer = null;
+
+    function safeInit(name, fn) {
+      try { fn(); } catch (e) { console.error(`[init:${name}]`, e); }
+    }
+
+    // Apply dynamic accent
+    document.documentElement.style.setProperty("--accent", CONFIG.accent);
+
+    /*******************************
+     * Init
+     *******************************/
+    safeInit("tabs", initTabs);
+    safeInit("clock", initClock);
+    safeInit("search", initSearch);
+    safeInit("notes", initNotes);
+    safeInit("priorities", initPriorities);
+    safeInit("projects", initProjects);
+    safeInit("revenue", initRevenue);
+    safeInit("youtube", initYouTube);
+    safeInit("meetings", initMeetings);
+    safeInit("intel", initIntel);
+    safeInit("command", initCommandCenter);
+    safeInit("timeline", renderTimeline);
+    safeInit("metrics", refreshMetrics);
+    safeInit("activity", renderActivity);
+    addActivity(`Operação iniciada: ${CONFIG.name} · ${CONFIG.business} — ${CONFIG.role}`);
+    safeInit("server-sync", initServerSync);
+
+    /*******************************
+     * Utilities
+     *******************************/
+    function id() {
+      return Math.random().toString(36).slice(2, 10);
+    }
+
+    function clone(obj) {
+      if (typeof structuredClone === "function") return structuredClone(obj);
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function nowLabel(ts = Date.now()) {
+      return new Intl.DateTimeFormat(undefined, {
+        month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit"
+      }).format(ts);
+    }
+
+    function formatFullDate(ts = Date.now()) {
+      return new Intl.DateTimeFormat(undefined, {
+        weekday: "long", year: "numeric", month: "long", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      }).format(ts);
+    }
+
+    function saveState(reason = "Dados atualizados") {
+      localStorage.setItem(KEYS.state, JSON.stringify(state));
+      queueServerActivity(reason);
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEYS.state);
+        if (!raw) return clone(DEFAULT_STATE);
+        const parsed = JSON.parse(raw);
+        return {
+          ...clone(DEFAULT_STATE),
+          ...parsed,
+          tasks: {
+            backlog: parsed?.tasks?.backlog || [],
+            inProgress: parsed?.tasks?.inProgress || [],
+            done: parsed?.tasks?.done || []
+          },
+          revenue: {
+            goalMonthly: parsed?.revenue?.goalMonthly ?? 50000,
+            clients: parsed?.revenue?.clients || [],
+            history6m: parsed?.revenue?.history6m || [12000,15000,17000,21000,26000,31000]
+          },
+          ops: parsed?.ops || clone(DEFAULT_STATE.ops),
+          intel: parsed?.intel || clone(DEFAULT_STATE.intel),
+          meetings: parsed?.meetings || clone(DEFAULT_STATE.meetings),
+          youtube: parsed?.youtube || clone(DEFAULT_STATE.youtube),
+          command: parsed?.command || clone(DEFAULT_STATE.command)
+        };
+      } catch {
+        return clone(DEFAULT_STATE);
+      }
+    }
+
+    function deepMerge(base, backup) {
+      if (Array.isArray(base)) return base.length ? base : (Array.isArray(backup) ? backup : base);
+      if (base && typeof base === "object") {
+        const out = { ...(backup && typeof backup === "object" ? backup : {}), ...base };
+        for (const k of Object.keys(out)) {
+          out[k] = deepMerge(base?.[k], backup?.[k]);
+        }
+        return out;
+      }
+      return base !== undefined && base !== null && base !== "" ? base : backup;
+    }
+
+    function serializeForServer() {
+      return {
+        [KEYS.state]: JSON.parse(localStorage.getItem(KEYS.state) || "{}"),
+        [KEYS.notes]: localStorage.getItem(KEYS.notes) || ""
+      };
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+
+    function setServerStatus(isOnline) {
+      serverOnline = !!isOnline;
+      const dot = document.getElementById("serverDot");
+      const txt = document.getElementById("serverText");
+      const badge = document.getElementById("serverBadge");
+      if (!dot || !txt || !badge) return;
+      dot.style.background = serverOnline ? "var(--success)" : "var(--danger)";
+      dot.style.boxShadow = serverOnline
+        ? "0 0 0 0 rgba(46, 213, 115, 0.7)"
+        : "0 0 0 0 rgba(255, 95, 122, 0.7)";
+      txt.textContent = serverOnline ? "Sistema Online" : "Modo Local";
+      badge.textContent = `Server: ${serverOnline ? "Online" : "Offline"}`;
+    }
+
+    async function syncFromServerBackup() {
+      try {
+        const data = await fetchJson(`${SERVER.base}/mc/data`);
+        const localState = JSON.parse(localStorage.getItem(KEYS.state) || "{}");
+        const backupState = data?.[KEYS.state] || data || {};
+        const mergedState = deepMerge(localState, backupState);
+        state = deepMerge(state, mergedState);
+        localStorage.setItem(KEYS.state, JSON.stringify(state));
+
+        const localNotes = localStorage.getItem(KEYS.notes) || "";
+        const backupNotes = data?.[KEYS.notes] || "";
+        if (!localNotes && backupNotes) localStorage.setItem(KEYS.notes, backupNotes);
+
+        setServerStatus(true);
+      } catch {
+        setServerStatus(false);
+      }
+    }
+
+    async function backupToServer() {
+      try {
+        await fetchJson(`${SERVER.base}/mc/data`, {
+          method: "POST",
+          body: JSON.stringify(serializeForServer())
+        });
+        setServerStatus(true);
+      } catch {
+        setServerStatus(false);
+      }
+    }
+
+    let activityDebounce = null;
+    function queueServerActivity(message) {
+      if (activityDebounce) clearTimeout(activityDebounce);
+      activityDebounce = setTimeout(async () => {
+        try {
+          await fetchJson(`${SERVER.base}/mc/activity`, {
+            method: "POST",
+            body: JSON.stringify({ title: "Mission Control", message })
+          });
+          setServerStatus(true);
+        } catch {
+          setServerStatus(false);
+        }
+      }, 1200);
+    }
+
+    async function loadWeather() {
+      const weatherEl = document.getElementById("weatherInfo");
+      if (!weatherEl) return;
+      try {
+        const d = await fetchJson(`${SERVER.base}/mc/weather?city=${encodeURIComponent(SERVER.weatherCity)}`);
+        weatherEl.textContent = `${d.temperature || "--"} · ${d.condition || "--"}`;
+        setServerStatus(true);
+      } catch {
+        weatherEl.textContent = "clima indisponível";
+        setServerStatus(false);
+      }
+    }
+
+    async function initServerSync() {
+      setServerStatus(false);
+      await syncFromServerBackup();
+      await loadWeather();
+      await backupToServer();
+      if (syncTimer) clearInterval(syncTimer);
+      syncTimer = setInterval(backupToServer, 5 * 60 * 1000);
+      setInterval(loadWeather, 10 * 60 * 1000);
+    }
+
+    function daysUntil(dateStr) {
+      const now = new Date();
+      const goal = new Date(dateStr + "T23:59:59");
+      const diff = goal - now;
+      return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
+
+    /*******************************
+     * Header + Tabs + Search
+     *******************************/
+    function initTabs() {
+      const btns = [...document.querySelectorAll(".tab-btn")];
+      const sections = [...document.querySelectorAll(".tab-content")];
+      btns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const tab = btn.dataset.tab;
+          btns.forEach(b => b.classList.toggle("active", b === btn));
+          sections.forEach(s => s.classList.toggle("active", s.id === tab));
+        });
+      });
+    }
+
+    function initClock() {
+      const welcomeEl = document.getElementById("welcomeText");
+      const dateEl = document.getElementById("liveDateTime");
+
+      function tick() {
+        const h = new Date().getHours();
+        const saudacao = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+        welcomeEl.textContent = `${saudacao}, ${CONFIG.name}`;
+        dateEl.textContent = formatFullDate();
+      }
+
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    function initSearch() {
+      const input = document.getElementById("searchInput");
+      const searchable = [...document.querySelectorAll("[data-search], .task, .activity-item, .priority-item")];
+
+      function applyFilter(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) {
+          document.querySelectorAll(".task, .activity-item, .priority-item, [data-search]").forEach(el => el.classList.remove("hidden"));
+          return;
+        }
+
+        document.querySelectorAll(".task, .activity-item, .priority-item, [data-search]").forEach(el => {
+          const text = (el.dataset.search || el.textContent || "").toLowerCase();
+          el.classList.toggle("hidden", !text.includes(q));
+        });
+      }
+
+      input.addEventListener("input", e => applyFilter(e.target.value));
+
+      document.addEventListener("keydown", e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          input.focus();
+          input.select();
+        }
+      });
+    }
+
+    /*******************************
+     * Metrics + Activity
+     *******************************/
+    function refreshMetrics() {
+      document.getElementById("goalValue").textContent = `${CONFIG.goalProgress}%`;
+      document.getElementById("goalPct").textContent = `${CONFIG.goalProgress}%`;
+      document.getElementById("goalTrend").textContent = `▲ ${CONFIG.goalTrend} vs semana anterior`;
+
+      const active = state.tasks.backlog.length + state.tasks.inProgress.length;
+      document.getElementById("activeProjects").textContent = active;
+      document.getElementById("activeProjectsTrend").textContent = `${state.tasks.inProgress.length} em progresso agora`;
+
+      const today = new Date().toDateString();
+      const doneToday = state.tasks.done.filter(t => new Date(t.createdAt).toDateString() === today).length;
+      document.getElementById("tasksToday").textContent = doneToday;
+      document.getElementById("tasksTodayTrend").textContent = doneToday > 0 ? "Execução forte hoje" : "Sem tarefas concluídas hoje";
+
+      const d = daysUntil(CONFIG.goalDeadline);
+      document.getElementById("daysToGoal").textContent = d;
+      document.getElementById("goalDeadlineTag").textContent = CONFIG.goalDeadline;
+      document.getElementById("daysTrend").textContent = d === 0 ? "Data da meta alcançada" : "Até a data-alvo";
+
+      const metricLabel = document.querySelector(".metric-card .metric-top span");
+      if (metricLabel) metricLabel.textContent = `🎯 ${CONFIG.goalMetric}`;
+    }
+
+    function addActivity(text) {
+      state.activity.unshift({ id: id(), text, ts: Date.now() });
+      state.activity = state.activity.slice(0, 100);
+      saveState(text);
+      renderActivity();
+      queueServerActivity(text);
+    }
+
+    function renderActivity() {
+      const list = document.getElementById("activityList");
+      if (!state.activity.length) {
+        list.innerHTML = `<div class="activity-item">Sem atividade ainda<div class="meta">Comece adicionando prioridades ou tarefas.</div></div>`;
+        return;
+      }
+      list.innerHTML = state.activity.map(a => `
+        <div class="activity-item" data-search="${escapeHtml(a.text)} ${new Date(a.ts).toDateString()}">
+          <div>${escapeHtml(a.text)}</div>
+          <div class="meta">${nowLabel(a.ts)}</div>
+        </div>
+      `).join("");
+    }
+
+    /*******************************
+     * Priorities
+     *******************************/
+    function initPriorities() {
+      document.getElementById("addPriorityBtn").addEventListener("click", () => {
+        state.priorities.push({ id: id(), text: "Nova prioridade", done: false });
+        saveState();
+        renderPriorities();
+        addActivity("Nova prioridade adicionada");
+      });
+      renderPriorities();
+    }
+
+    function renderPriorities() {
+      const list = document.getElementById("priorityList");
+      list.innerHTML = state.priorities.map(p => `
+        <label class="priority-item ${p.done ? "done" : ""}" data-id="${p.id}" data-search="${escapeHtml(p.text)} priority">
+          <input type="checkbox" ${p.done ? "checked" : ""} data-action="toggle" />
+          <input type="text" value="${escapeAttr(p.text)}" data-action="edit" />
+          <button class="btn" data-action="remove">✕</button>
+        </label>
+      `).join("");
+
+      list.querySelectorAll(".priority-item").forEach(item => {
+        const pid = item.dataset.id;
+        item.querySelector('[data-action="toggle"]').addEventListener("change", e => {
+          const p = state.priorities.find(x => x.id === pid);
+          p.done = e.target.checked;
+          saveState();
+          renderPriorities();
+          addActivity(`${p.done ? "Concluída" : "Reaberta"} prioridade: ${p.text}`);
+        });
+
+        item.querySelector('[data-action="edit"]').addEventListener("input", e => {
+          const p = state.priorities.find(x => x.id === pid);
+          p.text = e.target.value;
+          saveState();
+        });
+
+        item.querySelector('[data-action="remove"]').addEventListener("click", () => {
+          const p = state.priorities.find(x => x.id === pid);
+          state.priorities = state.priorities.filter(x => x.id !== pid);
+          saveState();
+          renderPriorities();
+          addActivity(`Prioridade removida: ${p?.text || "(sem título)"}`);
+        });
+      });
+    }
+
+    /*******************************
+     * Projects (Kanban + Modal)
+     *******************************/
+    function initProjects() {
+      renderTasks();
+
+      document.querySelectorAll("[data-add-task]").forEach(btn => {
+        btn.addEventListener("click", () => openTaskModal({ column: btn.dataset.addTask }));
+      });
+
+      document.getElementById("cancelTaskBtn").addEventListener("click", closeTaskModal);
+      document.getElementById("taskModalBackdrop").addEventListener("click", e => {
+        if (e.target.id === "taskModalBackdrop") closeTaskModal();
+      });
+
+      document.getElementById("saveTaskBtn").addEventListener("click", saveTaskFromModal);
+      document.getElementById("deleteTaskBtn").addEventListener("click", deleteTaskFromModal);
+    }
+
+    function allTasks() {
+      return [
+        ...state.tasks.backlog,
+        ...state.tasks.inProgress,
+        ...state.tasks.done
+      ];
+    }
+
+    function openTaskModal({ task = null, column = "backlog" } = {}) {
+      editingTask = task;
+      document.getElementById("modalTitle").textContent = task ? "Editar Tarefa" : "Nova Tarefa";
+      document.getElementById("taskTitle").value = task?.title || "";
+      document.getElementById("taskDesc").value = task?.description || "";
+      document.getElementById("taskPriority").value = task?.priority || "medium";
+      document.getElementById("taskColumn").value = task?.column || column;
+      document.getElementById("deleteTaskBtn").classList.toggle("hidden", !task);
+      document.getElementById("taskModalBackdrop").classList.add("open");
+      setTimeout(() => document.getElementById("taskTitle").focus(), 20);
+    }
+
+    function closeTaskModal() {
+      document.getElementById("taskModalBackdrop").classList.remove("open");
+      editingTask = null;
+    }
+
+    function saveTaskFromModal() {
+      const title = document.getElementById("taskTitle").value.trim();
+      const description = document.getElementById("taskDesc").value.trim();
+      const priority = document.getElementById("taskPriority").value;
+      const column = document.getElementById("taskColumn").value;
+      if (!title) return alert("Título da tarefa é obrigatório.");
+
+      if (editingTask) {
+        removeTaskById(editingTask.id);
+        const updated = { ...editingTask, title, description, priority, column };
+        state.tasks[column].unshift(updated);
+        addActivity(`Tarefa atualizada: ${title} (${column})`);
+      } else {
+        const task = {
+          id: id(),
+          title,
+          description,
+          priority,
+          column,
+          createdAt: Date.now()
+        };
+        state.tasks[column].unshift(task);
+        addActivity(`Tarefa adicionada: ${title} → ${column}`);
+      }
+
+      saveState();
+      renderTasks();
+      refreshMetrics();
+      closeTaskModal();
+    }
+
+    function deleteTaskFromModal() {
+      if (!editingTask) return;
+      removeTaskById(editingTask.id);
+      saveState();
+      renderTasks();
+      refreshMetrics();
+      addActivity(`Tarefa excluída: ${editingTask.title}`);
+      closeTaskModal();
+    }
+
+    function removeTaskById(taskId) {
+      for (const c of ["backlog", "inProgress", "done"]) {
+        state.tasks[c] = state.tasks[c].filter(t => t.id !== taskId);
+      }
+    }
+
+    function renderTasks() {
+      const map = {
+        backlog: document.getElementById("backlogList"),
+        inProgress: document.getElementById("inProgressList"),
+        done: document.getElementById("doneList")
+      };
+
+      for (const column of Object.keys(map)) {
+        const list = map[column];
+        const tasks = state.tasks[column];
+
+        if (!tasks.length) {
+          list.innerHTML = `<div class="task" style="opacity:.72;cursor:default">Sem tarefas por enquanto.</div>`;
+          continue;
+        }
+
+        list.innerHTML = tasks.map(task => `
+          <article class="task" data-id="${task.id}" data-search="${escapeHtml(task.title)} ${escapeHtml(task.description || "")} ${task.priority} ${column}">
+            <h4 class="task-title">${escapeHtml(task.title)}</h4>
+            <p class="task-desc">${escapeHtml((task.description || "").slice(0, 120)) || "Sem descrição"}</p>
+            <div class="task-meta">
+              <span class="badge ${task.priority}">${task.priority}</span>
+              <span>${nowLabel(task.createdAt)}</span>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      document.querySelectorAll(".task[data-id]").forEach(el => {
+        el.addEventListener("click", () => {
+          const task = allTasks().find(t => t.id === el.dataset.id);
+          if (task) openTaskModal({ task });
+        });
+      });
+    }
+
+    /*******************************
+     * Timeline
+     *******************************/
+    function renderTimeline() {
+      const wrap = document.getElementById("timelineContainer");
+      wrap.innerHTML = TIMELINE_PHASES.map(phase => `
+        <article class="phase ${phase.current ? "current" : ""}">
+          <h4>${escapeHtml(phase.title)}</h4>
+          <div class="range">${escapeHtml(phase.range)}</div>
+          <p>${escapeHtml(phase.description)}</p>
+          <ul class="milestones">
+            ${phase.milestones.map(m => `<li class="${m.done ? "done" : ""}">${m.done ? "✅" : "⬜"} ${escapeHtml(m.text)}</li>`).join("")}
+          </ul>
+        </article>
+      `).join("");
+    }
+
+    /*******************************
+     * Notes
+     *******************************/
+    function initNotes() {
+      const textarea = document.getElementById("notesInput");
+      const countEl = document.getElementById("charCount");
+      const savedEl = document.getElementById("lastSaved");
+
+      const noteValue = localStorage.getItem(KEYS.notes) || "";
+      textarea.value = noteValue;
+      updateMeta();
+
+      textarea.addEventListener("input", () => {
+        localStorage.setItem(KEYS.notes, textarea.value);
+        savedEl.textContent = `Último salvamento: ${nowLabel()}`;
+        updateMeta();
+        queueServerActivity("Notas atualizadas");
+      });
+
+      function updateMeta() {
+        countEl.textContent = `${textarea.value.length} caracteres`;
+        const hasSaved = localStorage.getItem(KEYS.notes) !== null;
+        if (hasSaved && savedEl.textContent.includes("--")) {
+          savedEl.textContent = `Último salvamento: ${nowLabel()}`;
+        }
+      }
+    }
+
+    /*******************************
+     * Revenue
+     *******************************/
+    let editingClient = null;
+
+    function initRevenue() {
+      document.getElementById("saveRevenueGoalBtn").addEventListener("click", () => {
+        const v = Number(document.getElementById("revenueGoalInput").value || 0);
+        state.revenue.goalMonthly = Math.max(0, v);
+        saveState();
+        renderRevenue();
+        addActivity(`Meta de receita atualizada: ${money(state.revenue.goalMonthly)}`);
+      });
+
+      document.getElementById("addClientBtn").addEventListener("click", () => openClientModal());
+      document.getElementById("cancelClientBtn").addEventListener("click", closeClientModal);
+      document.getElementById("saveClientBtn").addEventListener("click", saveClientFromModal);
+      document.getElementById("deleteClientBtn").addEventListener("click", deleteClientFromModal);
+      document.getElementById("clientModalBackdrop").addEventListener("click", (e) => {
+        if (e.target.id === "clientModalBackdrop") closeClientModal();
+      });
+
+      renderRevenue();
+    }
+
+    function money(v) {
+      return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v || 0);
+    }
+
+    function currentMRR() {
+      return (state.revenue.clients || []).filter(c => c.status === "active").reduce((a, c) => a + Number(c.value || 0), 0);
+    }
+
+    function renderRevenue() {
+      const goal = Number(state.revenue.goalMonthly || 0);
+      const mrr = currentMRR();
+      const pct = goal > 0 ? Math.min(100, Math.round((mrr / goal) * 100)) : 0;
+
+      document.getElementById("revenueGoalInput").value = goal || "";
+      document.getElementById("currentMrr").textContent = money(mrr);
+      document.getElementById("goalMrr").textContent = money(goal);
+      document.getElementById("gaugeValue").textContent = `${pct}%`;
+      document.getElementById("revenueGauge").style.setProperty("--p", pct);
+
+      renderClients();
+      drawRevenueChart();
+      renderProjections(mrr, goal);
+    }
+
+    function renderClients() {
+      const el = document.getElementById("clientList");
+      const clients = state.revenue.clients || [];
+      if (!clients.length) {
+        el.innerHTML = '<div class="client-item" style="cursor:default">Sem clientes cadastrados.</div>';
+        return;
+      }
+      el.innerHTML = clients.map(c => `
+        <article class="client-item" data-id="${c.id}">
+          <div class="client-top">
+            <strong>${escapeHtml(c.name)}</strong>
+            <span class="status-pill ${c.status}">${c.status}</span>
+          </div>
+          <div class="client-meta">
+            <span>MRR: ${money(c.value)}</span>
+            <span>Início: ${escapeHtml(c.startDate || "--")}</span>
+          </div>
+        </article>
+      `).join('');
+
+      el.querySelectorAll('.client-item[data-id]').forEach(card => {
+        card.addEventListener('click', () => {
+          const c = (state.revenue.clients || []).find(x => x.id === card.dataset.id);
+          if (c) openClientModal(c);
+        });
+      });
+    }
+
+    function openClientModal(client = null) {
+      editingClient = client;
+      document.getElementById("clientModalTitle").textContent = client ? "Editar Cliente" : "Novo Cliente";
+      document.getElementById("clientName").value = client?.name || "";
+      document.getElementById("clientValue").value = client?.value || "";
+      document.getElementById("clientStatus").value = client?.status || "active";
+      document.getElementById("clientStart").value = client?.startDate || "";
+      document.getElementById("deleteClientBtn").classList.toggle("hidden", !client);
+      document.getElementById("clientModalBackdrop").classList.add("open");
+    }
+
+    function closeClientModal() {
+      document.getElementById("clientModalBackdrop").classList.remove("open");
+      editingClient = null;
+    }
+
+    function saveClientFromModal() {
+      const name = document.getElementById("clientName").value.trim();
+      const value = Number(document.getElementById("clientValue").value || 0);
+      const status = document.getElementById("clientStatus").value;
+      const startDate = document.getElementById("clientStart").value;
+      if (!name) return alert("Nome do cliente é obrigatório.");
+
+      if (editingClient) {
+        state.revenue.clients = state.revenue.clients.map(c => c.id === editingClient.id ? { ...c, name, value, status, startDate } : c);
+        addActivity(`Cliente atualizado: ${name}`);
+      } else {
+        state.revenue.clients.unshift({ id: id(), name, value, status, startDate });
+        addActivity(`Cliente adicionado: ${name}`);
+      }
+
+      saveState();
+      refreshMetrics();
+      renderRevenue();
+      closeClientModal();
+    }
+
+    function deleteClientFromModal() {
+      if (!editingClient) return;
+      state.revenue.clients = state.revenue.clients.filter(c => c.id !== editingClient.id);
+      addActivity(`Cliente removido: ${editingClient.name}`);
+      saveState();
+      refreshMetrics();
+      renderRevenue();
+      closeClientModal();
+    }
+
+    function drawRevenueChart() {
+      const canvas = document.getElementById('revenueChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth || 600;
+      const h = canvas.clientHeight || 220;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.scale(dpr, dpr);
+
+      const vals = (state.revenue.history6m || []).slice(-6);
+      const labels = ["M-5", "M-4", "M-3", "M-2", "M-1", "Atual"];
+      const max = Math.max(...vals, 1);
+      const pad = 24;
+      const barW = (w - pad * 2) / vals.length * 0.62;
+      const gap = ((w - pad * 2) / vals.length) - barW;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.font = '12px Inter';
+
+      vals.forEach((v, i) => {
+        const x = pad + i * (barW + gap) + gap / 2;
+        const bh = ((h - 52) * (v / max));
+        const y = h - 28 - bh;
+
+        const grad = ctx.createLinearGradient(0, y, 0, h-28);
+        grad.addColorStop(0, 'rgba(0,229,168,0.95)');
+        grad.addColorStop(1, 'rgba(0,229,168,0.35)');
+        ctx.fillStyle = grad;
+        roundRect(ctx, x, y, barW, bh, 8);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(220,230,245,0.88)';
+        ctx.fillText(labels[i], x + 6, h - 10);
+      });
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rr);
+      ctx.arcTo(x + w, y + h, x, y + h, rr);
+      ctx.arcTo(x, y + h, x, y, rr);
+      ctx.arcTo(x, y, x + w, y, rr);
+      ctx.closePath();
+    }
+
+    function renderProjections(mrr, goal) {
+      const annual = mrr * 12;
+      document.getElementById('projectedAnnual').textContent = money(annual);
+
+      let needed = 0;
+      if (mrr > 0 && goal > mrr) {
+        needed = ((goal - mrr) / mrr) * 100;
+      }
+      document.getElementById('neededGrowth').textContent = `${needed.toFixed(1)}%`;
+    }
+
+    /*******************************
+     * YouTube
+     *******************************/
+    const YT_STATUSES = ["idea","scripting","filming","editing","published"];
+    const YT_MILESTONES = [
+      { subs: 1000, title: "Rising Creator" },
+      { subs: 10000, title: "Growth Engine" },
+      { subs: 50000, title: "Audience Builder" },
+      { subs: 100000, title: "Authority Channel" }
+    ];
+    let editingVideoId = null;
+
+    function initYouTube() {
+      document.getElementById('addVideoIdeaBtn').addEventListener('click', () => openVideoModal());
+      document.getElementById('cancelVideoBtn').addEventListener('click', closeVideoModal);
+      document.getElementById('saveVideoBtn').addEventListener('click', saveVideoIdea);
+      document.getElementById('deleteVideoBtn').addEventListener('click', deleteVideoIdea);
+      document.getElementById('videoIdeaBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='videoIdeaBackdrop') closeVideoModal(); });
+
+      document.getElementById('saveSubsBtn').addEventListener('click', () => {
+        state.youtube.subs = Math.max(0, Number(document.getElementById('subCountInput').value || 0));
+        saveState();
+        renderYouTube();
+        addActivity(`YouTube subs atualizados: ${state.youtube.subs}`);
+      });
+
+      renderYouTube();
+    }
+
+    function renderYouTube() {
+      document.getElementById('subCountInput').value = state.youtube.subs || 0;
+      renderVideoBoard();
+      renderMilestone();
+      renderCalendar();
+    }
+
+    function renderVideoBoard() {
+      const board = document.getElementById('videoBoard');
+      const ideas = state.youtube.ideas || [];
+      if (!ideas.length) {
+        board.innerHTML = '<div class="video-card" style="cursor:default">Sem ideias ainda.</div>';
+        return;
+      }
+      board.innerHTML = ideas.map(v => `
+        <article class="video-card" data-id="${v.id}">
+          <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center;">
+            <strong>${escapeHtml(v.title)}</strong>
+            <span class="status-chip">${v.status}</span>
+          </div>
+          <div class="video-meta">
+            <span>Tópico: ${escapeHtml(v.topic || '--')}</span>
+            <span>Publicação: ${escapeHtml(v.targetDate || '--')}</span>
+          </div>
+        </article>
+      `).join('');
+      board.querySelectorAll('.video-card[data-id]').forEach(c => c.addEventListener('click', () => openVideoModal((state.youtube.ideas||[]).find(v => v.id === c.dataset.id))));
+    }
+
+    function openVideoModal(v=null) {
+      editingVideoId = v?.id || null;
+      document.getElementById('videoModalTitle').textContent = v ? 'Editar Ideia de Vídeo' : 'Nova Ideia de Vídeo';
+      document.getElementById('videoTitle').value = v?.title || '';
+      document.getElementById('videoTopic').value = v?.topic || '';
+      document.getElementById('videoStatus').value = v?.status || 'idea';
+      document.getElementById('videoDate').value = v?.targetDate || '';
+      document.getElementById('deleteVideoBtn').classList.toggle('hidden', !v);
+      document.getElementById('videoIdeaBackdrop').classList.add('open');
+    }
+
+    function closeVideoModal() {
+      document.getElementById('videoIdeaBackdrop').classList.remove('open');
+      editingVideoId = null;
+    }
+
+    function saveVideoIdea() {
+      const title = document.getElementById('videoTitle').value.trim();
+      const topic = document.getElementById('videoTopic').value.trim();
+      const status = document.getElementById('videoStatus').value;
+      const targetDate = document.getElementById('videoDate').value;
+      if (!title) return alert('Título é obrigatório.');
+      if (editingVideoId) {
+        state.youtube.ideas = state.youtube.ideas.map(v => v.id === editingVideoId ? { ...v, title, topic, status, targetDate } : v);
+        addActivity(`Vídeo atualizado: ${title}`);
+      } else {
+        state.youtube.ideas.unshift({ id: id(), title, topic, status, targetDate });
+        addActivity(`Nova ideia de vídeo: ${title}`);
+      }
+      saveState();
+      renderYouTube();
+      closeVideoModal();
+    }
+
+    function deleteVideoIdea() {
+      if (!editingVideoId) return;
+      const old = state.youtube.ideas.find(v => v.id === editingVideoId);
+      state.youtube.ideas = state.youtube.ideas.filter(v => v.id !== editingVideoId);
+      saveState();
+      renderYouTube();
+      closeVideoModal();
+      addActivity(`Vídeo removido: ${old?.title || 'sem título'}`);
+    }
+
+    function renderMilestone() {
+      const subs = Number(state.youtube.subs || 0);
+      const next = YT_MILESTONES.find(m => subs < m.subs) || YT_MILESTONES[YT_MILESTONES.length-1];
+      const prev = [...YT_MILESTONES].reverse().find(m => subs >= m.subs);
+      const floor = prev ? prev.subs : 0;
+      const ceil = next ? next.subs : floor + 1;
+      const progress = Math.max(0, Math.min(100, ((subs - floor) / Math.max(1, (ceil - floor))) * 100));
+
+      document.getElementById('milestoneLabel').textContent = next ? `Próximo marco: ${next.subs.toLocaleString('pt-BR')} inscritos` : 'Marco máximo atingido';
+      document.getElementById('milestoneTitle').textContent = next ? next.title : 'Legend Channel';
+      document.getElementById('xpBar').style.width = `${progress}%`;
+      document.getElementById('xpMeta').textContent = `${progress.toFixed(1)}% até o próximo nível`;
+    }
+
+    function renderCalendar() {
+      const wrap = document.getElementById('ytCalendar');
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const first = new Date(year, month, 1);
+      const startWeekday = (first.getDay() + 6) % 7;
+      const days = new Date(year, month + 1, 0).getDate();
+      const planned = new Set((state.youtube.ideas || []).map(v => v.targetDate).filter(Boolean));
+
+      const cells = [];
+      for (let i=0;i<startWeekday;i++) cells.push('<div class="cal-cell"></div>');
+      for (let d=1; d<=days; d++) {
+        const dt = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const mark = planned.has(dt) ? '<span class="cal-dot"></span>' : '';
+        cells.push(`<div class="cal-cell"><span class="cal-day">${d}</span>${mark}</div>`);
+      }
+      wrap.innerHTML = cells.join('');
+    }
+
+    /*******************************
+     * Ops
+     *******************************/
+    function initOps() {
+      document.getElementById('opsSyncNowBtn').addEventListener('click', async () => {
+        await backupToServer();
+        addActivity('Sync manual executado (Ops)');
+      });
+
+      document.getElementById('opsRestoreBtn').addEventListener('click', async () => {
+        await syncFromServerBackup();
+        state = loadState();
+        renderOps();
+        addActivity('Restore de backup do servidor executado (Ops)');
+      });
+
+      document.getElementById('opsMarkOtCheckedBtn').addEventListener('click', () => {
+        state.ops.otserver.lastCheck = new Date().toISOString();
+        state.ops.otserver.status = 'done';
+        state.ops.otserver.notes = 'Verificação registrada manualmente no painel.';
+        saveState('Verificação OTServer registrada');
+        renderOps();
+      });
+
+      document.getElementById('opsAddAgentRunBtn').addEventListener('click', ()=>document.getElementById('opsRunBackdrop').classList.add('open'));
+      document.getElementById('opsCancelRunBtn').addEventListener('click', ()=>document.getElementById('opsRunBackdrop').classList.remove('open'));
+      document.getElementById('opsSaveRunBtn').addEventListener('click', saveOpsRun);
+      document.getElementById('opsRunBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='opsRunBackdrop') e.currentTarget.classList.remove('open'); });
+
+      renderOps();
+    }
+
+    function saveOpsRun() {
+      const agent = document.getElementById('opsRunAgent').value.trim();
+      const task = document.getElementById('opsRunTask').value.trim();
+      const status = document.getElementById('opsRunStatus').value;
+      const notes = document.getElementById('opsRunNotes').value.trim();
+      if (!agent || !task) return alert('Agente e tarefa são obrigatórios.');
+      state.ops.runs.unshift({ id: id(), ts: Date.now(), agent, task, status, notes });
+      state.ops.runs = state.ops.runs.slice(0, 120);
+      saveState(`Execução registrada: ${agent} - ${task}`);
+      renderOps();
+      document.getElementById('opsRunBackdrop').classList.remove('open');
+      ['opsRunAgent','opsRunTask','opsRunNotes'].forEach(i=>document.getElementById(i).value='');
+    }
+
+    function renderOps() {
+      renderOpsCrons();
+      renderOpsOtserver();
+      renderOpsRuns();
+    }
+
+    function renderOpsCrons() {
+      const el = document.getElementById('opsCronList');
+      const items = state.ops?.crons || [];
+      el.innerHTML = items.map(c => `
+        <article class="ops-item">
+          <div class="ops-head">
+            <strong>${escapeHtml(c.task)}</strong>
+            <span class="pill ${c.status === 'done' ? 'done' : c.status === 'failed' ? 'failed' : 'running'}">${c.status}</span>
+          </div>
+          <div class="ops-meta">
+            <span>Agenda: ${escapeHtml(c.schedule)}</span>
+            <span>Agente: ${escapeHtml(c.agent)}</span>
+            <span>Última execução: ${c.lastRun ? new Date(c.lastRun).toLocaleString('pt-BR') : '--'}</span>
+          </div>
+          <div class="ops-actions">
+            <button class="btn" data-action="done" data-id="${c.id}">Marcar concluído</button>
+            <button class="btn" data-action="failed" data-id="${c.id}">Marcar falha</button>
+            <button class="btn" data-action="pending" data-id="${c.id}">Reset</button>
+          </div>
+        </article>
+      `).join('');
+
+      el.querySelectorAll('button[data-id]').forEach(b => b.addEventListener('click', () => {
+        const item = state.ops.crons.find(x => x.id === b.dataset.id);
+        if (!item) return;
+        item.status = b.dataset.action === 'pending' ? 'pending' : b.dataset.action;
+        item.lastRun = new Date().toISOString();
+        saveState(`Cron atualizado: ${item.task} -> ${item.status}`);
+        renderOpsCrons();
+      }));
+    }
+
+    function renderOpsOtserver() {
+      const o = state.ops?.otserver || { status:'pending', lastCheck:null, notes:'' };
+      const el = document.getElementById('opsOtserver');
+      el.innerHTML = `
+        <article class="ops-item">
+          <div class="ops-head"><strong>Status OTServer</strong><span class="pill ${o.status === 'done' ? 'done' : o.status === 'failed' ? 'failed' : 'running'}">${o.status}</span></div>
+          <div class="ops-meta">
+            <span>Último check: ${o.lastCheck ? new Date(o.lastCheck).toLocaleString('pt-BR') : '--'}</span>
+            <span>${escapeHtml(o.notes || '--')}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderOpsRuns() {
+      const el = document.getElementById('opsAgentRuns');
+      const list = state.ops?.runs || [];
+      if (!list.length) {
+        el.innerHTML = '<div class="ops-item">Sem execuções registradas ainda.</div>';
+        return;
+      }
+      el.innerHTML = list.slice(0, 50).map(r => `
+        <article class="ops-item">
+          <div class="ops-head"><strong>${escapeHtml(r.task)}</strong><span class="pill ${r.status==='done'?'done':r.status==='failed'?'failed':'running'}">${r.status}</span></div>
+          <div class="ops-meta"><span>Agente: ${escapeHtml(r.agent)}</span><span>${new Date(r.ts).toLocaleString('pt-BR')}</span></div>
+          <div class="ops-meta"><span>${escapeHtml(r.notes || '--')}</span></div>
+        </article>
+      `).join('');
+    }
+
+    /*******************************
+     * Intel
+     *******************************/
+    function initIntel() {
+      document.getElementById('addIntelBtn').addEventListener('click', ()=>document.getElementById('intelBackdrop').classList.add('open'));
+      document.getElementById('cancelIntelBtn').addEventListener('click', ()=>document.getElementById('intelBackdrop').classList.remove('open'));
+      document.getElementById('saveIntelBtn').addEventListener('click', saveIntel);
+      document.getElementById('intelBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='intelBackdrop') e.currentTarget.classList.remove('open'); });
+      document.getElementById('intelCategoryFilter').addEventListener('change', renderIntel);
+      document.getElementById('intelImportanceFilter').addEventListener('change', renderIntel);
+      renderIntel();
+    }
+
+    function saveIntel() {
+      const title = document.getElementById('intelTitle').value.trim();
+      const summary = document.getElementById('intelSummary').value.trim();
+      const source = document.getElementById('intelSource').value.trim();
+      const category = document.getElementById('intelCategory').value;
+      const importance = document.getElementById('intelImportance').value;
+      if (!title || !summary) return alert('Título e resumo são obrigatórios.');
+      state.intel.items.unshift({ id:id(), title, summary, source, category, importance, dateAdded: Date.now() });
+      saveState();
+      renderIntel();
+      addActivity(`Novo intel adicionado: ${title}`);
+      document.getElementById('intelBackdrop').classList.remove('open');
+      ['intelTitle','intelSummary','intelSource'].forEach(i=>document.getElementById(i).value='');
+    }
+
+    function renderIntel() {
+      const cat = document.getElementById('intelCategoryFilter').value;
+      const imp = document.getElementById('intelImportanceFilter').value;
+      let items = (state.intel.items || []).slice().sort((a,b)=>b.dateAdded-a.dateAdded);
+      const filtered = items.filter(i => (cat==='all' || i.category===cat) && (imp==='all' || i.importance===imp));
+
+      const list = document.getElementById('intelList');
+      if (!filtered.length) list.innerHTML = '<div class="intel-item">Sem itens para este filtro.</div>';
+      else list.innerHTML = filtered.map(i => `
+        <article class="intel-item">
+          <div style="display:flex;justify-content:space-between;gap:.6rem;align-items:center;">
+            <strong>${escapeHtml(i.title)}</strong>
+            <span class="tag ${i.importance}">${i.importance==='hot'?'🔥 hot':i.importance==='notable'?'⚡ notable':'📌 reference'}</span>
+          </div>
+          <div style="margin-top:.3rem">${escapeHtml(i.summary)}</div>
+          <div class="intel-meta">
+            <span>${escapeHtml(i.category)}</span>
+            <span>${new Date(i.dateAdded).toLocaleDateString('pt-BR')}</span>
+            <a href="${escapeHtml(i.source||'#')}" target="_blank" rel="noopener noreferrer">fonte</a>
+          </div>
+        </article>
+      `).join('');
+
+      const brief = items
+        .filter(i => i.importance === 'hot' || i.importance === 'notable')
+        .slice(0,5);
+      const briefEl = document.getElementById('dailyBrief');
+      if (!brief.length) briefEl.innerHTML = '<div class="intel-item">Sem itens relevantes no momento.</div>';
+      else briefEl.innerHTML = brief.slice(0,5).map(i => `
+        <article class="intel-item">
+          <div style="display:flex;justify-content:space-between;gap:.6rem;align-items:center;">
+            <strong>${escapeHtml(i.title)}</strong>
+            <span class="tag ${i.importance}">${i.importance==='hot'?'🔥 hot':i.importance==='notable'?'⚡ notable':'📌 reference'}</span>
+          </div>
+          <div class="intel-meta"><span>${escapeHtml(i.category)}</span><span>${new Date(i.dateAdded).toLocaleDateString('pt-BR')}</span></div>
+        </article>
+      `).join('');
+    }
+
+    /*******************************
+     * Meetings
+     *******************************/
+    let editingMeetingId = null;
+
+    function initMeetings() {
+      document.getElementById('addMeetingBtn').addEventListener('click', () => openMeetingModal());
+      document.getElementById('cancelMeetingBtn').addEventListener('click', closeMeetingModal);
+      document.getElementById('saveMeetingBtn').addEventListener('click', saveMeeting);
+      document.getElementById('deleteMeetingBtn').addEventListener('click', deleteMeeting);
+      document.getElementById('meetingBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='meetingBackdrop') closeMeetingModal(); });
+      renderMeetings();
+      setInterval(renderMeetings, 30000);
+    }
+
+    function meetingDate(m) {
+      return m.dateTime ? new Date(m.dateTime) : new Date(0);
+    }
+
+    function renderMeetings() {
+      const items = (state.meetings.items || []).slice().sort((a,b)=>meetingDate(a)-meetingDate(b));
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59,999);
+
+      const today = items.filter(m => meetingDate(m) >= todayStart && meetingDate(m) <= todayEnd && meetingDate(m) >= now);
+      const upcoming = items.filter(m => meetingDate(m) > now && !(meetingDate(m) >= todayStart && meetingDate(m) <= todayEnd));
+      const past = items.filter(m => meetingDate(m) < now);
+
+      renderMeetingList('todayMeetings', today, true);
+      renderMeetingList('upcomingMeetings', upcoming, false);
+      renderMeetingList('pastMeetings', past, false);
+    }
+
+    function renderMeetingList(idEl, list, isToday) {
+      const el = document.getElementById(idEl);
+      if (!list.length) {
+        el.innerHTML = '<div class="meeting-card" style="cursor:default">Sem reuniões aqui.</div>';
+        return;
+      }
+      el.innerHTML = list.map(m => {
+        const dt = m.dateTime ? new Date(m.dateTime) : null;
+        const countdown = isToday && dt ? `<span class="countdown">${formatCountdown(dt)}</span>` : '';
+        return `
+          <article class="meeting-card ${isToday ? 'today-highlight' : ''}" data-id="${m.id}">
+            <div class="meeting-head">
+              <div>
+                <strong>${escapeHtml(m.title)}</strong>
+                <div class="meeting-meta">
+                  <span>${dt ? dt.toLocaleString('pt-BR') : '--'}</span>
+                  <span>${escapeHtml(m.attendees || '--')}</span>
+                  <span>${escapeHtml(m.type || '--')}</span>
+                  ${countdown}
+                </div>
+              </div>
+              <button class="btn" data-action="edit">Editar</button>
+            </div>
+            <div class="meeting-meta" style="margin-top:.4rem"><span>Prep: ${escapeHtml(m.prepNotes || '--')}</span></div>
+            <div class="meeting-expand">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;">
+                <strong>Agenda</strong><button class="btn" data-action="addAgenda">+ Item</button>
+              </div>
+              <div class="agenda-list">${(m.agenda||[]).map(a=>`
+                <label class="agenda-item" data-agenda-id="${a.id}">
+                  <input type="checkbox" ${a.done?'checked':''} data-action="toggleAgenda" />
+                  <input type="text" value="${escapeAttr(a.text)}" data-action="editAgenda" />
+                  <button class="btn" data-action="removeAgenda">✕</button>
+                </label>
+              `).join('')}</div>
+              <div class="field" style="margin-top:.5rem;"><label>Notas</label><textarea class="meeting-notes" data-action="notes">${escapeHtml(m.notes||'')}</textarea></div>
+              <div class="field"><label>Action items</label><textarea class="meeting-notes" data-action="actions">${escapeHtml(m.actions||'')}</textarea></div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      el.querySelectorAll('.meeting-card').forEach(card => {
+        const id = card.dataset.id;
+        const m = (state.meetings.items||[]).find(x=>x.id===id);
+        if (!m) return;
+
+        card.querySelector('.meeting-head').addEventListener('click', (ev)=>{
+          if (ev.target?.dataset?.action === 'edit') return;
+          card.classList.toggle('open');
+        });
+        card.querySelector('[data-action="edit"]').addEventListener('click', ()=>openMeetingModal(m));
+
+        const addAgendaBtn = card.querySelector('[data-action="addAgenda"]');
+        if (addAgendaBtn) addAgendaBtn.addEventListener('click', ()=>{
+          m.agenda = m.agenda || [];
+          m.agenda.push({id:idGen(), text:'Novo item', done:false});
+          saveState(); renderMeetings();
+        });
+
+        card.querySelectorAll('.agenda-item').forEach(row => {
+          const aid = row.dataset.agendaId;
+          row.querySelector('[data-action="toggleAgenda"]').addEventListener('change', e=>{
+            const a = (m.agenda||[]).find(x=>x.id===aid); if(!a) return; a.done=e.target.checked; saveState();
+          });
+          row.querySelector('[data-action="editAgenda"]').addEventListener('input', e=>{
+            const a = (m.agenda||[]).find(x=>x.id===aid); if(!a) return; a.text=e.target.value; saveState();
+          });
+          row.querySelector('[data-action="removeAgenda"]').addEventListener('click', ()=>{
+            m.agenda=(m.agenda||[]).filter(x=>x.id!==aid); saveState(); renderMeetings();
+          });
+        });
+
+        const notes = card.querySelector('[data-action="notes"]');
+        if (notes) notes.addEventListener('input', e=>{ m.notes=e.target.value; saveState(); });
+        const actions = card.querySelector('[data-action="actions"]');
+        if (actions) actions.addEventListener('input', e=>{ m.actions=e.target.value; saveState(); });
+      });
+    }
+
+    function idGen(){ return Math.random().toString(36).slice(2,10); }
+
+    function formatCountdown(target) {
+      const diff = target - new Date();
+      if (diff <= 0) return 'Iniciando';
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      return `em ${h}h ${m}m`;
+    }
+
+    function openMeetingModal(m=null) {
+      editingMeetingId = m?.id || null;
+      document.getElementById('meetingModalTitle').textContent = m ? 'Editar Reunião' : 'Nova Reunião';
+      document.getElementById('meetingTitle').value = m?.title || '';
+      document.getElementById('meetingDateTime').value = m?.dateTime || '';
+      document.getElementById('meetingAttendees').value = m?.attendees || '';
+      document.getElementById('meetingType').value = m?.type || 'call';
+      document.getElementById('meetingPrep').value = m?.prepNotes || '';
+      document.getElementById('deleteMeetingBtn').classList.toggle('hidden', !m);
+      document.getElementById('meetingBackdrop').classList.add('open');
+    }
+
+    function closeMeetingModal() {
+      document.getElementById('meetingBackdrop').classList.remove('open');
+      editingMeetingId = null;
+    }
+
+    function saveMeeting() {
+      const title = document.getElementById('meetingTitle').value.trim();
+      const dateTime = document.getElementById('meetingDateTime').value;
+      const attendees = document.getElementById('meetingAttendees').value.trim();
+      const type = document.getElementById('meetingType').value;
+      const prepNotes = document.getElementById('meetingPrep').value.trim();
+      if (!title || !dateTime) return alert('Título e data/hora são obrigatórios.');
+
+      if (editingMeetingId) {
+        state.meetings.items = state.meetings.items.map(m => m.id===editingMeetingId ? { ...m, title, dateTime, attendees, type, prepNotes } : m);
+        addActivity(`Reunião atualizada: ${title}`);
+      } else {
+        state.meetings.items.unshift({ id: id(), title, dateTime, attendees, type, prepNotes, agenda:[], notes:'', actions:'' });
+        addActivity(`Nova reunião: ${title}`);
+      }
+      saveState();
+      renderMeetings();
+      closeMeetingModal();
+    }
+
+    function deleteMeeting() {
+      if (!editingMeetingId) return;
+      const m = state.meetings.items.find(x=>x.id===editingMeetingId);
+      state.meetings.items = state.meetings.items.filter(x=>x.id!==editingMeetingId);
+      saveState();
+      renderMeetings();
+      closeMeetingModal();
+      addActivity(`Reunião removida: ${m?.title || 'sem título'}`);
+    }
+
+    /*******************************
+     * Command Center
+     *******************************/
+    let selectedAgentId = null;
+
+    function initCommandCenter() {
+      document.getElementById('closeDrawerBtn').addEventListener('click', closeAgentDrawer);
+      document.getElementById('sendTaskBtn').addEventListener('click', () => {
+        const a = getSelectedAgent();
+        if (!a) return;
+        document.getElementById('taskAgentName').textContent = a.name;
+        document.getElementById('taskToAgentText').value = '';
+        document.getElementById('taskToAgentBackdrop').classList.add('open');
+      });
+      document.getElementById('cancelSendTaskBtn').addEventListener('click', () => document.getElementById('taskToAgentBackdrop').classList.remove('open'));
+      document.getElementById('confirmSendTaskBtn').addEventListener('click', sendTaskToAgent);
+      document.getElementById('taskToAgentBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='taskToAgentBackdrop') e.currentTarget.classList.remove('open'); });
+
+      document.getElementById('addDecisionBtn').addEventListener('click', () => document.getElementById('decisionBackdrop').classList.add('open'));
+      document.getElementById('cancelDecisionBtn').addEventListener('click', () => document.getElementById('decisionBackdrop').classList.remove('open'));
+      document.getElementById('saveDecisionBtn').addEventListener('click', saveDecision);
+      document.getElementById('decisionBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='decisionBackdrop') e.currentTarget.classList.remove('open'); });
+
+      renderAgents();
+      renderDecisions();
+    }
+
+    function getSelectedAgent() {
+      return (state.command.agents || []).find(a => a.id === selectedAgentId);
+    }
+
+    function statusClass(st) {
+      return st === 'online' ? 'status-online' : st === 'busy' ? 'status-busy' : 'status-offline';
+    }
+
+    function timeAgo(ts) {
+      const mins = Math.max(0, Math.floor((Date.now() - ts) / 60000));
+      if (mins < 1) return 'agora';
+      if (mins < 60) return `${mins} min atrás`;
+      const h = Math.floor(mins / 60);
+      return `${h}h atrás`;
+    }
+
+    function renderAgents() {
+      const grid = document.getElementById('agentGrid');
+      const agents = state.command.agents || [];
+      grid.innerHTML = agents.map(a => `
+        <article class="agent-card" data-id="${a.id}">
+          <div class="agent-top"><strong>${escapeHtml(a.name)}</strong><span><i class="status-dot ${statusClass(a.status)}"></i>${a.status}</span></div>
+          <div class="agent-role">${escapeHtml(a.role)}</div>
+          <div class="agent-meta">
+            <span>Modelo: ${escapeHtml(a.model)}</span>
+            <span>Ativo: ${timeAgo(a.lastActive || Date.now())}</span>
+          </div>
+        </article>
+      `).join('');
+
+      grid.querySelectorAll('.agent-card').forEach(c => c.addEventListener('click', () => openAgentDrawer(c.dataset.id)));
+    }
+
+    function openAgentDrawer(agentId) {
+      selectedAgentId = agentId;
+      const a = getSelectedAgent();
+      if (!a) return;
+      document.getElementById('drawerName').textContent = `${a.name} · ${a.status}`;
+      document.getElementById('drawerRole').textContent = `${a.role} · ${a.model} · ativo ${timeAgo(a.lastActive || Date.now())}`;
+      document.getElementById('drawerDesc').textContent = a.description || '';
+      document.getElementById('drawerCaps').innerHTML = (a.capabilities || []).map(c => `<li>${escapeHtml(c)}</li>`).join('');
+      document.getElementById('drawerActivity').innerHTML = (a.activity || []).slice(0,10).map(x => `<div class="drawer-activity-item">${escapeHtml(x)}</div>`).join('');
+      document.getElementById('drawerPerf').textContent = a.performanceNotes || '';
+      document.getElementById('agentDrawer').classList.add('open');
+    }
+
+    function closeAgentDrawer() {
+      document.getElementById('agentDrawer').classList.remove('open');
+    }
+
+    function sendTaskToAgent() {
+      const a = getSelectedAgent();
+      if (!a) return;
+      const txt = document.getElementById('taskToAgentText').value.trim();
+      if (!txt) return alert('Descreva a tarefa.');
+      a.activity = a.activity || [];
+      a.activity.unshift(`Task recebida: ${txt}`);
+      a.lastActive = Date.now();
+      a.status = 'busy';
+      saveState();
+      renderAgents();
+      openAgentDrawer(a.id);
+      addActivity(`Tarefa enviada para ${a.name}`);
+      document.getElementById('taskToAgentBackdrop').classList.remove('open');
+    }
+
+    function renderDecisions() {
+      const list = document.getElementById('decisionList');
+      const items = state.command.decisions || [];
+      if (!items.length) {
+        list.innerHTML = '<div class="decision-item">Sem decisões registradas.</div>';
+        return;
+      }
+      list.innerHTML = items.map(d => `
+        <article class="decision-item">
+          <strong>${escapeHtml(d.question)}</strong>
+          <div style="margin-top:.3rem">${escapeHtml(d.summary)}</div>
+          <div class="meta">${escapeHtml(d.date)} · Agentes: ${escapeHtml((d.consulted || []).join(', '))}</div>
+        </article>
+      `).join('');
+    }
+
+    function saveDecision() {
+      const q = document.getElementById('decisionQuestion').value.trim();
+      const s = document.getElementById('decisionSummary').value.trim();
+      const a = document.getElementById('decisionAgents').value.trim();
+      if (!q || !s) return alert('Preencha pergunta e resumo.');
+      state.command.decisions.unshift({
+        id: id(),
+        date: new Date().toISOString().slice(0,10),
+        question: q,
+        summary: s,
+        consulted: a ? a.split(',').map(x => x.trim()).filter(Boolean) : []
+      });
+      saveState();
+      renderDecisions();
+      addActivity('Nova decisão executiva registrada');
+      document.getElementById('decisionBackdrop').classList.remove('open');
+      document.getElementById('decisionQuestion').value = '';
+      document.getElementById('decisionSummary').value = '';
+      document.getElementById('decisionAgents').value = '';
+    }
+
+    /*******************************
+     * Escaping helpers
+     *******************************/
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replaceAll("`", "&#096;");
+    }
+  </script>
+</body>
+</html>
