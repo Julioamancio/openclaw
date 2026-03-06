@@ -75,29 +75,53 @@ for a in items:
     aid=a.get('id','na')
     created=a.get('created_at','--')
 
+    # risk scoring
+    risk_score='60'; risk_level='medium'; risk_require='0'
+    try:
+        rp=subprocess.run([
+          '/root/.openclaw/workspace/scripts/risk-score.sh', msg
+        ], capture_output=True, text=True, timeout=20)
+        rkv={}
+        for line in rp.stdout.splitlines():
+            if '=' in line:
+                k,v=line.split('=',1)
+                rkv[k.strip()]=v.strip()
+        risk_score=rkv.get('RISK_SCORE','60')
+        risk_level=rkv.get('RISK_LEVEL','medium')
+        risk_require=rkv.get('RISK_REQUIRE_CONFIRMATION','0')
+    except Exception:
+        pass
+
     healed=False
     heal_notes='auto-heal não executado'
     task='desconhecida'
     heal_level='3'
     manual_required='1'
-    try:
-        p=subprocess.run([
-            '/root/.openclaw/workspace/scripts/auto-heal.sh',
-            msg,
-            aid
-        ], capture_output=True, text=True, timeout=220)
-        kv={}
-        for line in p.stdout.splitlines():
-            if '=' in line:
-                k,v=line.split('=',1)
-                kv[k.strip()]=v.strip()
-        healed=(kv.get('AUTOHEAL_RESULT')=='healed')
-        heal_notes=kv.get('AUTOHEAL_NOTES', heal_notes)
-        task=kv.get('AUTOHEAL_TASK', task)
-        heal_level=kv.get('AUTOHEAL_LEVEL', heal_level)
-        manual_required=kv.get('AUTOHEAL_MANUAL_REQUIRED', manual_required)
-    except Exception as e:
-        heal_notes=f'erro auto-heal: {e}'
+
+    # high-risk require confirmation: do not auto-heal
+    if str(risk_require) == '1':
+        heal_notes=f'aguardando confirmação humana (risk={risk_level}:{risk_score})'
+        manual_required='1'
+        heal_level='3'
+    else:
+        try:
+            p=subprocess.run([
+                '/root/.openclaw/workspace/scripts/auto-heal.sh',
+                msg,
+                aid
+            ], capture_output=True, text=True, timeout=220)
+            kv={}
+            for line in p.stdout.splitlines():
+                if '=' in line:
+                    k,v=line.split('=',1)
+                    kv[k.strip()]=v.strip()
+            healed=(kv.get('AUTOHEAL_RESULT')=='healed')
+            heal_notes=kv.get('AUTOHEAL_NOTES', heal_notes)
+            task=kv.get('AUTOHEAL_TASK', task)
+            heal_level=kv.get('AUTOHEAL_LEVEL', heal_level)
+            manual_required=kv.get('AUTOHEAL_MANUAL_REQUIRED', manual_required)
+        except Exception as e:
+            heal_notes=f'erro auto-heal: {e}'
 
     status='closed' if healed else 'open'
     action='Auto-heal aplicado com sucesso' if healed else 'Despacho de alerta + ACK em fila'
@@ -105,7 +129,7 @@ for a in items:
     payload={
       'incident': msg,
       'probable_cause': 'Falha operacional detectada automaticamente',
-      'action_taken': f"{action} | level={heal_level} | {heal_notes}",
+      'action_taken': f"{action} | risk={risk_level}:{risk_score} | level={heal_level} | {heal_notes}",
       'prevention': 'Revisar runbook e fortalecer monitoramento',
       'status': status
     }
@@ -117,10 +141,10 @@ for a in items:
 
     if healed:
       summary.append(f"♻️ {msg}")
-      summary.append(f"   {created} · L{heal_level} · auto-heal: {heal_notes}")
+      summary.append(f"   {created} · risk={risk_level}:{risk_score} · L{heal_level} · auto-heal: {heal_notes}")
     else:
       summary.append(f"🚨 {msg}")
-      summary.append(f"   {created} · L{heal_level} · ação manual: necessária ({heal_notes})")
+      summary.append(f"   {created} · risk={risk_level}:{risk_score} · L{heal_level} · ação manual: necessária ({heal_notes})")
       if str(manual_required) == '1' and str(heal_level) == '3':
         r=route_for(msg)
         priority_count += 1

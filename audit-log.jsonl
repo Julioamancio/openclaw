@@ -1,0 +1,2 @@
+{"ts": "2026-03-06T16:48:02.181678+00:00", "type": "manual_check", "actor": "Mike", "task": "AuditTrail", "risk": "low", "strategy": "test", "result": "ok", "notes": "audit trail enabled"}
+{"ts": "2026-03-06T18:05:01.740669+00:00", "type": "auto_heal", "actor": "Mike", "task": "Health Score abaixo de 80 (atual 32)", "risk": "runtime", "strategy": "none/exploit", "result": "failed", "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 32)"}

@@ -5,6 +5,7 @@ WORKSPACE="/root/.openclaw/workspace"
 MSG="${1:-}"
 ALERT_ID="${2:-na}"
 RUNBOOK_FILE="$WORKSPACE/runbooks.json"
+AB_EXPLORE_EVERY="${AB_EXPLORE_EVERY:-5}"  # a cada N execuções força exploração
 
 if [ -z "$MSG" ]; then
   echo "AUTOHEAL_TASK=unknown"
@@ -46,36 +47,51 @@ retry_backoff() {
   return 1
 }
 
-strategy_order() {
+# retorna: ORDER|MODE (exploit/explore)
+strategy_plan() {
   local key="$1"
-  python3 - "$RUNBOOK_FILE" "$key" <<'PY'
+  python3 - "$RUNBOOK_FILE" "$key" "$AB_EXPLORE_EVERY" <<'PY'
 import json, sys
-p, key = sys.argv[1:3]
+p, key, explore_every = sys.argv[1], sys.argv[2], int(sys.argv[3])
 try:
     d=json.load(open(p))
     t=d['tasks'].get(key)
     if not t:
-        print('l1 l2')
+        print('l1 l2|exploit')
         raise SystemExit
     default=t.get('defaultOrder',['l1','l2'])
     s=t.get('strategies',{})
-    def rate(k):
-        a=s.get(k,{}).get('attempts',0)
-        ok=s.get(k,{}).get('success',0)
-        return (ok/a) if a>0 else -1
-    ordered=sorted(default, key=lambda k: rate(k), reverse=True)
-    print(' '.join(ordered))
+
+    def score(k):
+        st=s.get(k,{})
+        a=float(st.get('attempts',0) or 0)
+        ok=float(st.get('success',0) or 0)
+        avg=float(st.get('avgDurationSec',0) or 0)
+        success=(ok/a) if a>0 else 0.5
+        speed=(1.0/(1.0+avg/30.0)) if avg>0 else 0.5
+        return (success*0.8)+(speed*0.2)
+
+    ordered=sorted(default, key=lambda k: score(k), reverse=True)
+    total_attempts=sum(int((s.get(k,{}) or {}).get('attempts',0) or 0) for k in default)
+
+    mode='exploit'
+    if explore_every > 0 and len(ordered) > 1 and total_attempts > 0 and total_attempts % explore_every == 0:
+        # força A/B exploration: troca prioridade do segundo
+        ordered=[ordered[1], ordered[0], *ordered[2:]]
+        mode='explore'
+
+    print(' '.join(ordered) + '|' + mode)
 except Exception:
-    print('l1 l2')
+    print('l1 l2|exploit')
 PY
 }
 
 update_registry() {
-  local key="$1"; local strat="$2"; local ok="$3"
-  python3 - "$RUNBOOK_FILE" "$key" "$strat" "$ok" <<'PY'
+  local key="$1"; local strat="$2"; local ok="$3"; local duration="$4"; local mode="$5"
+  python3 - "$RUNBOOK_FILE" "$key" "$strat" "$ok" "$duration" "$mode" <<'PY'
 import json, sys
 from datetime import datetime, timezone
-p,key,strat,ok=sys.argv[1:5]
+p,key,strat,ok,duration,mode=sys.argv[1:7]
 try:
     d=json.load(open(p))
 except Exception:
@@ -87,6 +103,15 @@ st['attempts']=int(st.get('attempts',0))+1
 if ok=='1': st['success']=int(st.get('success',0))+1
 st['lastResult']='success' if ok=='1' else 'failed'
 st['lastAt']=datetime.now(timezone.utc).isoformat()
+st['lastMode']=mode
+
+dur=float(duration or 0)
+prev=float(st.get('avgDurationSec',0) or 0)
+if prev<=0:
+    st['avgDurationSec']=round(dur,2)
+else:
+    st['avgDurationSec']=round((prev*0.7)+(dur*0.3),2)
+
 with open(p,'w',encoding='utf-8') as f:
     json.dump(d,f,ensure_ascii=False,indent=2)
 PY
@@ -128,15 +153,24 @@ TASK="$(extract_task "$MSG")"
 KEY="$(task_key "$TASK")"
 RESULT="failed"; LEVEL="3"; MANUAL_REQUIRED="1"; NOTES="sem runbook para tarefa: $TASK"
 
+USED_STRATEGY="none"
+MODE="exploit"
 if [ "$KEY" != "unknown" ]; then
-  ORDER="$(strategy_order "$KEY")"
+  PLAN="$(strategy_plan "$KEY")"
+  ORDER="${PLAN%%|*}"
+  MODE="${PLAN##*|}"
+
   for STRAT in $ORDER; do
+    START=$(date +%s)
     if run_strategy "$KEY" "$STRAT"; then
-      update_registry "$KEY" "$STRAT" 1
+      END=$(date +%s)
+      DUR=$(( END - START ))
+      update_registry "$KEY" "$STRAT" 1 "$DUR" "$MODE"
+      USED_STRATEGY="$STRAT"
       RESULT="healed"
       LEVEL="${STRAT#l}"
       MANUAL_REQUIRED="0"
-      NOTES="recuperado com estratégia $STRAT (seleção por taxa de sucesso)"
+      NOTES="recuperado com estratégia $STRAT (mode=$MODE, duração=${DUR}s)"
       case "$KEY" in
         nexo) "$WORKSPACE/scripts/ops-job-mark.sh" "Ideia de Negócio" "done" "Nexo" "Auto-heal L$LEVEL: $NOTES" >/dev/null 2>&1 || true ;;
         daniela) "$WORKSPACE/scripts/ops-job-mark.sh" "Check remetentes" "done" "Daniela" "Auto-heal L$LEVEL: $NOTES" >/dev/null 2>&1 || true ;;
@@ -144,15 +178,21 @@ if [ "$KEY" != "unknown" ]; then
       esac
       break
     else
-      update_registry "$KEY" "$STRAT" 0
+      END=$(date +%s)
+      DUR=$(( END - START ))
+      update_registry "$KEY" "$STRAT" 0 "$DUR" "$MODE"
     fi
   done
 
   if [ "$RESULT" != "healed" ]; then
     LEVEL="3"
     MANUAL_REQUIRED="1"
-    NOTES="$KEY falhou após estratégias: $ORDER"
+    NOTES="$KEY falhou após estratégias: $ORDER (mode=$MODE)"
   fi
+fi
+
+if [ -x "$WORKSPACE/scripts/audit-event.sh" ]; then
+  "$WORKSPACE/scripts/audit-event.sh" "auto_heal" "Mike" "$TASK" "runtime" "$USED_STRATEGY/$MODE" "$RESULT" "$NOTES" >/dev/null 2>&1 || true
 fi
 
 echo "AUTOHEAL_TASK=$TASK"

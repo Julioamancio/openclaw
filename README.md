@@ -336,6 +336,11 @@ df -h /
 
 ---
 
+## 📒 Operações Contínuas
+
+- Changelog operacional automático: [`OPERATIONS_CHANGELOG.md`](OPERATIONS_CHANGELOG.md)
+- Atualização diária automática via cron (`scripts/auto-doc-ops.sh`)
+
 ## 📝 Notes
 
 - **Heartbeat Mode:** O agente realiza checks periódicos automaticamente
@@ -360,6 +365,17 @@ Mudanças aplicadas após revisão de segurança:
 ---
 
 ## 🆕 Atualizações Operacionais (2026-03-06)
+
+### Lote 2 (operação inteligente)
+- Risk Scoring Engine (`risk-policy.json` + `scripts/risk-score.sh`)
+- High-risk approval endpoint no Mission Control (`POST /mc/high-risk/approve`)
+- Janela de aprovação + reescalonamento (`scripts/high-risk-window-guard.sh`)
+- Health Score 0–100 com card no painel e guard de threshold (`/mc/health-score` + `scripts/health-score-guard.sh`)
+- Runbook A/B learning com exploração controlada e métrica de duração média (`runbooks.json` + `scripts/auto-heal.sh`)
+- Detecção de anomalia por horário (`scripts/anomaly-hourly-guard.sh`)
+- Audit trail estruturado (`audit-log.jsonl` + `scripts/audit-event.sh`)
+- Auto-documentação contínua (`OPERATIONS_CHANGELOG.md` + `scripts/auto-doc-ops.sh`)
+
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual
 - Runbook registry com aprendizagem por taxa de sucesso (`runbooks.json`)

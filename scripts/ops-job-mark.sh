@@ -136,4 +136,8 @@ if [ "$STATUS" = "failed" ] && [ "${SHOULD_ALERT:-0}" = "1" ]; then
   fi
 fi
 
+if [ -x "$WORKSPACE/scripts/audit-event.sh" ]; then
+  "$WORKSPACE/scripts/audit-event.sh" "job_update" "$AGENT" "$TASK" "$SEVERITY" "ops-job-mark" "$STATUS" "$NOTES" >/dev/null 2>&1 || true
+fi
+
 echo "[ops-job-mark] ${TASK} -> ${STATUS} (severity=${SEVERITY}, closed_pm=${CLOSED_PM:-0}, alert=${SHOULD_ALERT:-0})"

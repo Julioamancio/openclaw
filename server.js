@@ -5,6 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const net = require('net');
+const { spawnSync } = require('child_process');
 const { URL } = require('url');
 
 const PORT = 8899;
@@ -340,7 +341,96 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, rb);
     }
 
-    // 13) GET/POST /mc/postmortems
+    // 13) GET /mc/health-score - single executive score (0-100)
+    if (req.method === 'GET' && pathname === '/mc/health-score') {
+      const jobs = readJson(JOBS_FILE, { jobs: [], runs: [] });
+      const pms = readJson(POSTMORTEMS_FILE, []);
+      const runs = Array.isArray(jobs?.runs) ? jobs.runs.slice(0, 100) : [];
+      const jobList = Array.isArray(jobs?.jobs) ? jobs.jobs : [];
+      const openPm = Array.isArray(pms) ? pms.filter(x => String(x.status || '').toLowerCase() === 'open').length : 0;
+      const failedJobs = jobList.filter(j => String(j.status || '').toLowerCase() === 'failed').length;
+      const doneRuns = runs.filter(r => String(r.status || '').toLowerCase() === 'done').length;
+      const runSuccess = runs.length ? (doneRuns / runs.length) * 100 : 100;
+
+      let score = 100;
+      score -= Math.min(40, openPm * 12);
+      score -= Math.min(25, failedJobs * 10);
+      score -= Math.max(0, Math.round((95 - runSuccess) * 0.8));
+      score = Math.max(0, Math.min(100, Math.round(score)));
+
+      const level = score >= 90 ? 'excellent' : score >= 80 ? 'good' : score >= 60 ? 'warning' : 'critical';
+
+      return sendJson(res, 200, {
+        generated_at: new Date().toISOString(),
+        score,
+        level,
+        factors: {
+          open_postmortems: openPm,
+          failed_jobs: failedJobs,
+          run_success_rate_pct: Number(runSuccess.toFixed(1)),
+          recent_runs: runs.length
+        }
+      });
+    }
+
+    // 14) POST /mc/high-risk/approve - manual approval for high-risk auto-heal
+    if (req.method === 'POST' && pathname === '/mc/high-risk/approve') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const id = String(incoming.id || '').trim();
+      if (!id) return sendJson(res, 400, { error: 'id is required' });
+
+      const items = readJson(POSTMORTEMS_FILE, []);
+      const list = Array.isArray(items) ? items : [];
+      const pm = list.find(x => x.id === id);
+      if (!pm) return sendJson(res, 404, { error: 'postmortem not found' });
+
+      if (String(pm.status || '').toLowerCase() !== 'open') {
+        return sendJson(res, 200, { ok: true, message: 'already closed', postmortem: pm });
+      }
+
+      const incident = String(pm.incident || '');
+      const heal = spawnSync('/root/.openclaw/workspace/scripts/auto-heal.sh', [incident, id], {
+        encoding: 'utf8',
+        timeout: 240000
+      });
+
+      const out = String(heal.stdout || '');
+      const kv = {};
+      out.split(/\r?\n/).forEach(line => {
+        const i = line.indexOf('=');
+        if (i > 0) kv[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+      });
+
+      const healed = kv.AUTOHEAL_RESULT === 'healed';
+      const notes = kv.AUTOHEAL_NOTES || 'sem retorno do auto-heal';
+      const level = kv.AUTOHEAL_LEVEL || '3';
+      const nowIso = new Date().toISOString();
+
+      if (healed) {
+        pm.status = 'closed';
+        pm.action_taken = `${pm.action_taken || ''} | approved_by_human:${nowIso} | level=${level} | ${notes}`.trim();
+      } else {
+        pm.action_taken = `${pm.action_taken || ''} | approval_attempt:${nowIso} | level=${level} | ${notes}`.trim();
+      }
+
+      writeJson(POSTMORTEMS_FILE, list);
+
+      const activity = readJson(ACTIVITY_FILE, []);
+      const a = Array.isArray(activity) ? activity : [];
+      a.push({
+        id: `act_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        timestamp: new Date().toISOString(),
+        title: 'High Risk Approval',
+        message: healed ? `Aprovação manual aplicada: ${incident}` : `Aprovação manual sem cura: ${incident}`,
+        meta: { postmortemId: id, healed, notes, level }
+      });
+      writeJson(ACTIVITY_FILE, a);
+
+      return sendJson(res, 200, { ok: true, healed, level, notes, postmortem: pm });
+    }
+
+    // 14) GET/POST /mc/postmortems
     if (req.method === 'GET' && pathname === '/mc/postmortems') {
       const items = readJson(POSTMORTEMS_FILE, []);
       const list = Array.isArray(items) ? items.slice(-50).reverse() : [];

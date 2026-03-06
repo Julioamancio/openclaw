@@ -21,16 +21,16 @@
       "schedule": "22:00 BRT",
       "agent": "Sistema",
       "status": "done",
-      "lastRun": "2026-03-06T09:38:31.150794+00:00",
-      "notes": "normalizado"
+      "lastRun": "2026-03-06T16:03:13.963502+00:00",
+      "notes": "normalizado por manutenção"
     },
     {
       "task": "Heartbeat técnico",
       "schedule": "Periódico",
       "agent": "Mike",
-      "status": "failed",
-      "lastRun": "2026-03-06T09:41:16.553328+00:00",
-      "notes": "teste auto-heal"
+      "status": "pending",
+      "lastRun": "2026-03-06T16:45:49.406674+00:00",
+      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
     },
     {
       "task": "Gateway monitor",
@@ -47,9 +47,66 @@
       "status": "pending",
       "lastRun": "2026-03-06T09:51:12.285260+00:00",
       "notes": "normalizado apos teste L3"
+    },
+    {
+      "task": "Gateway Risk Test",
+      "schedule": "manual",
+      "agent": "Mike",
+      "status": "pending",
+      "lastRun": "2026-03-06T13:00:19.563368+00:00",
+      "notes": "normalizado"
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-06T16:45:49.406674+00:00",
+      "task": "Heartbeat técnico",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
+    },
+    {
+      "ts": "2026-03-06T16:45:46.560425+00:00",
+      "task": "Heartbeat técnico",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
+    },
+    {
+      "ts": "2026-03-06T16:45:07.011611+00:00",
+      "task": "Heartbeat técnico",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
+    },
+    {
+      "ts": "2026-03-06T16:03:13.963502+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "normalizado por manutenção"
+    },
+    {
+      "ts": "2026-03-06T16:03:13.922776+00:00",
+      "task": "Heartbeat técnico",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "normalizado por manutenção"
+    },
+    {
+      "ts": "2026-03-06T13:00:19.563368+00:00",
+      "task": "Gateway Risk Test",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "normalizado"
+    },
+    {
+      "ts": "2026-03-06T13:00:08.419802+00:00",
+      "task": "Gateway Risk Test",
+      "status": "failed",
+      "agent": "Mike",
+      "notes": "teste risk engine"
+    },
     {
       "ts": "2026-03-06T12:40:01.539384+00:00",
       "task": "Ideia de Negócio",

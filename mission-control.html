@@ -2462,6 +2462,7 @@
       try {
         const slo = await fetchJson(`${SERVER.base}/mc/slo`);
         const trends = await fetchJson(`${SERVER.base}/mc/slo-trends`);
+        const healthScore = await fetchJson(`${SERVER.base}/mc/health-score`);
         const runbooks = await fetchJson(`${SERVER.base}/mc/runbooks`);
         const post = await fetchJson(`${SERVER.base}/mc/postmortems`);
 
@@ -2487,6 +2488,10 @@
 
         if (sloEl) {
           sloEl.innerHTML = `
+            <article class="ops-item">
+              <div class="ops-head"><strong>Health Score</strong><span class="pill ${Number(healthScore?.score ?? 0) >= 80 ? 'done' : 'failed'}">${healthScore?.score ?? '--'}/100</span></div>
+              <div class="ops-meta"><span>Nível: ${healthScore?.level || '--'}</span><span>Open PM: ${healthScore?.factors?.open_postmortems ?? '--'}</span><span>Failed Jobs: ${healthScore?.factors?.failed_jobs ?? '--'}</span><span>Run Success: ${healthScore?.factors?.run_success_rate_pct ?? '--'}%</span></div>
+            </article>
             <article class="ops-item">
               <div class="ops-head"><strong>Success rate</strong><span class="pill ${slo?.slo_status?.success_rate === 'pass' ? 'done' : 'failed'}">${slo?.slo_status?.success_rate || '--'}</span></div>
               <div class="ops-meta"><span>Recent runs: ${slo?.sli?.recent_runs ?? '--'}</span><span>Success: ${slo?.sli?.success_rate_pct ?? '--'}%</span><span>Alerts(100): ${slo?.sli?.alerts_last_100_events ?? '--'}</span></div>
@@ -2521,8 +2526,29 @@
                 <div class="ops-head"><strong>${escapeHtml(p.incident || 'Incidente')}</strong><span class="pill ${p.status === 'closed' ? 'done' : 'running'}">${escapeHtml(p.status || 'open')}</span></div>
                 <div class="ops-meta"><span>${new Date(p.created_at || Date.now()).toLocaleString('pt-BR')}</span></div>
                 <div class="ops-meta"><span>Causa provável: ${escapeHtml(p.probable_cause || '--')}</span></div>
+                ${p.status === 'open' ? `<div class="ops-actions"><button class="btn" data-approve-highrisk="${escapeAttr(p.id || '')}">Aprovar Auto-Heal (High Risk)</button></div>` : ''}
               </article>
             `).join('');
+
+            pmEl.querySelectorAll('[data-approve-highrisk]').forEach(btn => {
+              btn.addEventListener('click', async () => {
+                const id = btn.getAttribute('data-approve-highrisk');
+                if (!id) return;
+                btn.disabled = true;
+                btn.textContent = 'Aprovando...';
+                try {
+                  await fetchJson(`${SERVER.base}/mc/high-risk/approve`, {
+                    method: 'POST',
+                    body: JSON.stringify({ id })
+                  });
+                  addActivity(`Aprovação manual de high-risk aplicada (${id})`);
+                  await syncSloPostmortems();
+                } catch {
+                  btn.disabled = false;
+                  btn.textContent = 'Falhou (tentar de novo)';
+                }
+              });
+            });
           }
         }
       } catch {

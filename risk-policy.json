@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "rules": [
+    { "match": "Gateway|OTServer|Backup", "score": 85, "level": "high", "requireConfirmation": true },
+    { "match": "Check remetentes|email|Daniela", "score": 45, "level": "medium", "requireConfirmation": false },
+    { "match": "Ideia de Negócio|Nexo", "score": 35, "level": "medium", "requireConfirmation": false },
+    { "match": "Heartbeat técnico", "score": 55, "level": "medium", "requireConfirmation": false }
+  ],
+  "default": { "score": 60, "level": "medium", "requireConfirmation": false }
+}
