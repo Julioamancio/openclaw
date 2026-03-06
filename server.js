@@ -4,6 +4,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const net = require('net');
 const { URL } = require('url');
 
 const PORT = 8899;
@@ -13,6 +14,8 @@ const ROOT = __dirname;
 const DASHBOARD_FILE = path.join(ROOT, 'mission-control.html');
 const DATA_FILE = path.join(ROOT, 'mc-data.json');
 const ACTIVITY_FILE = path.join(ROOT, 'mc-activity.json');
+const ALERTS_FILE = path.join(ROOT, 'mc-alerts.json');
+const JOBS_FILE = path.join(ROOT, 'mc-jobs.json');
 
 const startedAt = Date.now();
 let lastRefreshTs = new Date().toISOString();
@@ -78,6 +81,26 @@ function getRequestBody(req, maxBytes = 1024 * 1024) {
 
 function normalizeCity(input) {
   return (input || 'Sao Paulo').trim().replace(/\s+/g, '+');
+}
+
+function checkTcp(host, port, timeoutMs = 1200) {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    let done = false;
+
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      socket.destroy();
+      resolve(ok);
+    };
+
+    socket.setTimeout(timeoutMs);
+    socket.once('connect', () => finish(true));
+    socket.once('timeout', () => finish(false));
+    socket.once('error', () => finish(false));
+    socket.connect(port, host);
+  });
 }
 
 const server = http.createServer(async (req, res) => {
@@ -162,6 +185,7 @@ const server = http.createServer(async (req, res) => {
       const items = readJson(ACTIVITY_FILE, []);
       const next = Array.isArray(items) ? items : [];
       const entry = {
+        id: `act_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         timestamp: new Date().toISOString(),
         title: incoming.title || 'Activity',
         message: incoming.message || '',
@@ -171,7 +195,75 @@ const server = http.createServer(async (req, res) => {
       next.push(entry);
       writeJson(ACTIVITY_FILE, next);
 
+      if (String(entry.message || '').startsWith('ALERTA:')) {
+        const alerts = readJson(ALERTS_FILE, []);
+        const queue = Array.isArray(alerts) ? alerts : [];
+        queue.push({
+          id: `alt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          created_at: new Date().toISOString(),
+          sent: false,
+          message: entry.message,
+          source: entry.title || 'Mission Control'
+        });
+        writeJson(ALERTS_FILE, queue);
+      }
+
       return sendJson(res, 200, { ok: true, entry });
+    }
+
+    // 7) GET /mc/alerts - unsent exception alerts
+    if (req.method === 'GET' && pathname === '/mc/alerts') {
+      const alerts = readJson(ALERTS_FILE, []);
+      const queue = Array.isArray(alerts) ? alerts : [];
+      const unsent = queue.filter(a => !a.sent).slice(-20).reverse();
+      return sendJson(res, 200, unsent);
+    }
+
+    // 8) POST /mc/alerts/ack - mark alerts as sent
+    if (req.method === 'POST' && pathname === '/mc/alerts/ack') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const ids = Array.isArray(incoming.ids) ? incoming.ids : [];
+
+      const alerts = readJson(ALERTS_FILE, []);
+      const queue = Array.isArray(alerts) ? alerts : [];
+      const idSet = new Set(ids);
+
+      for (const a of queue) {
+        if (idSet.has(a.id)) a.sent = true;
+      }
+      writeJson(ALERTS_FILE, queue);
+      return sendJson(res, 200, { ok: true, acked: ids.length });
+    }
+
+    // 9) GET /mc/jobs - real job status/runs used by Ops tab
+    if (req.method === 'GET' && pathname === '/mc/jobs') {
+      const jobs = readJson(JOBS_FILE, { jobs: [], runs: [] });
+      return sendJson(res, 200, jobs);
+    }
+
+    // 10) GET /mc/otserver - lightweight OTServer health
+    if (req.method === 'GET' && pathname === '/mc/otserver') {
+      const host = (url.searchParams.get('host') || '127.0.0.1').trim();
+      const gamePort = Number(url.searchParams.get('gamePort') || 7171);
+      const loginPort = Number(url.searchParams.get('loginPort') || 7172);
+
+      const [gameOk, loginOk] = await Promise.all([
+        checkTcp(host, gamePort),
+        checkTcp(host, loginPort),
+      ]);
+
+      const overall = gameOk && loginOk ? 'online' : (gameOk || loginOk ? 'degraded' : 'offline');
+
+      return sendJson(res, 200, {
+        host,
+        checked_at: new Date().toISOString(),
+        overall,
+        ports: {
+          [gamePort]: gameOk ? 'open' : 'closed',
+          [loginPort]: loginOk ? 'open' : 'closed'
+        }
+      });
     }
 
     return sendJson(res, 404, { error: 'Not found' });
@@ -183,6 +275,8 @@ const server = http.createServer(async (req, res) => {
 // Boot files
 ensureJsonFile(DATA_FILE, {});
 ensureJsonFile(ACTIVITY_FILE, []);
+ensureJsonFile(ALERTS_FILE, []);
+ensureJsonFile(JOBS_FILE, { jobs: [], runs: [] });
 
 server.listen(PORT, HOST, () => {
   console.log(`Mission Control server running at http://${HOST}:${PORT}`);

@@ -56,6 +56,7 @@ git push origin main || echo "Push falhou"
   - [ ] **Remetentes específicos** — SÓ às 08:00 e 16:00 BRT (11:00 e 19:00 UTC)
 - [ ] **Ideia de Negócio** — SÓ às 09:00 BRT (12:00 UTC)
 - [ ] **Second Brain:** estado dos dados em `/root/.openclaw/workspace/second-brain/data/`
+- [ ] **Exceções Mission Control:** checar `GET http://127.0.0.1:8899/mc/alerts`; se houver pendentes, enviar resumo no Telegram e ACK em `POST /mc/alerts/ack`
 
 ---
 

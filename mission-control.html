@@ -1260,6 +1260,11 @@
       weatherCity: "Belo Horizonte/MG"
     };
 
+    const OPS_KEYS = {
+      lastAlert: "mc_ops_last_alert",
+      lastDailyReport: "mc_ops_last_daily_report"
+    };
+
     /*******************************
      * Default App State
      *******************************/
@@ -1629,6 +1634,31 @@
       if (syncTimer) clearInterval(syncTimer);
       syncTimer = setInterval(backupToServer, 5 * 60 * 1000);
       setInterval(loadWeather, 10 * 60 * 1000);
+    }
+
+    function shouldSendOpsAlert(key, minMinutes = 60) {
+      const now = Date.now();
+      const raw = localStorage.getItem(OPS_KEYS.lastAlert);
+      const map = raw ? JSON.parse(raw) : {};
+      const last = Number(map[key] || 0);
+      if (now - last < minMinutes * 60000) return false;
+      map[key] = now;
+      localStorage.setItem(OPS_KEYS.lastAlert, JSON.stringify(map));
+      return true;
+    }
+
+    function maybeEmitDailyOpsReport() {
+      const now = new Date();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const dayKey = now.toISOString().slice(0, 10);
+      const lastDay = localStorage.getItem(OPS_KEYS.lastDailyReport);
+      if (hour === 22 && minute >= 10 && lastDay !== dayKey) {
+        const done = (state.ops?.crons || []).filter(c => c.status === 'done').length;
+        const pending = (state.ops?.crons || []).filter(c => c.status !== 'done').length;
+        queueServerActivity(`Relatório diário Ops: ${done} concluídas, ${pending} pendentes`);
+        localStorage.setItem(OPS_KEYS.lastDailyReport, dayKey);
+      }
     }
 
     function daysUntil(dateStr) {
@@ -2316,6 +2346,18 @@
       document.getElementById('opsRunBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='opsRunBackdrop') e.currentTarget.classList.remove('open'); });
 
       renderOps();
+      setInterval(() => {
+        syncOpsFromServer();
+        refreshCronAutoStatus();
+        renderOpsCrons();
+        checkOtServerHealth();
+        maybeEmitOpsExceptionAlerts();
+        maybeEmitDailyOpsReport();
+      }, 60 * 1000);
+
+      syncOpsFromServer();
+      refreshCronAutoStatus();
+      checkOtServerHealth();
     }
 
     function saveOpsRun() {
@@ -2330,6 +2372,98 @@
       renderOps();
       document.getElementById('opsRunBackdrop').classList.remove('open');
       ['opsRunAgent','opsRunTask','opsRunNotes'].forEach(i=>document.getElementById(i).value='');
+    }
+
+    async function syncOpsFromServer() {
+      try {
+        const d = await fetchJson(`${SERVER.base}/mc/jobs`);
+        if (Array.isArray(d?.jobs) && d.jobs.length) {
+          for (const sj of d.jobs) {
+            const local = (state.ops?.crons || []).find(c => c.task === sj.task);
+            if (local) {
+              local.status = sj.status || local.status;
+              local.lastRun = sj.lastRun || local.lastRun;
+              local.agent = sj.agent || local.agent;
+            } else {
+              state.ops.crons.push({
+                id: id(),
+                task: sj.task || 'Job',
+                schedule: sj.schedule || 'server',
+                agent: sj.agent || 'Sistema',
+                status: sj.status || 'pending',
+                lastRun: sj.lastRun || null
+              });
+            }
+          }
+        }
+
+        if (Array.isArray(d?.runs) && d.runs.length) {
+          const mapped = d.runs.slice(0, 80).map(r => ({
+            id: id(),
+            ts: Date.parse(r.ts || r.timestamp || new Date().toISOString()),
+            agent: r.agent || 'Sistema',
+            task: r.task || r.message || 'Execução',
+            status: r.status || 'done',
+            notes: r.notes || ''
+          }));
+          state.ops.runs = mapped;
+        }
+
+        renderOps();
+      } catch {
+        // keep local-only mode silently
+      }
+    }
+
+    function refreshCronAutoStatus() {
+      const now = new Date();
+      const h = now.getHours();
+      let changed = false;
+
+      (state.ops?.crons || []).forEach(c => {
+        const last = c.lastRun ? new Date(c.lastRun) : null;
+        const stale = !last || (now - last > 24 * 60 * 60 * 1000);
+        const prev = c.status;
+
+        if (c.task.includes('Backup GitHub')) {
+          if (h >= 22 && stale) c.status = 'failed';
+        }
+        if (c.task.includes('Check remetentes')) {
+          if ((h >= 11 || h >= 19) && stale) c.status = 'failed';
+        }
+
+        if (c.status !== prev) changed = true;
+      });
+
+      if (changed) saveState('Auto-sync de status cron');
+    }
+
+    async function checkOtServerHealth() {
+      try {
+        const d = await fetchJson(`${SERVER.base}/mc/otserver`);
+        state.ops.otserver.lastCheck = d.checked_at || new Date().toISOString();
+        state.ops.otserver.status = d.overall === 'online' ? 'done' : (d.overall === 'degraded' ? 'running' : 'failed');
+        state.ops.otserver.notes = `Host ${d.host} · 7171:${d.ports?.['7171'] || '--'} · 7172:${d.ports?.['7172'] || '--'}`;
+        saveState('Check OTServer automático');
+        renderOpsOtserver();
+      } catch {
+        state.ops.otserver.lastCheck = new Date().toISOString();
+        state.ops.otserver.status = 'failed';
+        state.ops.otserver.notes = 'Falha ao consultar endpoint /mc/otserver';
+        saveState('Falha no check OTServer');
+        renderOpsOtserver();
+      }
+    }
+
+    function maybeEmitOpsExceptionAlerts() {
+      const backup = (state.ops?.crons || []).find(c => c.task.includes('Backup GitHub'));
+      if (backup?.status === 'failed' && shouldSendOpsAlert('backup-failed', 90)) {
+        queueServerActivity('ALERTA: Backup GitHub em falha/atraso');
+      }
+
+      if (state.ops?.otserver?.status === 'failed' && shouldSendOpsAlert('otserver-failed', 30)) {
+        queueServerActivity('ALERTA: OTServer offline/degradado');
+      }
     }
 
     function renderOps() {

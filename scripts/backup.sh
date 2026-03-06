@@ -12,6 +12,7 @@ TZ="-03"
 cd "$WORKSPACE" || exit 1
 
 echo "[$(date)] Iniciando backup diário..."
+[ -x "$WORKSPACE/scripts/ops-job-mark.sh" ] && "$WORKSPACE/scripts/ops-job-mark.sh" "Backup GitHub" "running" "Sistema" "Backup iniciado" || true
 
 # Força perfil GUARDIAN para operação crítica de backup/push
 if [ -x "$WORKSPACE/scripts/auto-self-improving-profile.sh" ]; then
@@ -19,7 +20,7 @@ if [ -x "$WORKSPACE/scripts/auto-self-improving-profile.sh" ]; then
     echo "Perfil self-improving aplicado para backup: ${PROFILE_SELECTED^^}"
 fi
 
-# Ao finalizar (sucesso/erro), retorna para o perfil automático padrão de heartbeat
+# Ao finalizar (sucesso/erro), retorna perfil + registra job no Mission Control
 restore_profile() {
     if [ -x "$WORKSPACE/scripts/auto-self-improving-profile.sh" ]; then
         RESTORED=$($WORKSPACE/scripts/auto-self-improving-profile.sh heartbeat 2>/dev/null || true)
@@ -28,7 +29,17 @@ restore_profile() {
         fi
     fi
 }
-trap restore_profile EXIT
+
+on_exit() {
+    EXIT_CODE=$?
+    if [ "$EXIT_CODE" -eq 0 ]; then
+        [ -x "$WORKSPACE/scripts/ops-job-mark.sh" ] && "$WORKSPACE/scripts/ops-job-mark.sh" "Backup GitHub" "done" "Sistema" "Backup executado com sucesso" || true
+    else
+        [ -x "$WORKSPACE/scripts/ops-job-mark.sh" ] && "$WORKSPACE/scripts/ops-job-mark.sh" "Backup GitHub" "failed" "Sistema" "Backup falhou (exit $EXIT_CODE)" || true
+    fi
+    restore_profile
+}
+trap on_exit EXIT
 
 # Verificar e adicionar changes no Second Brain
 if [ -d "$SECOND_BRAIN" ]; then

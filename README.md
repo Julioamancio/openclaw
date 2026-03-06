@@ -224,6 +224,9 @@ Painel premium local para operação diária, com persistência local e backup n
 - `POST /mc/data` a cada 5 minutos (backup automático)
 - `GET /mc/weather?city=Belo Horizonte/MG` no header
 - `POST /mc/activity` em mudanças de dados
+- `GET /mc/jobs` para status real de jobs/scripts no painel Ops
+- `GET /mc/alerts` + `POST /mc/alerts/ack` para fila de exceções
+- `GET /mc/otserver` para health check OTServer (7171/7172)
 - Indicador visual de conectividade (`Server: Online/Offline`)
 
 **Auto-start macOS (opcional):**

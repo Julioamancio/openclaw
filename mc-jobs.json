@@ -1,0 +1,37 @@
+{
+  "jobs": [
+    {
+      "task": "Check remetentes",
+      "schedule": "08:00 e 16:00 BRT",
+      "agent": "Daniela",
+      "status": "pending",
+      "lastRun": null,
+      "notes": ""
+    },
+    {
+      "task": "Ideia de Negócio",
+      "schedule": "09:00 BRT",
+      "agent": "Nexo",
+      "status": "pending",
+      "lastRun": null,
+      "notes": ""
+    },
+    {
+      "task": "Backup GitHub",
+      "schedule": "22:00 BRT",
+      "agent": "Sistema",
+      "status": "pending",
+      "lastRun": null,
+      "notes": ""
+    },
+    {
+      "task": "Heartbeat técnico",
+      "schedule": "Periódico",
+      "agent": "Mike",
+      "status": "pending",
+      "lastRun": null,
+      "notes": ""
+    }
+  ],
+  "runs": []
+}
