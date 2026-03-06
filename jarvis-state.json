@@ -1,5 +1,15 @@
 {
   "version": 1,
-  "events": [],
+  "events": [
+    {
+      "id": "ev_1772832139428",
+      "ts": "2026-03-06T21:22:19.428676+00:00",
+      "type": "autonomy_mode",
+      "entity": "sre-mode",
+      "payload": {
+        "raw": "{\"from\":\"observe\",\"to\":\"autopilot\",\"reason\":\"autopilot_threshold_met\"}}"
+      }
+    }
+  ],
   "snapshots": []
 }

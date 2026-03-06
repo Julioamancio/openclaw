@@ -170,6 +170,9 @@ const server = http.createServer(async (req, res) => {
         return sendText(res, 404, 'mission-control.html not found in server folder.');
       }
       const html = fs.readFileSync(DASHBOARD_FILE, 'utf8');
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       return sendText(res, 200, html, 'text/html; charset=utf-8');
     }
 
@@ -608,7 +611,7 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, x.status === 0 ? 200 : 500, parsed || { ok: false, output: txt.slice(0, 500) });
     }
 
-    // 17) POST /mc/planner/competitive - multi-planner arbitration
+    // 17) POST /mc/planner/competitive - multi-planner proposals
     if (req.method === 'POST' && pathname === '/mc/planner/competitive') {
       const raw = await getRequestBody(req);
       const incoming = raw ? JSON.parse(raw) : {};
@@ -621,6 +624,60 @@ const server = http.createServer(async (req, res) => {
       let parsed = null;
       try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
       return sendJson(res, x.status === 0 ? 200 : 500, parsed || { error: 'planner failed', output: txt.slice(0, 500) });
+    }
+
+    // 18) POST /mc/planner/arbitrate - deterministic arbiter over planners
+    if (req.method === 'POST' && pathname === '/mc/planner/arbitrate') {
+      const raw = await getRequestBody(req);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const mission = String(incoming.mission || '').trim();
+      if (!mission) return sendJson(res, 400, { error: 'mission is required' });
+      const risk = String(incoming.risk || 'medium');
+      const budget = String(incoming.budgetUsd != null ? incoming.budgetUsd : 0.8);
+      const x = spawnSync('/root/.openclaw/workspace/scripts/planner-arbiter.sh', [mission, risk, budget], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { error: 'arbiter failed', output: txt.slice(0, 500) });
+    }
+
+    // 19) POST /mc/autonomy/evaluate - compute target mode from confidence stats
+    if (req.method === 'POST' && pathname === '/mc/autonomy/evaluate') {
+      const x = spawnSync('/root/.openclaw/workspace/scripts/autonomy-mode-eval.sh', [], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { error: 'autonomy eval failed', output: txt.slice(0, 500) });
+    }
+
+    // 20) POST /mc/autonomy/apply - evaluate and apply SRE mode automatically
+    if (req.method === 'POST' && pathname === '/mc/autonomy/apply') {
+      const x = spawnSync('/root/.openclaw/workspace/scripts/autonomy-mode-eval.sh', [], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      if (!parsed?.mode) return sendJson(res, 500, { error: 'invalid autonomy eval', output: txt.slice(0, 500) });
+
+      const modePath = path.join(ROOT, 'sre-mode.json');
+      const curr = readJson(modePath, { version: 1, mode: 'assist' });
+      const prev = curr.mode || 'assist';
+      curr.mode = parsed.mode;
+      curr.updatedAt = new Date().toISOString();
+      curr.reason = parsed.reason || 'autonomy_apply';
+      writeJson(modePath, curr);
+
+      spawnSync('/root/.openclaw/workspace/scripts/state-event.sh', ['autonomy_mode', 'sre-mode', JSON.stringify({ from: prev, to: curr.mode, reason: curr.reason })], { encoding: 'utf8', timeout: 30000 });
+
+      return sendJson(res, 200, { ok: true, from: prev, to: curr.mode, reason: curr.reason, stats: parsed.stats || {} });
+    }
+
+    // 21) POST /mc/regression/gate - block promotion on regression failure
+    if (req.method === 'POST' && pathname === '/mc/regression/gate') {
+      const x = spawnSync('/root/.openclaw/workspace/scripts/regression-gate.sh', [], { encoding: 'utf8', timeout: 30000 });
+      const txt = String(x.stdout || x.stderr || '').trim();
+      let parsed = null;
+      try { parsed = JSON.parse(txt.split(/\r?\n/).filter(Boolean).slice(-1)[0] || '{}'); } catch {}
+      return sendJson(res, x.status === 0 ? 200 : 500, parsed || { gate: 'fail', output: txt.slice(0, 500) });
     }
 
     // 18) POST /mc/policy-formal/eval - formal policy decision

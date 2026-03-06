@@ -168,6 +168,41 @@
           "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 0)"
         }
       ]
+    },
+    "alt_1772830804107_x70q1": {
+      "id": "alt_1772830804107_x70q1",
+      "state": "escalated",
+      "createdAt": "2026-03-06T21:02:06.860424+00:00",
+      "updatedAt": "2026-03-06T21:02:07.008385+00:00",
+      "history": [
+        {
+          "ts": "2026-03-06T21:02:06.860454+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "ALERTA: Health Score abaixo de 80 (atual 0)"
+        },
+        {
+          "ts": "2026-03-06T21:02:06.881859+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "risk assessment start"
+        },
+        {
+          "ts": "2026-03-06T21:02:06.949171+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "approved",
+          "notes": "policy check passed"
+        },
+        {
+          "ts": "2026-03-06T21:02:07.008387+00:00",
+          "action": "transition",
+          "from": "approved",
+          "to": "escalated",
+          "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 0)"
+        }
+      ]
     }
   }
 }

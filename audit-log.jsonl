@@ -20,3 +20,5 @@
 {"ts": "2026-03-06T20:33:31.621095+00:00", "type": "job_update", "actor": "Daniela", "task": "Check remetentes", "risk": "warning", "strategy": "ops-job-mark", "result": "running", "notes": "Verificação iniciada"}
 {"ts": "2026-03-06T20:36:05.467681+00:00", "type": "job_update", "actor": "Daniela", "task": "Check remetentes", "risk": "warning", "strategy": "ops-job-mark", "result": "running", "notes": "Verificação iniciada"}
 {"ts": "2026-03-06T20:37:35.680178+00:00", "type": "job_update", "actor": "Daniela", "task": "Check remetentes", "risk": "warning", "strategy": "ops-job-mark", "result": "done", "notes": "Nenhum e-mail novo"}
+{"ts": "2026-03-06T20:58:59.523896+00:00", "type": "job_update", "actor": "Daniela", "task": "Check remetentes", "risk": "warning", "strategy": "ops-job-mark", "result": "running", "notes": "Verificação iniciada"}
+{"ts": "2026-03-06T21:02:06.983539+00:00", "type": "auto_heal", "actor": "Mike", "task": "Health Score abaixo de 80 (atual 0)", "risk": "runtime", "strategy": "none/exploit", "result": "failed", "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 0)"}

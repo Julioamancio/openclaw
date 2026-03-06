@@ -124,5 +124,14 @@
     "action_taken": "Despacho de alerta + ACK em fila | risk=medium:60 | level=3 | sem runbook para tarefa: Health Score abaixo de 80 (atual 0)",
     "prevention": "Revisar runbook e fortalecer monitoramento",
     "status": "open"
+  },
+  {
+    "id": "pm_1772830927020_nm199",
+    "created_at": "2026-03-06T21:02:07.020Z",
+    "incident": "ALERTA: Health Score abaixo de 80 (atual 0)",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila | risk=medium:60 | level=3 | sem runbook para tarefa: Health Score abaixo de 80 (atual 0)",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "open"
   }
 ]

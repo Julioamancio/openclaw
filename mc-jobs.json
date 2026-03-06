@@ -4,9 +4,9 @@
       "task": "Check remetentes",
       "schedule": "08:00 e 16:00 BRT",
       "agent": "Daniela",
-      "status": "done",
-      "lastRun": "2026-03-06T20:37:35.645667+00:00",
-      "notes": "Nenhum e-mail novo"
+      "status": "running",
+      "lastRun": "2026-03-06T20:58:59.472042+00:00",
+      "notes": "Verificação iniciada"
     },
     {
       "task": "Ideia de Negócio",
@@ -66,6 +66,13 @@
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-06T20:58:59.472042+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
     {
       "ts": "2026-03-06T20:37:35.645667+00:00",
       "task": "Check remetentes",

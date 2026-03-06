@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "thresholds": {
+    "autopilot": { "minSuccessRate": 98, "maxFailureRate": 2, "maxAvgCostUsd": 0.02 },
+    "assist": { "minSuccessRate": 92, "maxFailureRate": 8, "maxAvgCostUsd": 0.05 }
+  },
+  "defaultMode": "observe"
+}

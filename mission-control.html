@@ -715,6 +715,222 @@
       .welcome { flex-direction: column; align-items: flex-start; }
       .metrics { grid-template-columns: 1fr; }
     }
+
+    /* ===== Visual Refresh (Jarvis UI pass) ===== */
+    :root {
+      --jarvis-bg: #0a0f1f;
+      --jarvis-panel: #0f172a;
+      --jarvis-panel-2: #111c34;
+      --jarvis-border: rgba(148, 163, 184, 0.22);
+      --jarvis-glow: rgba(59, 130, 246, 0.35);
+      --jarvis-text: #dbe7ff;
+      --jarvis-subtext: #9fb3d9;
+      --jarvis-accent: #3b82f6;
+      --jarvis-accent-2: #6366f1;
+      --jarvis-ok: #22c55e;
+      --jarvis-warn: #f59e0b;
+      --jarvis-bad: #ef4444;
+    }
+
+    body {
+      background:
+        radial-gradient(1200px 700px at 85% -10%, rgba(37, 99, 235, .16), transparent 55%),
+        radial-gradient(1000px 700px at -10% -20%, rgba(99, 102, 241, .15), transparent 50%),
+        var(--jarvis-bg);
+      color: var(--jarvis-text);
+    }
+
+    .header {
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--jarvis-border);
+      background: rgba(10, 15, 31, .72);
+    }
+
+    .brand span {
+      letter-spacing: .4px;
+      font-weight: 700;
+    }
+
+    .logo {
+      box-shadow: 0 0 0 2px rgba(59,130,246,.22), 0 0 24px rgba(59,130,246,.35);
+    }
+
+    .tab-btn {
+      border-radius: 10px;
+      border: 1px solid transparent;
+      transition: all .16s ease;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--jarvis-border);
+      background: rgba(30, 41, 59, .65);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(59,130,246,.24), rgba(99,102,241,.22));
+      border-color: rgba(96, 165, 250, .4);
+      box-shadow: inset 0 0 0 1px rgba(125, 211, 252, .2);
+    }
+
+    .card, .panel, .column, .ops-item {
+      background: linear-gradient(180deg, rgba(17, 28, 52, .92), rgba(15, 23, 42, .95));
+      border: 1px solid var(--jarvis-border);
+      box-shadow: 0 6px 24px rgba(2, 6, 23, .35);
+      border-radius: 14px;
+    }
+
+    .section-title {
+      color: #c8dafd;
+      letter-spacing: .2px;
+    }
+
+    .metric-card {
+      border: 1px solid rgba(99, 102, 241, .22);
+      background: linear-gradient(145deg, rgba(29, 43, 74, .8), rgba(15, 23, 42, .95));
+    }
+
+    .metric-value {
+      color: #eff6ff;
+      text-shadow: 0 0 18px rgba(59,130,246,.25);
+    }
+
+    .btn {
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,.26);
+      background: linear-gradient(135deg, rgba(30,41,59,.88), rgba(51,65,85,.75));
+      color: #e5edff;
+      font-weight: 600;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(96,165,250,.55);
+      box-shadow: 0 6px 18px rgba(37,99,235,.22);
+    }
+
+    .btn:active { transform: translateY(0); }
+
+    .input, .textarea, .select, .search {
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,.24);
+      background: rgba(15, 23, 42, .85);
+      color: var(--jarvis-text);
+    }
+
+    .input:focus, .textarea:focus, .select:focus, .search:focus {
+      border-color: rgba(59,130,246,.7);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.16);
+      outline: none;
+    }
+
+    .pill.done { background: rgba(34,197,94,.16); color: #86efac; border: 1px solid rgba(34,197,94,.35); }
+    .pill.failed { background: rgba(239,68,68,.14); color: #fca5a5; border: 1px solid rgba(239,68,68,.35); }
+    .pill.running { background: rgba(245,158,11,.12); color: #fcd34d; border: 1px solid rgba(245,158,11,.35); }
+
+    .ops-meta, .trend, .status, .server-badge {
+      color: var(--jarvis-subtext);
+    }
+
+    .welcome {
+      border: 1px solid rgba(96,165,250,.28);
+      background: linear-gradient(125deg, rgba(30,64,175,.24), rgba(30,41,59,.92));
+    }
+
+    .activity-item, .priority-item, .intel-item {
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,.16);
+      background: rgba(15, 23, 42, .55);
+    }
+
+    /* ===== NOC Enterprise Pass ===== */
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding-top: 1.25rem;
+    }
+
+    .tabs {
+      gap: .35rem;
+      padding: .2rem;
+      background: rgba(15, 23, 42, .45);
+      border: 1px solid rgba(148,163,184,.15);
+      border-radius: 12px;
+    }
+
+    .tab-btn {
+      font-size: .84rem;
+      padding: .45rem .7rem;
+      line-height: 1;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      margin-bottom: .7rem;
+      font-weight: 700;
+    }
+
+    .card, .panel, .column, .ops-item {
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(2,6,23,.24);
+    }
+
+    .ops-list {
+      display: grid;
+      gap: .65rem;
+    }
+
+    .ops-head {
+      align-items: center;
+    }
+
+    .ops-meta {
+      font-size: .86rem;
+      opacity: .95;
+    }
+
+    .btn {
+      padding: .5rem .8rem;
+      font-size: .83rem;
+      letter-spacing: .1px;
+    }
+
+    #controltower .ops-actions {
+      gap: .6rem !important;
+    }
+
+    #controltower .input {
+      min-height: 38px;
+    }
+
+    #ctStatus {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    #ctFinops {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .welcome {
+      padding: 1rem 1.1rem;
+    }
+
+    .metric-card {
+      min-height: 132px;
+    }
+
+    .metric-value {
+      font-size: 1.65rem;
+    }
+
+    @media (max-width: 1100px) {
+      .header-inner {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        justify-self: stretch;
+      }
+    }
   </style>
 </head>
 <body>
@@ -737,6 +953,7 @@
           <button class="tab-btn" data-tab="youtube">🎬 YouTube</button>
           <button class="tab-btn" data-tab="meetings">📞 Meetings</button>
           <button class="tab-btn" data-tab="intel">📡 Intel</button>
+          <button class="tab-btn" data-tab="controltower">🧠 Control Tower</button>
           <button class="tab-btn" data-tab="ops">🧭 Ops</button>
         </nav>
 
@@ -751,6 +968,10 @@
     </header>
 
     <main class="container">
+      <div class="card" style="margin-bottom:1rem;border:1px solid rgba(59,130,246,.45);background:rgba(30,64,175,.16)">
+        <strong>🚀 BUILD ATIVO:</strong> Jarvis-Core v2 · Control Tower + Mission Executor + FinOps + Replay/Twin
+      </div>
+
       <!-- Dashboard -->
       <section id="dashboard" class="tab-content active">
         <div class="card welcome">
@@ -990,6 +1211,36 @@
         </section>
       </section>
 
+      <!-- Control Tower -->
+      <section id="controltower" class="tab-content">
+        <section class="card panel" data-search="control tower ceo observe assist autopilot promote rollback missão">
+          <h3 class="section-title">Control Tower (CEO)</h3>
+          <div class="ops-meta" style="margin:-.25rem 0 .8rem 0;">Comando executivo para operação segura: modo, promoção, rollback, aprovação high-risk e execução de missão.</div>
+          <div class="ops-actions" style="margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button id="ctModeObserveBtn" class="btn">Observe</button>
+            <button id="ctModeAssistBtn" class="btn">Assist</button>
+            <button id="ctModeAutopilotBtn" class="btn">Autopilot</button>
+            <button id="ctPromoteBtn" class="btn">Promote</button>
+            <button id="ctRollbackBtn" class="btn">Rollback</button>
+            <button id="ctApproveRiskBtn" class="btn">Approve High-Risk</button>
+          </div>
+          <div class="ops-actions" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <input id="ctMissionInput" class="input" placeholder="Ex: recover gateway degraded + resumo ops" style="min-width:320px;max-width:560px;" />
+            <label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;opacity:.9;"><input id="ctMissionDryRun" type="checkbox" checked /> dry-run</label>
+            <button id="ctRunMissionBtn" class="btn">Run Mission</button>
+          </div>
+          <div id="ctStatus" class="ops-list" style="margin-top:.7rem;"></div>
+        </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="finops mission budget shadow score">
+          <h3 class="section-title">FinOps + Shadow Score</h3>
+          <div class="ops-actions" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;">
+            <button id="ctRefreshFinopsBtn" class="btn">Atualizar métricas</button>
+          </div>
+          <div id="ctFinops" class="ops-list"></div>
+        </section>
+      </section>
+
       <!-- Ops -->
       <section id="ops" class="tab-content">
         <section class="card panel" data-search="crons tarefas diárias backup heartbeat">
@@ -1017,24 +1268,6 @@
             <button id="opsAddAgentRunBtn" class="btn">+ Registrar execução</button>
           </div>
           <div id="opsAgentRuns" class="ops-list"></div>
-        </section>
-
-        <section class="card panel" style="margin-top:1rem" data-search="control tower ceo observe assist autopilot promote rollback missão">
-          <h3 class="section-title">Control Tower (CEO)</h3>
-          <div class="ops-actions" style="margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-            <button id="ctModeObserveBtn" class="btn">Observe</button>
-            <button id="ctModeAssistBtn" class="btn">Assist</button>
-            <button id="ctModeAutopilotBtn" class="btn">Autopilot</button>
-            <button id="ctPromoteBtn" class="btn">Promote</button>
-            <button id="ctRollbackBtn" class="btn">Rollback</button>
-            <button id="ctApproveRiskBtn" class="btn">Approve High-Risk</button>
-          </div>
-          <div class="ops-actions" style="display:flex;gap:.5rem;flex-wrap:wrap;">
-            <input id="ctMissionInput" class="input" placeholder="Ex: recover gateway degraded + resumo ops" style="min-width:320px;max-width:560px;" />
-            <label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;opacity:.9;"><input id="ctMissionDryRun" type="checkbox" checked /> dry-run</label>
-            <button id="ctRunMissionBtn" class="btn">Run Mission</button>
-          </div>
-          <div id="ctStatus" class="ops-list" style="margin-top:.7rem;"></div>
         </section>
 
         <section class="card panel" style="margin-top:1rem" data-search="slo sli postmortem">
@@ -2376,6 +2609,7 @@
       document.getElementById('ctRollbackBtn').addEventListener('click', runControlTowerRollback);
       document.getElementById('ctRunMissionBtn').addEventListener('click', runControlTowerMission);
       document.getElementById('ctApproveRiskBtn').addEventListener('click', runControlTowerApproveHighRisk);
+      document.getElementById('ctRefreshFinopsBtn').addEventListener('click', syncControlTowerFinops);
 
       renderOps();
       setInterval(() => {
@@ -2383,6 +2617,7 @@
         syncAgentTimelineFromServer();
         syncSloPostmortems();
         syncControlTower();
+        syncControlTowerFinops();
         refreshCronAutoStatus();
         renderOpsCrons();
         checkOtServerHealth();
@@ -2396,6 +2631,7 @@
       refreshCronAutoStatus();
       checkOtServerHealth();
       syncControlTower();
+      syncControlTowerFinops();
     }
 
     async function syncControlTower() {
@@ -2418,6 +2654,30 @@
       } catch {
         const el = document.getElementById('ctStatus');
         if (el) el.innerHTML = '<div class="ops-item">Control Tower offline.</div>';
+      }
+    }
+
+    async function syncControlTowerFinops() {
+      const el = document.getElementById('ctFinops');
+      if (!el) return;
+      try {
+        const fin = await fetchJson(`${SERVER.base}/mc/finops`);
+        const sh = await fetchJson(`${SERVER.base}/mc/shadow-score`);
+        const top = Array.isArray(sh?.ranking) ? sh.ranking.slice(0, 3) : [];
+        el.innerHTML = `
+          <article class="ops-item">
+            <div class="ops-head"><strong>Budget & Spend</strong><span class="pill running">${Number(fin?.defaultBudgetUsd || 0).toFixed(2)} USD padrão</span></div>
+            <div class="ops-meta"><span>Missões: ${fin?.totalMissions ?? 0}</span><span>Spend total: ${(fin?.totalEstimatedSpendUsd ?? 0).toFixed ? fin.totalEstimatedSpendUsd.toFixed(4) : fin?.totalEstimatedSpendUsd} USD</span><span>Média: ${(fin?.avgEstimatedSpendUsd ?? 0).toFixed ? fin.avgEstimatedSpendUsd.toFixed(4) : fin?.avgEstimatedSpendUsd} USD</span></div>
+          </article>
+          <article class="ops-item">
+            <div class="ops-head"><strong>Shadow Ranking</strong><span class="pill done">top ${top.length}</span></div>
+            <div class="ops-meta" style="display:block;line-height:1.7;">
+              ${top.length ? top.map((r, i) => `${i+1}. ${escapeHtml(r.model)} — score ${r.shadowScore} · success ${r.successRatePct}%`).join('<br>') : 'Sem dados ainda'}
+            </div>
+          </article>
+        `;
+      } catch {
+        el.innerHTML = '<div class="ops-item">FinOps/Shadow indisponível.</div>';
       }
     }
 

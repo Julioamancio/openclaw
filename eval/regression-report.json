@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-03-06T20:58:35.561526+00:00",
+  "total": 2,
+  "passed": 2,
+  "score": 100,
+  "gate": "pass",
+  "results": [
+    {
+      "id": "reg_ops_summary_low",
+      "ok": true,
+      "notes": ""
+    },
+    {
+      "id": "reg_incident_high_budget_guard",
+      "ok": true,
+      "notes": ""
+    }
+  ]
+}

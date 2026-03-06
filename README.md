@@ -402,6 +402,10 @@ Mudanças aplicadas após revisão de segurança:
   - Planner competitivo com arbitragem (`scripts/planner-competitive.sh`, `/mc/planner/competitive`)
   - Policy formal declarativa + testes (`policy-formal.json`, `scripts/policy-formal-*.sh`, `/mc/policy-formal/eval`, `/mc/policy-formal/test`)
   - Regression Suite de missões (`eval/regression-missions.json`, `scripts/regression-suite.sh`, `/mc/regression/run`)
+- Jarvis-Core v3 (modelo cada vez menos relevante):
+  - Arbiter determinístico para planners (`scripts/planner-arbiter.sh`, `/mc/planner/arbitrate`)
+  - Autonomia por confiança estatística (`autonomy-policy.json`, `scripts/autonomy-mode-eval.sh`, `/mc/autonomy/evaluate`, `/mc/autonomy/apply`)
+  - Regression Gate de promoção (`eval/regression-gate.json`, `scripts/regression-gate.sh`, `/mc/regression/gate`)
 
 - Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual
 - Runbook registry com aprendizagem por taxa de sucesso (`runbooks.json`)

@@ -2,6 +2,30 @@
   "version": 1,
   "items": [
     {
+      "id": "mission_1772830715559",
+      "mission": "incident rollback policy",
+      "risk": "high",
+      "ts": "2026-03-06T20:58:35.559Z",
+      "model": "nvidia-nim/moonshotai/kimi-k2.5",
+      "action": "downgrade",
+      "estimatedTokens": 1200,
+      "estimatedCostUsd": 0.0036,
+      "budgetUsd": 0.01,
+      "status": "done"
+    },
+    {
+      "id": "mission_1772830715524",
+      "mission": "status ops",
+      "risk": "low",
+      "ts": "2026-03-06T20:58:35.525Z",
+      "model": "nvidia-nim/moonshotai/kimi-k2.5",
+      "action": "keep",
+      "estimatedTokens": 500,
+      "estimatedCostUsd": 0.0015,
+      "budgetUsd": 0.02,
+      "status": "done"
+    },
+    {
       "id": "mission_1772829631484",
       "mission": "status ops",
       "risk": "low",

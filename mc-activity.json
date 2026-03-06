@@ -635,5 +635,23 @@
       "notes": "Verificação iniciada",
       "severity": "info"
     }
+  },
+  {
+    "id": "act_1772830739485_h68vl",
+    "timestamp": "2026-03-06T20:58:59.485Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772830804107_urxao",
+    "timestamp": "2026-03-06T21:00:04.107Z",
+    "title": "Health Score Guard",
+    "message": "ALERTA: Health Score abaixo de 80 (atual 0)",
+    "meta": null
   }
 ]

@@ -1,6 +1,7 @@
 {
   "version": 1,
-  "mode": "observe",
-  "updatedAt": "2026-03-06T20:30:13.996Z",
-  "notes": "observe|assist|autopilot"
+  "mode": "autopilot",
+  "updatedAt": "2026-03-06T21:22:19.408Z",
+  "notes": "observe|assist|autopilot",
+  "reason": "autopilot_threshold_met"
 }
