@@ -4,34 +4,289 @@
       "task": "Check remetentes",
       "schedule": "08:00 e 16:00 BRT",
       "agent": "Daniela",
-      "status": "pending",
-      "lastRun": null,
-      "notes": ""
+      "status": "done",
+      "lastRun": "2026-03-06T12:16:08.908533+00:00",
+      "notes": "Nenhum e-mail novo"
     },
     {
       "task": "Ideia de Negócio",
       "schedule": "09:00 BRT",
       "agent": "Nexo",
-      "status": "pending",
-      "lastRun": null,
-      "notes": ""
+      "status": "done",
+      "lastRun": "2026-03-06T12:40:01.539384+00:00",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
     },
     {
       "task": "Backup GitHub",
       "schedule": "22:00 BRT",
       "agent": "Sistema",
-      "status": "pending",
-      "lastRun": null,
-      "notes": ""
+      "status": "done",
+      "lastRun": "2026-03-06T09:38:31.150794+00:00",
+      "notes": "normalizado"
     },
     {
       "task": "Heartbeat técnico",
       "schedule": "Periódico",
       "agent": "Mike",
+      "status": "failed",
+      "lastRun": "2026-03-06T09:41:16.553328+00:00",
+      "notes": "teste auto-heal"
+    },
+    {
+      "task": "Gateway monitor",
+      "schedule": "manual",
+      "agent": "Mike",
       "status": "pending",
-      "lastRun": null,
-      "notes": ""
+      "lastRun": "2026-03-06T09:41:39.658147+00:00",
+      "notes": "normalizado após teste"
+    },
+    {
+      "task": "Random Job XYZ",
+      "schedule": "manual",
+      "agent": "Sistema",
+      "status": "pending",
+      "lastRun": "2026-03-06T09:51:12.285260+00:00",
+      "notes": "normalizado apos teste L3"
     }
   ],
-  "runs": []
+  "runs": [
+    {
+      "ts": "2026-03-06T12:40:01.539384+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
+    },
+    {
+      "ts": "2026-03-06T12:40:00.143952+00:00",
+      "task": "Ideia de Negócio",
+      "status": "failed",
+      "agent": "Nexo",
+      "notes": "Execução concorrente bloqueada por lock"
+    },
+    {
+      "ts": "2026-03-06T12:39:59.647010+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-06T12:39:56.134606+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Auto-heal L1: run-nexo-task executado com sucesso"
+    },
+    {
+      "ts": "2026-03-06T12:39:56.095240+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
+    },
+    {
+      "ts": "2026-03-06T12:39:53.596701+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-06T12:39:42.167143+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
+    },
+    {
+      "ts": "2026-03-06T12:39:38.774772+00:00",
+      "task": "Ideia de Negócio",
+      "status": "failed",
+      "agent": "Nexo",
+      "notes": "Execução concorrente bloqueada por lock"
+    },
+    {
+      "ts": "2026-03-06T12:39:38.734778+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-06T12:16:08.908533+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-06T12:15:50.692311+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-06T12:00:07.305971+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
+    },
+    {
+      "ts": "2026-03-06T12:00:01.604494+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-06T11:00:01.159672+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-06T09:51:12.285260+00:00",
+      "task": "Random Job XYZ",
+      "status": "pending",
+      "agent": "Sistema",
+      "notes": "normalizado apos teste L3"
+    },
+    {
+      "ts": "2026-03-06T09:51:07.524025+00:00",
+      "task": "Random Job XYZ",
+      "status": "failed",
+      "agent": "Sistema",
+      "notes": "teste escalonamento L3"
+    },
+    {
+      "ts": "2026-03-06T09:41:39.658147+00:00",
+      "task": "Gateway monitor",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "normalizado após teste"
+    },
+    {
+      "ts": "2026-03-06T09:41:24.219697+00:00",
+      "task": "Gateway monitor",
+      "status": "failed",
+      "agent": "Mike",
+      "notes": "teste auto-heal gateway"
+    },
+    {
+      "ts": "2026-03-06T09:41:16.553328+00:00",
+      "task": "Heartbeat técnico",
+      "status": "failed",
+      "agent": "Mike",
+      "notes": "teste auto-heal"
+    },
+    {
+      "ts": "2026-03-06T09:38:31.150794+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "normalizado"
+    },
+    {
+      "ts": "2026-03-06T09:38:31.093198+00:00",
+      "task": "Heartbeat técnico",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "normalizado"
+    },
+    {
+      "ts": "2026-03-06T09:38:30.022819+00:00",
+      "task": "Backup GitHub",
+      "status": "failed",
+      "agent": "Sistema",
+      "notes": "teste severidade critical"
+    },
+    {
+      "ts": "2026-03-06T09:38:29.973856+00:00",
+      "task": "Heartbeat técnico",
+      "status": "failed",
+      "agent": "Mike",
+      "notes": "teste severidade warning"
+    },
+    {
+      "ts": "2026-03-06T09:28:28.579086+00:00",
+      "task": "Ideia de Negócio",
+      "status": "pending",
+      "agent": "Nexo",
+      "notes": "normalizado após falha"
+    },
+    {
+      "ts": "2026-03-06T09:28:25.528948+00:00",
+      "task": "Ideia de Negócio",
+      "status": "failed",
+      "agent": "Nexo",
+      "notes": "teste dedup 2"
+    },
+    {
+      "ts": "2026-03-06T09:28:25.478215+00:00",
+      "task": "Ideia de Negócio",
+      "status": "failed",
+      "agent": "Nexo",
+      "notes": "teste dedup 1"
+    },
+    {
+      "ts": "2026-03-06T09:26:19.695757+00:00",
+      "task": "Check remetentes",
+      "status": "pending",
+      "agent": "Daniela",
+      "notes": "Normalizado após teste guiado"
+    },
+    {
+      "ts": "2026-03-06T09:26:17.927518+00:00",
+      "task": "Check remetentes",
+      "status": "failed",
+      "agent": "Daniela",
+      "notes": "Teste guiado item4"
+    },
+    {
+      "ts": "2026-03-06T09:24:28.811223+00:00",
+      "task": "Heartbeat técnico",
+      "status": "pending",
+      "agent": "Mike",
+      "notes": "Status normalizado após teste de alertas"
+    },
+    {
+      "ts": "2026-03-06T09:24:21.281687+00:00",
+      "task": "Heartbeat técnico",
+      "status": "failed",
+      "agent": "Mike",
+      "notes": "Teste de alerta automatizado"
+    },
+    {
+      "ts": "2026-03-06T09:21:23.921105+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
+    },
+    {
+      "ts": "2026-03-06T09:21:21.251759+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-06T01:27:46.192977+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-06T01:27:46.110617+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    }
+  ]
 }

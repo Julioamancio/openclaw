@@ -332,6 +332,7 @@ df -h /
 | Self-Improving Profiles | ✅ Fast / Default / Guardian + auto-switch |
 | Second Brain | ✅ Operational |
 | Heartbeat Checks | ✅ Programado |
+| Mission Control Ops (SLO/L3/Auto-heal) | ✅ Ativo |
 
 ---
 
@@ -358,6 +359,16 @@ Mudanças aplicadas após revisão de segurança:
 
 ---
 
+## 🆕 Atualizações Operacionais (2026-03-06)
+
+- Auto-heal em 3 níveis (L1/L2/L3) com fallback para intervenção manual
+- Runbook registry com aprendizagem por taxa de sucesso (`runbooks.json`)
+- Escalonamento L3 com SLA e roteamento on-call (`oncall-map.json` + `escalate-l3-open.sh`)
+- Dispatch de alertas com lock/timeout + criação automática de postmortem
+- `check-emails.sh` blindado contra travamento (lock + timeout IMAP + cleanup órfão)
+- Resumo executivo diário automático via Telegram (`daily-executive-summary.sh`)
+- Tendências SLO 7d/30d + ranking de runbooks no Mission Control
+
 ## 🔗 Links
 
 - [Documentação OpenClaw](https://docs.openclaw.ai)
@@ -366,6 +377,6 @@ Mudanças aplicadas após revisão de segurança:
 
 ---
 
-*Última atualização: 2026-03-05*
+*Última atualização: 2026-03-06*
 
 *Maintainer: Mike (Jarvis-Prime) via OpenClaw*

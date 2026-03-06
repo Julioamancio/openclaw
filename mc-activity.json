@@ -1,1 +1,468 @@
-[]
+[
+  {
+    "id": "act_1772760466126_2aamy",
+    "timestamp": "2026-03-06T01:27:46.126Z",
+    "title": "Ops Job",
+    "message": "Backup GitHub -> running",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    }
+  },
+  {
+    "id": "act_1772760466204_w945h",
+    "timestamp": "2026-03-06T01:27:46.204Z",
+    "title": "Ops Job",
+    "message": "Backup GitHub -> done",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    }
+  },
+  {
+    "id": "act_1772760704349_bf5p4",
+    "timestamp": "2026-03-06T01:31:44.349Z",
+    "title": "Daily Ops Report",
+    "message": "Relatório diário Ops: 1 concluídas, 3 pendentes, 0 falhas\\n- Check remetentes: pending\\n- Ideia de Negócio: pending\\n- Backup GitHub: done\\n- Heartbeat técnico: pending",
+    "meta": null
+  },
+  {
+    "id": "act_1772760812462_s4ncw",
+    "timestamp": "2026-03-06T01:33:32.463Z",
+    "title": "Test",
+    "message": "ALERTA: teste fim-a-fim",
+    "meta": null
+  },
+  {
+    "id": "act_1772788881269_qcat3",
+    "timestamp": "2026-03-06T09:21:21.269Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> running",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    }
+  },
+  {
+    "id": "act_1772788883941_dddh8",
+    "timestamp": "2026-03-06T09:21:23.941Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> done",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
+    }
+  },
+  {
+    "id": "act_1772789061291_ba3a4",
+    "timestamp": "2026-03-06T09:24:21.291Z",
+    "title": "Ops Job",
+    "message": "Heartbeat técnico -> failed",
+    "meta": {
+      "agent": "Mike",
+      "notes": "Teste de alerta automatizado"
+    }
+  },
+  {
+    "id": "act_1772789061298_qwiu2",
+    "timestamp": "2026-03-06T09:24:21.298Z",
+    "title": "Ops Job",
+    "message": "ALERTA: Heartbeat técnico falhou",
+    "meta": {
+      "agent": "Mike",
+      "notes": "Teste de alerta automatizado"
+    }
+  },
+  {
+    "id": "act_1772789068826_uyimd",
+    "timestamp": "2026-03-06T09:24:28.826Z",
+    "title": "Ops Job",
+    "message": "Heartbeat técnico -> pending",
+    "meta": {
+      "agent": "Mike",
+      "notes": "Status normalizado após teste de alertas"
+    }
+  },
+  {
+    "id": "act_1772789177938_4qmwe",
+    "timestamp": "2026-03-06T09:26:17.938Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> failed",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Teste guiado item4"
+    }
+  },
+  {
+    "id": "act_1772789177947_plqfd",
+    "timestamp": "2026-03-06T09:26:17.947Z",
+    "title": "Ops Job",
+    "message": "ALERTA: Check remetentes falhou",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Teste guiado item4"
+    }
+  },
+  {
+    "id": "act_1772789179706_bn9me",
+    "timestamp": "2026-03-06T09:26:19.706Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> pending",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Normalizado após teste guiado"
+    }
+  },
+  {
+    "id": "act_1772789305489_xbyav",
+    "timestamp": "2026-03-06T09:28:25.489Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> failed",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "teste dedup 1",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772789305504_3jb50",
+    "timestamp": "2026-03-06T09:28:25.504Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [critical] Ideia de Negócio falhou",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "teste dedup 1",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "act_1772789305540_bnbud",
+    "timestamp": "2026-03-06T09:28:25.540Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> failed",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "teste dedup 2",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772789308591_zv8j2",
+    "timestamp": "2026-03-06T09:28:28.591Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> pending",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "normalizado após falha",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772789909983_7fxdc",
+    "timestamp": "2026-03-06T09:38:29.983Z",
+    "title": "Ops Job",
+    "message": "Heartbeat técnico -> failed",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste severidade warning",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772789909999_c566q",
+    "timestamp": "2026-03-06T09:38:29.999Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [warning] Heartbeat técnico falhou",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste severidade warning",
+      "severity": "warning"
+    }
+  },
+  {
+    "id": "act_1772789910032_8rvoh",
+    "timestamp": "2026-03-06T09:38:30.032Z",
+    "title": "Ops Job",
+    "message": "Backup GitHub -> failed",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "teste severidade critical",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772789910048_fjn5t",
+    "timestamp": "2026-03-06T09:38:30.048Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [critical] Backup GitHub falhou",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "teste severidade critical",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "act_1772789911108_19rob",
+    "timestamp": "2026-03-06T09:38:31.108Z",
+    "title": "Ops Job",
+    "message": "Heartbeat técnico -> pending",
+    "meta": {
+      "agent": "Mike",
+      "notes": "normalizado",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772789911166_k1fs3",
+    "timestamp": "2026-03-06T09:38:31.166Z",
+    "title": "Ops Job",
+    "message": "Backup GitHub -> done",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "normalizado",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772790076563_ztd4s",
+    "timestamp": "2026-03-06T09:41:16.563Z",
+    "title": "Ops Job",
+    "message": "Heartbeat técnico -> failed",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste auto-heal",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772790084232_xm8vf",
+    "timestamp": "2026-03-06T09:41:24.232Z",
+    "title": "Ops Job",
+    "message": "Gateway monitor -> failed",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste auto-heal gateway",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772790084247_xe1zv",
+    "timestamp": "2026-03-06T09:41:24.247Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [critical] Gateway monitor falhou",
+    "meta": {
+      "agent": "Mike",
+      "notes": "teste auto-heal gateway",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "act_1772790099669_laq37",
+    "timestamp": "2026-03-06T09:41:39.669Z",
+    "title": "Ops Job",
+    "message": "Gateway monitor -> pending",
+    "meta": {
+      "agent": "Mike",
+      "notes": "normalizado após teste",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772790667534_nmzgx",
+    "timestamp": "2026-03-06T09:51:07.534Z",
+    "title": "Ops Job",
+    "message": "Random Job XYZ -> failed",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "teste escalonamento L3",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772790667547_tt7a4",
+    "timestamp": "2026-03-06T09:51:07.547Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [warning] Random Job XYZ falhou",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "teste escalonamento L3",
+      "severity": "warning"
+    }
+  },
+  {
+    "id": "act_1772790672295_kiiok",
+    "timestamp": "2026-03-06T09:51:12.295Z",
+    "title": "Ops Job",
+    "message": "Random Job XYZ -> pending",
+    "meta": {
+      "agent": "Sistema",
+      "notes": "normalizado apos teste L3",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772794801183_1fh0s",
+    "timestamp": "2026-03-06T11:00:01.183Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772798401630_j5xr5",
+    "timestamp": "2026-03-06T12:00:01.630Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> running",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772798407316_knt6g",
+    "timestamp": "2026-03-06T12:00:07.316Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> done",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772799350706_acs56",
+    "timestamp": "2026-03-06T12:15:50.706Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772799368920_hp0lv",
+    "timestamp": "2026-03-06T12:16:08.920Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800778749_gm383",
+    "timestamp": "2026-03-06T12:39:38.749Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> running",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800778786_5hk30",
+    "timestamp": "2026-03-06T12:39:38.786Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> failed",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Execução concorrente bloqueada por lock",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800778803_8393t",
+    "timestamp": "2026-03-06T12:39:38.803Z",
+    "title": "Ops Job",
+    "message": "ALERTA: [warning] Ideia de Negócio falhou",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Execução concorrente bloqueada por lock",
+      "severity": "warning"
+    }
+  },
+  {
+    "id": "act_1772800782178_3p2dd",
+    "timestamp": "2026-03-06T12:39:42.178Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> done",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800793607_esu9o",
+    "timestamp": "2026-03-06T12:39:53.607Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> running",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800796106_t6mho",
+    "timestamp": "2026-03-06T12:39:56.106Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> done",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800796151_wd6x1",
+    "timestamp": "2026-03-06T12:39:56.151Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> done",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Auto-heal L1: run-nexo-task executado com sucesso",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800799657_e9cpb",
+    "timestamp": "2026-03-06T12:39:59.657Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> running",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800800160_9tbf2",
+    "timestamp": "2026-03-06T12:40:00.160Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> failed",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Execução concorrente bloqueada por lock",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772800801552_0dl9a",
+    "timestamp": "2026-03-06T12:40:01.552Z",
+    "title": "Ops Job",
+    "message": "Ideia de Negócio -> done",
+    "meta": {
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md",
+      "severity": "info"
+    }
+  }
+]

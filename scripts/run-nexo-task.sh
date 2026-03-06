@@ -1,31 +1,50 @@
 #!/bin/bash
 # run-nexo-task.sh - Executa tarefa de geração de ideia de negócio (estilo Nexo)
-# Roda independentemente, usando DuckDuckGo para pesquisa
-set -e
+set -euo pipefail
 
 WORKSPACE="/root/.openclaw/workspace"
 LOG_FILE="$WORKSPACE/logs/nexo-$(date +%Y%m%d).log"
 OUTPUT_DIR="$WORKSPACE/ideias-negocio"
 DATE=$(date '+%Y-%m-%d')
 DATE_FMT=$(date '+%d/%m/%Y')
+MARK_SCRIPT="$WORKSPACE/scripts/ops-job-mark.sh"
+TASK_NAME="Ideia de Negócio"
+LOCK_FILE="/tmp/run-nexo-task.lock"
+HTTP_TIMEOUT_SEC="${HTTP_TIMEOUT_SEC:-20}"
 
 mkdir -p "$WORKSPACE/logs" "$OUTPUT_DIR"
 
-echo "=== Nexo Ideia Check: $(date) ===" >> "$LOG_FILE"
+mark_job() {
+  local status="$1"
+  local notes="${2:-}"
+  if [ -x "$MARK_SCRIPT" ]; then
+    "$MARK_SCRIPT" "$TASK_NAME" "$status" "Nexo" "$notes" >/dev/null 2>&1 || true
+  fi
+}
 
-# Pesquisa tendências via DuckDuckGo (gratuito)
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  echo "⚠️ run-nexo-task já está em execução (lock ativo)."
+  mark_job "failed" "Execução concorrente bloqueada por lock"
+  exit 1
+fi
+
+on_error() { mark_job "failed" "Falha na execução (erro/timeout HTTP)"; }
+trap on_error ERR
+
+mark_job "running" "Pesquisa e geração iniciadas"
+
+echo "=== Nexo Ideia Check: $(date) ===" >> "$LOG_FILE"
 echo "Pesquisando tendências B2B SaaS..." >> "$LOG_FILE"
 
-TRENDS=$(curl -s "https://lite.duckduckgo.com/lite/?q=trending+B2B+SaaS+ideas+2025+automation" \
+TRENDS=$(timeout "$HTTP_TIMEOUT_SEC" curl -s "https://lite.duckduckgo.com/lite/?q=trending+B2B+SaaS+ideas+2025+automation" \
     -H "User-Agent: Mozilla/5.0" 2>/dev/null | \
     sed -n 's/.*<a[^>]*href=".*"[^>]*>\s*\([^<]*\).*/\1/p' | \
-    head -15 | tr '\n' '|')
+    head -15 | tr '\n' '|' || true)
 
 echo "Tendências encontradas: $TRENDS" >> "$LOG_FILE"
 
-# Gera ideia baseada em padrões conhecidos
 OUTPUT_FILE="$OUTPUT_DIR/ideia-$DATE.md"
-
 cat > "$OUTPUT_FILE" << 'EOF'
 # 💡 Ideia do Dia: AI Documentation Generator for Dev Teams
 
@@ -100,17 +119,14 @@ Deploy: Railway + Supabase
 - Preço 50% menor que concorrentes
 EOF
 
-# Substitui data
-sed -i "s/DATE_PLACEHOLDER/$DATE_FMT/" "$OUTPUT_FILE"
-
-# Lê e envia
+sed -i "s|DATE_PLACEHOLDER|$DATE_FMT|" "$OUTPUT_FILE"
 OUTPUT=$(cat "$OUTPUT_FILE")
 echo "$OUTPUT"
 
-# Envia via Telegram
 if command -v openclaw &> /dev/null; then
     echo -e "💡 *Ideia do Dia - Nexo*\n\nGerado em: $DATE_FMT\n\nArquivo: $OUTPUT_FILE" | \
         openclaw message send --channel telegram --stdin 2>/dev/null || true
 fi
 
 echo "Ideia salva em: $OUTPUT_FILE" >> "$LOG_FILE"
+mark_job "done" "Ideia gerada em $OUTPUT_FILE"

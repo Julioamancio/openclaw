@@ -1,0 +1,48 @@
+{
+  "default": {
+    "owner": "Julio",
+    "channel": "telegram",
+    "target": "720093594",
+    "slaMinutes": 15
+  },
+  "owners": {
+    "Infra": {
+      "channel": "telegram",
+      "target": "720093594",
+      "priority": "high"
+    },
+    "MailOps": {
+      "channel": "telegram",
+      "target": "720093594",
+      "priority": "medium"
+    },
+    "BizOps": {
+      "channel": "telegram",
+      "target": "720093594",
+      "priority": "medium"
+    }
+  },
+  "routes": [
+    {
+      "match": "Gateway|OTServer|Backup",
+      "owner": "Infra",
+      "channel": "telegram",
+      "target": "720093594",
+      "slaMinutes": 10
+    },
+    {
+      "match": "Check remetentes|email|Dan|Daniela",
+      "owner": "MailOps",
+      "channel": "telegram",
+      "target": "720093594",
+      "slaMinutes": 20
+    },
+    {
+      "match": "Ideia de Negócio|Nexo",
+      "owner": "BizOps",
+      "channel": "telegram",
+      "target": "720093594",
+      "slaMinutes": 30
+    }
+  ]
+}

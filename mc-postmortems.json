@@ -1,0 +1,74 @@
+[
+  {
+    "id": "pm_1772789062399_2ydux",
+    "created_at": "2026-03-06T09:24:22.399Z",
+    "incident": "ALERTA: Heartbeat técnico falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila | Auto-closed em 2026-03-06T09:38:31.093198+00:00 após status 'pending'",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
+  },
+  {
+    "id": "pm_1772789178030_wpvm7",
+    "created_at": "2026-03-06T09:26:18.030Z",
+    "incident": "ALERTA: Check remetentes falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila | Auto-closed em 2026-03-06T12:16:08.908533+00:00 após status 'done'",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
+  },
+  {
+    "id": "pm_1772789306650_pi99d",
+    "created_at": "2026-03-06T09:28:26.650Z",
+    "incident": "ALERTA: [critical] Ideia de Negócio falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila | Auto-closed em 2026-03-06T09:28:28.579086+00:00 após status 'pending'",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
+  },
+  {
+    "id": "pm_1772790001734_e9z92",
+    "created_at": "2026-03-06T09:40:01.734Z",
+    "incident": "ALERTA: [critical] Backup GitHub falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "open"
+  },
+  {
+    "id": "pm_1772790001743_vzi0s",
+    "created_at": "2026-03-06T09:40:01.743Z",
+    "incident": "ALERTA: [warning] Heartbeat técnico falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "open"
+  },
+  {
+    "id": "pm_1772790088438_5zgkr",
+    "created_at": "2026-03-06T09:41:28.438Z",
+    "incident": "ALERTA: [critical] Gateway monitor falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Auto-heal aplicado com sucesso | gateway já estava running",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
+  },
+  {
+    "id": "pm_1772790668643_6bwr5",
+    "created_at": "2026-03-06T09:51:08.643Z",
+    "incident": "ALERTA: [warning] Random Job XYZ falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Despacho de alerta + ACK em fila | level=3 | sem runbook para tarefa: Random Job XYZ | Auto-closed em 2026-03-06T09:51:12.285260+00:00 após status 'pending'",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
+  },
+  {
+    "id": "pm_1772800796166_7bb33",
+    "created_at": "2026-03-06T12:39:56.166Z",
+    "incident": "ALERTA: [warning] Ideia de Negócio falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Auto-heal aplicado com sucesso | level=1 | run-nexo-task executado com sucesso",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
+  }
+]

@@ -1018,6 +1018,12 @@
           </div>
           <div id="opsAgentRuns" class="ops-list"></div>
         </section>
+
+        <section class="card panel" style="margin-top:1rem" data-search="slo sli postmortem">
+          <h3 class="section-title">SLO / SLI + Postmortems</h3>
+          <div id="opsSlo" class="ops-list"></div>
+          <div id="opsPostmortems" class="ops-list" style="margin-top:.7rem;"></div>
+        </section>
       </section>
     </main>
   </div>
@@ -2348,6 +2354,8 @@
       renderOps();
       setInterval(() => {
         syncOpsFromServer();
+        syncAgentTimelineFromServer();
+        syncSloPostmortems();
         refreshCronAutoStatus();
         renderOpsCrons();
         checkOtServerHealth();
@@ -2356,6 +2364,8 @@
       }, 60 * 1000);
 
       syncOpsFromServer();
+      syncAgentTimelineFromServer();
+      syncSloPostmortems();
       refreshCronAutoStatus();
       checkOtServerHealth();
     }
@@ -2412,6 +2422,111 @@
         renderOps();
       } catch {
         // keep local-only mode silently
+      }
+    }
+
+    async function syncAgentTimelineFromServer() {
+      try {
+        const activity = await fetchJson(`${SERVER.base}/mc/activity`);
+        if (!Array.isArray(activity)) return;
+
+        const mapped = activity
+          .filter(a => String(a.title || '').match(/Ops Job|Mission Control|Agent|Subagent/i))
+          .slice(0, 80)
+          .map(a => ({
+            id: a.id || id(),
+            ts: Date.parse(a.timestamp || new Date().toISOString()),
+            agent: a?.meta?.agent || a.title || 'Sistema',
+            task: a.message || 'Execução',
+            status: /falha|erro|failed/i.test(String(a.message || '')) ? 'failed' : (/running|execução/i.test(String(a.message || '')) ? 'running' : 'done'),
+            notes: a?.meta?.notes || ''
+          }));
+
+        if (mapped.length) {
+          const seen = new Set();
+          const merged = [...mapped, ...(state.ops?.runs || [])].filter(r => {
+            const key = `${r.ts}-${r.agent}-${r.task}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          state.ops.runs = merged.slice(0, 120);
+          renderOpsRuns();
+        }
+      } catch {
+        // silent fallback local only
+      }
+    }
+
+    async function syncSloPostmortems() {
+      try {
+        const slo = await fetchJson(`${SERVER.base}/mc/slo`);
+        const trends = await fetchJson(`${SERVER.base}/mc/slo-trends`);
+        const runbooks = await fetchJson(`${SERVER.base}/mc/runbooks`);
+        const post = await fetchJson(`${SERVER.base}/mc/postmortems`);
+
+        const spark = (pct) => {
+          const p = Number(pct ?? 0);
+          const filled = Math.max(0, Math.min(10, Math.round(p / 10)));
+          return '█'.repeat(filled) + '░'.repeat(10 - filled);
+        };
+
+        const sloEl = document.getElementById('opsSlo');
+        const ranking = [];
+        const tasks = runbooks?.tasks || {};
+        Object.entries(tasks).forEach(([taskName, cfg]) => {
+          const strategies = cfg?.strategies || {};
+          Object.entries(strategies).forEach(([k, v]) => {
+            const a = Number(v?.attempts || 0);
+            const s = Number(v?.success || 0);
+            const rate = a > 0 ? ((s / a) * 100) : 0;
+            ranking.push({ taskName, k, a, s, rate });
+          });
+        });
+        ranking.sort((x,y) => y.rate - x.rate || y.s - x.s);
+
+        if (sloEl) {
+          sloEl.innerHTML = `
+            <article class="ops-item">
+              <div class="ops-head"><strong>Success rate</strong><span class="pill ${slo?.slo_status?.success_rate === 'pass' ? 'done' : 'failed'}">${slo?.slo_status?.success_rate || '--'}</span></div>
+              <div class="ops-meta"><span>Recent runs: ${slo?.sli?.recent_runs ?? '--'}</span><span>Success: ${slo?.sli?.success_rate_pct ?? '--'}%</span><span>Alerts(100): ${slo?.sli?.alerts_last_100_events ?? '--'}</span></div>
+            </article>
+            <article class="ops-item">
+              <div class="ops-head"><strong>Tendência 7d</strong><span class="pill ${(trends?.window_7d?.success_rate_pct ?? 100) >= 95 ? 'done' : 'failed'}">${trends?.window_7d?.success_rate_pct ?? '--'}%</span></div>
+              <div class="ops-meta"><span>Runs: ${trends?.window_7d?.total ?? '--'}</span><span>✅ ${trends?.window_7d?.done ?? '--'}</span><span>❌ ${trends?.window_7d?.failed ?? '--'}</span><span>🟠 ${trends?.window_7d?.running ?? '--'}</span></div>
+              <div class="ops-meta"><span>Sparkline: ${spark(trends?.window_7d?.success_rate_pct)}</span></div>
+            </article>
+            <article class="ops-item">
+              <div class="ops-head"><strong>Tendência 30d</strong><span class="pill ${(trends?.window_30d?.success_rate_pct ?? 100) >= 95 ? 'done' : 'failed'}">${trends?.window_30d?.success_rate_pct ?? '--'}%</span></div>
+              <div class="ops-meta"><span>Runs: ${trends?.window_30d?.total ?? '--'}</span><span>✅ ${trends?.window_30d?.done ?? '--'}</span><span>❌ ${trends?.window_30d?.failed ?? '--'}</span><span>🟠 ${trends?.window_30d?.running ?? '--'}</span></div>
+              <div class="ops-meta"><span>Sparkline: ${spark(trends?.window_30d?.success_rate_pct)}</span></div>
+            </article>
+            <article class="ops-item">
+              <div class="ops-head"><strong>Runbook Ranking</strong><span class="pill done">top</span></div>
+              <div class="ops-meta" style="display:block;line-height:1.7;">
+                ${(ranking.slice(0, 6).map(r => `• ${r.taskName}/${r.k}: ${r.rate.toFixed(1)}% (${r.s}/${r.a})`).join('<br>')) || 'Sem dados ainda'}
+              </div>
+            </article>
+          `;
+        }
+
+        const pmEl = document.getElementById('opsPostmortems');
+        if (pmEl) {
+          const list = Array.isArray(post) ? post.slice(0, 5) : [];
+          if (!list.length) {
+            pmEl.innerHTML = '<div class="ops-item">Sem postmortems recentes.</div>';
+          } else {
+            pmEl.innerHTML = list.map(p => `
+              <article class="ops-item">
+                <div class="ops-head"><strong>${escapeHtml(p.incident || 'Incidente')}</strong><span class="pill ${p.status === 'closed' ? 'done' : 'running'}">${escapeHtml(p.status || 'open')}</span></div>
+                <div class="ops-meta"><span>${new Date(p.created_at || Date.now()).toLocaleString('pt-BR')}</span></div>
+                <div class="ops-meta"><span>Causa provável: ${escapeHtml(p.probable_cause || '--')}</span></div>
+              </article>
+            `).join('');
+          }
+        }
+      } catch {
+        // ignore
       }
     }
 

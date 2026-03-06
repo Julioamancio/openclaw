@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "tasks": {
+    "gateway": {
+      "defaultOrder": [
+        "l1",
+        "l2"
+      ],
+      "strategies": {
+        "l1": {
+          "description": "status/restart leve",
+          "attempts": 1,
+          "success": 1,
+          "lastResult": "success",
+          "lastAt": "2026-03-06T12:47:03.411796+00:00"
+        },
+        "l2": {
+          "description": "stop/start forçado",
+          "attempts": 0,
+          "success": 0
+        }
+      }
+    },
+    "nexo": {
+      "defaultOrder": [
+        "l1",
+        "l2"
+      ],
+      "strategies": {
+        "l1": {
+          "description": "rerun nexo",
+          "attempts": 0,
+          "success": 0
+        },
+        "l2": {
+          "description": "restart dependência + rerun",
+          "attempts": 0,
+          "success": 0
+        }
+      }
+    },
+    "daniela": {
+      "defaultOrder": [
+        "l1",
+        "l2"
+      ],
+      "strategies": {
+        "l1": {
+          "description": "rerun check-emails",
+          "attempts": 0,
+          "success": 0
+        },
+        "l2": {
+          "description": "restart dependência + rerun",
+          "attempts": 0,
+          "success": 0
+        }
+      }
+    },
+    "heartbeat": {
+      "defaultOrder": [
+        "l1",
+        "l2"
+      ],
+      "strategies": {
+        "l1": {
+          "description": "checks básicos",
+          "attempts": 0,
+          "success": 0
+        },
+        "l2": {
+          "description": "restart dependência + checks",
+          "attempts": 0,
+          "success": 0
+        }
+      }
+    }
+  }
+}
