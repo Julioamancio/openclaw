@@ -256,7 +256,13 @@ function serveStatic(req, res) {
 
   const ext = path.extname(filePath);
   const contentType = ext === '.html' ? 'text/html; charset=utf-8' : ext === '.js' ? 'application/javascript; charset=utf-8' : 'text/plain; charset=utf-8';
-  res.writeHead(200, { 'Content-Type': contentType });
+  const headers = { 'Content-Type': contentType };
+  // Força no-cache para evitar painel antigo
+  if (ext === '.html' || ext === '.js' || ext === '.css') {
+    headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0';
+    headers['Pragma'] = 'no-cache';
+  }
+  res.writeHead(200, headers);
   fs.createReadStream(filePath).pipe(res);
 }
 
