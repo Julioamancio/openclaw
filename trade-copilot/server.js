@@ -416,6 +416,39 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { state, botLog, supLog, mode: BINANCE_MODE, botMode });
     }
 
+    if (url.pathname === '/api/bot-status' && req.method === 'GET') {
+      const state = fs.existsSync(AUTO_STATE_FILE) ? JSON.parse(fs.readFileSync(AUTO_STATE_FILE, 'utf8')) : null;
+      let botMode = 'ultra';
+      try {
+        if (fs.existsSync(BOT_MODE_FILE)) {
+          const bm = JSON.parse(fs.readFileSync(BOT_MODE_FILE, 'utf8'));
+          if (bm?.mode) botMode = bm.mode;
+        }
+      } catch {}
+      const cfg = {
+        accountBalance: Number(process.env.ACCOUNT_BALANCE || 10000),
+        riskPerTradePct: 1,
+        maxExposurePct: 5,
+        maxPositions: 3,
+        allowedSymbols: ['ETHUSDT','BTCUSDT'],
+        intervals: ['4h','1h','15m'],
+        minRR: 1.8,
+        minProfitPct: 0.10,
+        cooldownMin: 12,
+        maxHoldMin: 360,
+        maxTradesPerDay: 10,
+        circuitBreaker: { consecutiveLosses: 3, pauseHours: 6 },
+        filters: {
+          longAboveEma: true,
+          shortBlockRsi30: true,
+          mtfAligned: true,
+        },
+        mode: botMode,
+        exchangeMode: BINANCE_MODE
+      };
+      return sendJson(res, 200, { ok: true, cfg, state });
+    }
+
     if (url.pathname === '/api/bot-mode' && req.method === 'GET') {
       let botMode = 'turbo';
       try {
