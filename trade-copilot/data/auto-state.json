@@ -1,0 +1,38 @@
+{
+  "day": "2026-03-07",
+  "tradesToday": 10,
+  "lastTradeAt": "2026-03-07T01:26:24.830Z",
+  "lastSymbol": null,
+  "lastSide": null,
+  "loops": 335,
+  "errors": 1,
+  "stats": {
+    "total": 10,
+    "wins": 3,
+    "losses": 7,
+    "pnlUsd": -0.0915,
+    "avgWin": 0.2906,
+    "avgLoss": -0.1376,
+    "byStrategy": {
+      "trend_follow_short": {
+        "total": 1,
+        "wins": 0,
+        "losses": 1,
+        "pnlUsd": -0.1458
+      },
+      "trend_follow_short@15m": {
+        "total": 7,
+        "wins": 3,
+        "losses": 4,
+        "pnlUsd": 0.1315
+      },
+      "trend_follow_long@5m": {
+        "total": 2,
+        "wins": 0,
+        "losses": 2,
+        "pnlUsd": -0.0772
+      }
+    }
+  },
+  "openTrade": null
+}

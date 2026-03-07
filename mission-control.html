@@ -923,6 +923,20 @@
       font-size: 1.65rem;
     }
 
+    .chat-row { display:flex; margin:.35rem 0; }
+    .chat-row.user { justify-content:flex-end; }
+    .chat-bubble {
+      max-width: 80%;
+      padding: .55rem .7rem;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,.2);
+      background: rgba(15,23,42,.65);
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: .9rem;
+    }
+    .chat-row.user .chat-bubble { background: rgba(30,64,175,.35); border-color: rgba(96,165,250,.45); }
+
     @media (max-width: 1100px) {
       .header-inner {
         grid-template-columns: 1fr;
@@ -954,6 +968,7 @@
           <button class="tab-btn" data-tab="meetings">📞 Meetings</button>
           <button class="tab-btn" data-tab="intel">📡 Intel</button>
           <button class="tab-btn" data-tab="controltower">🧠 Control Tower</button>
+          <button class="tab-btn" data-tab="chat">💬 Mike Chat</button>
           <button class="tab-btn" data-tab="ops">🧭 Ops</button>
         </nav>
 
@@ -1238,6 +1253,19 @@
             <button id="ctRefreshFinopsBtn" class="btn">Atualizar métricas</button>
           </div>
           <div id="ctFinops" class="ops-list"></div>
+        </section>
+      </section>
+
+      <!-- Chat -->
+      <section id="chat" class="tab-content">
+        <section class="card panel" data-search="chat mike conversa">
+          <h3 class="section-title">Chat com Mike (tempo real)</h3>
+          <div class="ops-meta" style="margin:-.2rem 0 .7rem 0;">Converse direto com o agente sem sair do Mission Control.</div>
+          <div id="mcChatLog" class="ops-list" style="max-height:52vh;overflow:auto;padding-right:.2rem;"></div>
+          <div class="ops-actions" style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+            <textarea id="mcChatInput" class="textarea" placeholder="Digite sua mensagem para o Mike..." style="min-height:72px;flex:1;min-width:320px;"></textarea>
+            <button id="mcChatSendBtn" class="btn">Enviar</button>
+          </div>
         </section>
       </section>
 
@@ -2610,6 +2638,15 @@
       document.getElementById('ctRunMissionBtn').addEventListener('click', runControlTowerMission);
       document.getElementById('ctApproveRiskBtn').addEventListener('click', runControlTowerApproveHighRisk);
       document.getElementById('ctRefreshFinopsBtn').addEventListener('click', syncControlTowerFinops);
+      const chatSend = document.getElementById('mcChatSendBtn');
+      const chatInput = document.getElementById('mcChatInput');
+      if (chatSend && chatInput) {
+        chatSend.addEventListener('click', sendMcChatMessage);
+        chatInput.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendMcChatMessage();
+        });
+        renderMcChat();
+      }
 
       renderOps();
       setInterval(() => {
@@ -2678,6 +2715,57 @@
         `;
       } catch {
         el.innerHTML = '<div class="ops-item">FinOps/Shadow indisponível.</div>';
+      }
+    }
+
+    function getMcChatHistory() {
+      try { return JSON.parse(localStorage.getItem('mc.chat.history') || '[]'); } catch { return []; }
+    }
+
+    function setMcChatHistory(items) {
+      localStorage.setItem('mc.chat.history', JSON.stringify(items.slice(-60)));
+    }
+
+    function renderMcChat() {
+      const el = document.getElementById('mcChatLog');
+      if (!el) return;
+      const items = getMcChatHistory();
+      if (!items.length) {
+        el.innerHTML = '<div class="ops-item">Sem mensagens ainda. Escreva abaixo para conversar com o Mike.</div>';
+        return;
+      }
+      el.innerHTML = items.map(m => `<div class="chat-row ${m.role === 'user' ? 'user' : 'assistant'}"><div class="chat-bubble">${escapeHtml(m.text || '')}</div></div>`).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function sendMcChatMessage() {
+      const input = document.getElementById('mcChatInput');
+      const btn = document.getElementById('mcChatSendBtn');
+      const text = (input?.value || '').trim();
+      if (!text || !btn) return;
+
+      const items = getMcChatHistory();
+      items.push({ role: 'user', text, ts: Date.now() });
+      setMcChatHistory(items);
+      renderMcChat();
+
+      input.value = '';
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const r = await fetchJson(`${SERVER.base}/mc/chat`, {
+          method: 'POST',
+          body: JSON.stringify({ message: text, timeoutSec: 90 })
+        });
+        items.push({ role: 'assistant', text: r?.reply || '(sem resposta)', ts: Date.now() });
+      } catch (e) {
+        items.push({ role: 'assistant', text: 'Falha no chat bridge. Tente novamente em alguns segundos.', ts: Date.now() });
+      } finally {
+        setMcChatHistory(items);
+        renderMcChat();
+        btn.disabled = false;
+        btn.textContent = 'Enviar';
       }
     }
 

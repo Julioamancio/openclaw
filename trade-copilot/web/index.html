@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NEXUS TRADE COMMAND</title>
+  <style>
+    :root{--bg:#0b0f17;--panel:#121826;--panel2:#0f1522;--line:#243049;--txt:#e7ecf7;--muted:#93a4c7;--green:#0ecb81;--red:#f6465d;--gold:#f0b90b;--blue:#3a7bff}
+    *{box-sizing:border-box}
+    html,body{max-width:100%;overflow-x:hidden}
+    body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,Arial}
+    .wrap{max-width:1360px;width:100%;margin:0 auto;padding:12px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .brand{font-weight:900;font-size:20px}.brand span{color:var(--gold)}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#0d1320;padding:6px 10px;border-radius:999px;font-size:12px}
+    .grid{display:grid;gap:10px}
+    .ticker{overflow:hidden;border:1px solid var(--line);background:#0d1320;border-radius:10px;padding:8px 0;margin-bottom:10px}
+    .ticker-track{display:inline-block;white-space:nowrap;animation:ticker 28s linear infinite;padding-left:100%}
+    .ticker-item{display:inline-block;margin:0 18px;font-size:13px}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+    .kpis{grid-template-columns:repeat(6,minmax(0,1fr))}
+    .desk{grid-template-columns:2fr 1fr}
+    .bottom{grid-template-columns:1.4fr 1fr}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 35%),var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+    .grid > *{min-width:0}
+    .k{font-size:11px;color:var(--muted)} .v{font-size:24px;font-weight:800;margin-top:2px}
+    .ok{color:var(--green)} .bad{color:var(--red)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .btn,input,select{min-height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:9px 11px}
+    .btn{cursor:pointer;font-weight:800}.b-blue{background:var(--blue);border:0}.b-gold{background:var(--gold);border:0;color:#2a2100}.b-green{background:var(--green);border:0;color:#072017}
+    .mode-on{background:rgba(14,203,129,.22)!important;border-color:rgba(14,203,129,.45)!important;color:#9ef2ce}
+    .best{border:1px solid rgba(240,185,11,.35);background:linear-gradient(90deg,rgba(240,185,11,.13),rgba(240,185,11,.03));border-radius:12px;padding:10px;margin:10px 0}
+    .best h2{margin:2px 0;font-size:30px}
+    .row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)} .row:last-child{border-bottom:0}
+    .row .l{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    .table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:10px}
+    table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;white-space:nowrap} th{color:var(--muted)}
+    .exec-table th,.exec-table td{vertical-align:top}
+    .exec-time{white-space:normal;word-break:break-word;overflow-wrap:anywhere;min-width:126px}
+    .exec-pair,.exec-side,.exec-qty,.exec-status{white-space:nowrap}
+    .exec-pair{font-weight:800}
+    .exec-side{font-weight:900;letter-spacing:.4px}
+    .exec-table th:nth-child(2), .exec-table td:nth-child(2){min-width:90px}
+    .exec-table th:nth-child(3), .exec-table td:nth-child(3){min-width:64px}
+    .exec-table th:nth-child(4), .exec-table td:nth-child(4){min-width:92px}
+    .exec-table th:nth-child(5), .exec-table td:nth-child(5){min-width:128px}
+    .badge{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.2)} .a{background:rgba(14,203,129,.15);color:#87f0c6}.b{background:rgba(58,123,255,.15);color:#9ec0ff}.c{background:rgba(240,185,11,.15);color:#ffd777}
+    .side-buy{color:var(--green);font-weight:800}.side-sell{color:var(--red);font-weight:800}
+    .st-open{color:#9ec0ff}.st-close{color:#ffd777}
+    canvas{width:100%;height:220px;background:#0c1220;border:1px solid var(--line);border-radius:10px}
+    details{border:1px solid var(--line);border-radius:10px;background:#0c1220;min-width:0} summary{padding:9px 10px;color:var(--muted);font-weight:700;cursor:pointer}
+    pre{margin:0;padding:10px;max-height:120px;overflow:auto;font-size:12px;line-height:1.35;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+    .subgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    .subgrid > *{min-width:0}
+    .book{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .book-head{display:grid;grid-template-columns:1fr 1fr;background:#0d1320;color:var(--muted);font-size:12px}
+    .book-head div{padding:8px 10px}
+    .book-cols{display:grid;grid-template-columns:1fr 1fr}
+    .book-col{padding:6px 8px}
+    .book-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 2px}
+    @media (max-width:1150px){.kpis{grid-template-columns:repeat(3,1fr)}.desk,.bottom,.subgrid{grid-template-columns:1fr}}
+    @media (max-width:700px){
+      .kpis{grid-template-columns:repeat(2,1fr)}
+      .btn,input,select{width:100%}
+      .toolbar{display:grid;grid-template-columns:1fr}
+      .best h2{font-size:23px}
+      th,td{white-space:normal;font-size:11px;padding:6px}
+      canvas{height:170px}
+      pre{max-height:90px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="brand"><span id="brandLogo"></span><span id="brandTitle">NEXUS</span> <span id="brandSubtitle">TRADE COMMAND</span></div>
+      <div class="chips" style="margin-top:6px">
+        <a class="chip" href="/" style="text-decoration:none;color:inherit;background:rgba(58,123,255,.2)">Dashboard</a>
+        <a class="chip" href="/api.html" style="text-decoration:none;color:inherit">API</a>
+        <button class="chip" id="envTopBtn" onclick="toggleEnvTop()" style="cursor:pointer">Ambiente: --</button>
+      </div>
+    </div>
+    <div class="chips"><div class="chip" id="modePill">MODE --</div><div class="chip" id="clock">--:--:-- UTC</div></div>
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-track" id="tickerTrack">
+      <span class="ticker-item">BTCUSDT --</span>
+      <span class="ticker-item">ETHUSDT --</span>
+      <span class="ticker-item">SOLUSDT --</span>
+      <span class="ticker-item">BNBUSDT --</span>
+      <span class="ticker-item">XRPUSDT --</span>
+    </div>
+  </div>
+
+  <div class="grid kpis">
+    <div class="card"><div class="k">Símbolo</div><div class="v" id="symbol">BTCUSDT</div></div>
+    <div class="card"><div class="k">Sinal</div><div class="v" id="side">--</div></div>
+    <div class="card"><div class="k">Score</div><div class="v" id="score">--</div></div>
+    <div class="card"><div class="k">Winrate</div><div class="v" id="winrate">--</div></div>
+    <div class="card"><div class="k">PnL (USD)</div><div class="v" id="pnl">--</div></div>
+    <div class="card"><div class="k">Equity</div><div class="v" id="equity">--</div></div>
+  </div>
+
+  <div class="grid desk" style="margin-top:10px">
+    <div class="card">
+      <div class="toolbar">
+        <select id="symbolSelect"><option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>BNBUSDT</option><option>XRPUSDT</option></select>
+        <input id="riskUsd" type="number" min="0.1" step="0.1" value="0.5"/>
+        <button class="btn b-blue" onclick="loadSignal()">Atualizar sinal</button>
+        <button class="btn b-blue" onclick="loadScan()">Scanner</button>
+      </div>
+      <div class="toolbar" style="margin-top:6px">
+        <button class="btn" id="modeSlow" onclick="setBotMode('slow')">Modo Lento</button>
+        <button class="btn" id="modeConservative" onclick="setBotMode('conservative')">Modo Conservador</button>
+        <button class="btn" id="modeFast" onclick="setBotMode('fast')">Modo Rápido</button>
+        <button class="btn" id="modeTurbo" onclick="setBotMode('turbo')">Modo Turbo</button>
+        <button class="btn" id="modeUltra" onclick="setBotMode('ultra')">Modo Ultra</button>
+      </div>
+      <div class="best">
+        <div class="k">MELHOR MOEDA AGORA</div>
+        <h2 id="bestSymbol">--</h2>
+        <div id="bestMeta" style="color:var(--muted);font-size:13px">Aguardando scanner...</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+          <span class="badge a" id="bestGrade">A+</span>
+          <button class="btn b-gold" onclick="operateBest()">Operar Melhor Setup</button>
+        </div>
+      </div>
+
+      <div class="row"><span class="l">Estratégia</span><b id="strategy" class="mono">--</b></div>
+      <div class="row"><span class="l">Entrada</span><b id="entry" class="mono">--</b></div>
+      <div class="row"><span class="l">Stop</span><b id="stop" class="mono bad">--</b></div>
+      <div class="row"><span class="l">Take</span><b id="take" class="mono ok">--</b></div>
+      <div class="row"><span class="l">Quantidade</span><b id="qty" class="mono">--</b></div>
+      <button class="btn b-green" style="width:100%;margin-top:10px" id="confirmBtn" onclick="confirmOrder()">Confirmar ordem</button>
+
+      <div style="font-weight:800;margin:12px 0 8px">Top moedas</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Symbol</th><th>24h%</th><th>Score</th><th>Hint</th><th>Nota</th><th>Ação</th></tr></thead><tbody id="scanBody"><tr><td colspan="6">Carregando...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:6px">Status do Bot</div>
+      <div class="row"><span class="l">Loops</span><b id="loops">--</b></div>
+      <div class="row"><span class="l">Erros</span><b id="errors">--</b></div>
+      <div class="row"><span class="l">Trades hoje</span><b id="tradesToday">--</b></div>
+      <div class="row"><span class="l">Trade aberto</span><b id="openTrade">--</b></div>
+      <div class="row"><span class="l">Último trade</span><b id="lastTrade">--</b></div>
+      <div class="row"><span class="l">Expectancy</span><b id="expectancy">--</b></div>
+      <div class="row"><span class="l">Profit Factor</span><b id="profitFactor">--</b></div>
+      <div class="row"><span class="l">Max Drawdown</span><b id="maxDrawdown">--</b></div>
+      <div style="font-weight:800;margin:10px 0 6px">Execuções</div>
+      <div class="table-wrap" style="max-height:220px;overflow:auto">
+        <table class="exec-table">
+          <thead><tr><th>Hora</th><th>Par</th><th>Lado</th><th>Qtd</th><th>Status</th></tr></thead>
+          <tbody id="execBody"><tr><td colspan="5" class="k">Sem execuções ainda.</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="book">
+        <div class="book-head"><div>Bids (fake)</div><div>Asks (fake)</div></div>
+        <div class="book-cols">
+          <div class="book-col" id="bidsCol"></div>
+          <div class="book-col" id="asksCol"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid bottom" style="margin-top:10px">
+    <div class="card"><div style="font-weight:800;margin-bottom:8px">Curva de Equity</div><canvas id="equityChart" width="700" height="220"></canvas></div>
+    <div class="card">
+      <div class="subgrid">
+        <details open><summary>Logs do Bot</summary><pre id="botLogs">--</pre></details>
+        <details><summary>Logs do Supervisor</summary><pre id="supLogs">--</pre></details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id); let currentSignal=null,bestCoin=null,equitySeries=[100];
+const usd=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fixed=(n,d=6)=>Number(n).toFixed(d); const grade=v=>v>=70?['A+','a']:v>=55?['A','a']:v>=40?['B','b']:['C','c'];
+const rand=(a,b)=>Math.random()*(b-a)+a;
+function drawEquity(){const c=$('equityChart'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#0c1220';x.fillRect(0,0,c.width,c.height);x.strokeStyle='rgba(140,170,255,.2)';for(let i=1;i<6;i++){const y=i*c.height/6;x.beginPath();x.moveTo(0,y);x.lineTo(c.width,y);x.stroke();}const mn=Math.min(...equitySeries),mx=Math.max(...equitySeries),sp=(mx-mn)||1;x.strokeStyle='#0ecb81';x.lineWidth=2.2;x.beginPath();equitySeries.forEach((v,i)=>{const px=i*(c.width/Math.max(equitySeries.length-1,1));const py=c.height-((v-mn)/sp)*(c.height-24)-12;i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();}
+function calcMaxDrawdown(series){let peak=series[0]||100,maxDd=0;for(const v of series){if(v>peak)peak=v;const dd=((peak-v)/peak)*100;if(dd>maxDd)maxDd=dd;}return maxDd;}
+function updatePerf(st){
+  const wins=Number(st.wins||0),losses=Number(st.losses||0),total=Number(st.total||0);
+  const avgWin=Number(st.avgWin||0),avgLoss=Number(st.avgLoss||0);
+  const pWin=total?wins/total:0,pLoss=1-pWin;
+  const expectancy=(pWin*avgWin)+(pLoss*avgLoss);
+  const grossProfit=Math.max(0,wins*avgWin);
+  const grossLoss=Math.abs(Math.min(0,losses*avgLoss));
+  const pf=grossLoss>0?(grossProfit/grossLoss):0;
+  const mdd=calcMaxDrawdown(equitySeries);
+  $('expectancy').textContent = total? `${expectancy.toFixed(4)} / trade` : '--';
+  $('profitFactor').textContent = total? pf.toFixed(2) : '--';
+  $('maxDrawdown').textContent = `${mdd.toFixed(2)}%`;
+}
+function renderBook(mid){
+  const bids=[],asks=[];
+  for(let i=1;i<=10;i++){
+    bids.push({p:mid-(i*rand(0.2,1.8)),q:rand(0.1,4.5)});
+    asks.push({p:mid+(i*rand(0.2,1.8)),q:rand(0.1,4.5)});
+  }
+  $('bidsCol').innerHTML=bids.map(r=>`<div class='book-row'><span class='ok mono'>${r.p.toFixed(2)}</span><span class='mono'>${r.q.toFixed(3)}</span></div>`).join('');
+  $('asksCol').innerHTML=asks.map(r=>`<div class='book-row'><span class='bad mono'>${r.p.toFixed(2)}</span><span class='mono'>${r.q.toFixed(3)}</span></div>`).join('');
+}
+async function refreshTicker(){
+  const syms=['BTCUSDT','ETHUSDT','SOLUSDT','BNBUSDT','XRPUSDT'];
+  const rows=[];
+  for(const s of syms){
+    try{const j=await (await fetch(`/api/signal?symbol=${s}&interval=15m&riskUsd=0.5`)).json();const cls=j.signal.side==='LONG'?'ok':j.signal.side==='SHORT'?'bad':'';rows.push(`<span class='ticker-item ${cls}'>${s} ${Number(j.signal.entry).toFixed(2)} (${j.signal.side})</span>`);}catch{rows.push(`<span class='ticker-item'>${s} --</span>`)}
+  }
+  $('tickerTrack').innerHTML=rows.join('')+rows.join('');
+}
+
+async function loadSignal(){const symbol=$('symbolSelect').value,riskUsd=Number($('riskUsd').value||0.5);const j=await (await fetch(`/api/signal?symbol=${symbol}&interval=15m&riskUsd=${riskUsd}`)).json();currentSignal=j;$('symbol').textContent=j.symbol;$('side').textContent=j.signal.side;$('score').textContent=j.score;$('side').className='v '+(j.signal.side==='LONG'?'ok':j.signal.side==='SHORT'?'bad':'');$('strategy').textContent=j.strategy;$('entry').textContent=usd(j.signal.entry);$('stop').textContent=usd(j.signal.stop);$('take').textContent=usd(j.signal.take);$('qty').textContent=fixed(j.signal.qty,8)+' '+j.symbol.replace('USDT','');$('confirmBtn').textContent=j.signal.side==='SHORT'?'Confirmar VENDA':'Confirmar COMPRA';renderBook(Number(j.signal.entry));}
+
+async function loadScan(){const j=await (await fetch('/api/market-scan?limit=10')).json();const b=$('scanBody');if(!j.items?.length){b.innerHTML='<tr><td colspan="6">Sem dados</td></tr>';return;}bestCoin=j.items[0];$('bestSymbol').textContent=`${bestCoin.symbol} (${bestCoin.side})`;$('bestMeta').textContent=`score ${bestCoin.score} • hint ${bestCoin.profitabilityHint} • 24h ${bestCoin.change24h}%`;const [g,c]=grade(bestCoin.profitabilityHint);$('bestGrade').textContent=g;$('bestGrade').className=`badge ${c}`;b.innerHTML=j.items.map((it,i)=>{const [gr,cl]=grade(it.profitabilityHint);return `<tr><td>${i+1}. ${it.symbol}</td><td class='${it.change24h>=0?'ok':'bad'}'>${it.change24h}%</td><td>${it.score}</td><td>${it.profitabilityHint}</td><td><span class='badge ${cl}'>${gr}</span></td><td><button class='btn b-blue' onclick="applySymbol('${it.symbol}')">Usar</button></td></tr>`}).join('');}
+function applySymbol(s){$('symbolSelect').value=s;loadSignal();}
+async function operateBest(){if(!bestCoin)await loadScan();if(!bestCoin)return;$('symbolSelect').value=bestCoin.symbol;await loadSignal();if(currentSignal?.signal?.side==='FLAT')return alert('Sem gatilho válido');await confirmOrder();}
+async function confirmOrder(){if(!currentSignal||currentSignal.signal.side==='FLAT')return alert('Sem sinal válido');const p={symbol:currentSignal.symbol,side:currentSignal.signal.side,qty:currentSignal.signal.qty};const j=await (await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)})).json();if(j.ok){alert(`Ordem enviada (${j.order.status}) id=${j.order.orderId}`);loadTrades();loadAutoState();}else alert(j.message||j.error||'Falha ao enviar');}
+async function loadTrades(){
+  const j=await (await fetch('/api/trades')).json();
+  const body=$('execBody');
+  if(!j.items||!j.items.length){body.innerHTML='<tr><td colspan="5" class="k">Sem execuções ainda.</td></tr>';return;}
+  body.innerHTML=j.items.slice(0,30).map(t=>{
+    const dt=(t.createdAt||'').replace('T',' ').replace('Z','');
+    const side=String(t.side||'').toUpperCase();
+    const sideCls=side==='BUY'?'side-buy':'side-sell';
+    const qty=Number(t.quantity||t.qty||0).toFixed(6);
+    const st=String(t.status||'');
+    const stCls=st.startsWith('OPEN')?'st-open':'st-close';
+    return `<tr><td class='mono exec-time'>${dt}</td><td class='exec-pair'>${t.symbol||'-'}</td><td class='exec-side ${sideCls}'>${side}</td><td class='mono exec-qty'>${qty}</td><td class='mono exec-status ${stCls}'>${st}</td></tr>`;
+  }).join('');
+}
+function paintModeButtons(mode){
+  ['modeSlow','modeConservative','modeFast','modeTurbo','modeUltra'].forEach(id=>$(id).classList.remove('mode-on'));
+  if(mode==='slow') $('modeSlow').classList.add('mode-on');
+  if(mode==='conservative') $('modeConservative').classList.add('mode-on');
+  if(mode==='fast') $('modeFast').classList.add('mode-on');
+  if(mode==='turbo') $('modeTurbo').classList.add('mode-on');
+  if(mode==='ultra') $('modeUltra').classList.add('mode-on');
+}
+
+async function setBotMode(mode){
+  const r = await fetch('/api/bot-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode})});
+  const j = await r.json();
+  if(!j.ok) return alert('Falha ao trocar modo');
+  paintModeButtons(j.mode);
+  await loadAutoState();
+}
+
+async function loadBrand(){
+  const r = await fetch('/api/brand');
+  const j = await r.json();
+  const b = j.brand || {};
+  $('brandTitle').textContent = b.title || 'NEXUS';
+  $('brandSubtitle').textContent = b.subtitle || 'TRADE COMMAND';
+  $('brandLogo').textContent = b.logo ? `${b.logo} ` : '';
+}
+
+async function refreshTopEnv(){
+  try{
+    const s=await (await fetch('/api/credentials/status')).json();
+    const mode=(s.mode==='real'?'REAL':'TESTE');
+    $('envTopBtn').textContent=`Ambiente: ${mode}`;
+    $('envTopBtn').style.background = s.mode==='real' ? 'rgba(246,70,93,.2)' : 'rgba(58,123,255,.2)';
+  }catch{}
+}
+
+async function toggleEnvTop(){
+  const s=await (await fetch('/api/credentials/status')).json();
+  const next=(s.mode==='real'?'testnet':'real');
+  const baseUrl=next==='real'?'https://api.binance.com':'https://testnet.binance.vision';
+  const payload={apiKey:'',apiSecret:'',exchangeMode:next,baseUrl};
+  const hasApi=s.hasApi;
+  if(hasApi){
+    alert('Troca rápida de ambiente disponível na aba API para preservar sua chave com segurança.');
+    location.href='/api.html';
+    return;
+  }
+  await fetch('/api/credentials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+  await refreshTopEnv();
+}
+
+async function loadAutoState(){const j=await (await fetch('/api/auto-state')).json();$('modePill').textContent=`EXCHANGE:${j.mode||'--'} • BOT:${(j.botMode||'--').toUpperCase()}`;paintModeButtons(j.botMode||'ultra');const s=j.state;if(!s)return;const st=s.stats||{},wr=st.total?((st.wins/st.total)*100):0,pnl=Number(st.pnlUsd||0),eq=100+pnl;$('winrate').textContent=st.total?`${wr.toFixed(1)}%`:'--';$('pnl').textContent=usd(pnl);$('pnl').className='v '+(pnl>=0?'ok':'bad');$('equity').textContent=usd(eq);$('loops').textContent=s.loops??'--';$('errors').textContent=s.errors??'--';$('tradesToday').textContent=s.tradesToday??'--';$('openTrade').textContent=s.openTrade?`${s.openTrade.symbol} ${s.openTrade.side}`:'NÃO';$('lastTrade').textContent=s.lastTradeAt||'--';$('botLogs').textContent=(j.botLog||[]).slice(0,18).join('\n')||'--';$('supLogs').textContent=(j.supLog||[]).slice(0,10).join('\n')||'--';equitySeries.push(eq);if(equitySeries.length>120)equitySeries.shift();updatePerf(st);drawEquity();}
+setInterval(()=>{$('clock').textContent=new Date().toISOString().slice(11,19)+' UTC';},1000);
+setInterval(loadSignal,30000);setInterval(loadScan,45000);setInterval(loadTrades,30000);setInterval(loadAutoState,15000);setInterval(refreshTicker,20000);setInterval(()=>{if(currentSignal?.signal?.entry)renderBook(Number(currentSignal.signal.entry)+rand(-5,5));},1200);
+loadBrand();refreshTopEnv();loadSignal();loadScan();loadTrades();loadAutoState();drawEquity();refreshTicker();
+</script>
+</body>
+</html>

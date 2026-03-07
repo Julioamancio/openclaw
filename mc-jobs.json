@@ -5,7 +5,7 @@
       "schedule": "08:00 e 16:00 BRT",
       "agent": "Daniela",
       "status": "running",
-      "lastRun": "2026-03-06T20:58:59.472042+00:00",
+      "lastRun": "2026-03-07T01:34:31.259186+00:00",
       "notes": "Verificação iniciada"
     },
     {
@@ -60,12 +60,75 @@
       "task": "State Machine Test",
       "schedule": "manual",
       "agent": "Mike",
-      "status": "failed",
+      "status": "pending",
       "lastRun": "2026-03-06T19:18:10.751583+00:00",
       "notes": "teste phase C"
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-07T01:34:31.259186+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-07T00:58:30.496151+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-07T00:06:20.272256+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-06T21:48:40.697115+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-06T21:48:06.445635+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-06T21:46:36.216322+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-06T21:43:10.766360+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-06T21:33:22.294415+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-06T21:31:52.057156+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
     {
       "ts": "2026-03-06T20:58:59.472042+00:00",
       "task": "Check remetentes",

@@ -9,6 +9,15 @@
       "payload": {
         "raw": "{\"from\":\"observe\",\"to\":\"autopilot\",\"reason\":\"autopilot_threshold_met\"}}"
       }
+    },
+    {
+      "id": "ev_1772833360870",
+      "ts": "2026-03-06T21:42:40.870972+00:00",
+      "type": "mc_chat",
+      "entity": "controltower",
+      "payload": {
+        "raw": "{\"input\":\"como está o health?\",\"reply\":\"Health resumido: success 50% em 26 runs terminais, open postmortems 0.\"}}"
+      }
     }
   ],
   "snapshots": []

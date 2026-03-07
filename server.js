@@ -1014,7 +1014,49 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    // 20) GET /mc/replays - replay library
+    // 20) POST /mc/chat - dynamic ops copilot inside Mission Control
+    if (req.method === 'POST' && pathname === '/mc/chat') {
+      const raw = await getRequestBody(req, 256 * 1024);
+      const incoming = raw ? JSON.parse(raw) : {};
+      const text = String(incoming.message || '').trim();
+      if (!text) return sendJson(res, 400, { error: 'message is required' });
+
+      const q = text.toLowerCase();
+      const health = readJson(JOBS_FILE, { jobs: [], runs: [] });
+      const scoreProbe = (() => {
+        const pms = readJson(POSTMORTEMS_FILE, []);
+        const runs = Array.isArray(health?.runs) ? health.runs : [];
+        const terminal = runs.filter(r => ['done', 'failed'].includes(String(r.status || '').toLowerCase()));
+        const done = terminal.filter(r => String(r.status || '').toLowerCase() === 'done').length;
+        const success = terminal.length ? Math.round((done / terminal.length) * 100) : 100;
+        const openPm = Array.isArray(pms) ? pms.filter(x => String(x.status || '').toLowerCase() === 'open').length : 0;
+        return { success, openPm, terminal: terminal.length };
+      })();
+
+      const fin = readJson(MISSION_BUDGETS_FILE, { version: 1, items: [] });
+      const finItems = Array.isArray(fin?.items) ? fin.items : [];
+      const finTotal = finItems.reduce((acc, x) => acc + Number(x?.estimatedCostUsd || 0), 0);
+
+      let reply = '';
+      if (/health|score|sa[úu]de/.test(q)) {
+        reply = `Health resumido: success ${scoreProbe.success}% em ${scoreProbe.terminal} runs terminais, open postmortems ${scoreProbe.openPm}.`;
+      } else if (/finops|custo|budget|gasto/.test(q)) {
+        reply = `FinOps: ${finItems.length} missões no ledger, gasto estimado total ${finTotal.toFixed(4)} USD.`;
+      } else if (/modo|autonomy|autopilot|assist|observe/.test(q)) {
+        const mode = getSreMode();
+        reply = `Modo operacional atual: ${mode}. Se quiser, use Control Tower para alterar.`;
+      } else if (/miss[aã]o|run mission|executar/.test(q)) {
+        reply = 'Posso executar missão via Control Tower. Use o botão Run Mission e eu aplico pipeline: proof → simulate → judge → execute.';
+      } else {
+        reply = 'Chat operacional ativo. Posso responder sobre health score, finops, modo/autonomia e execução de missão.';
+      }
+
+      spawnSync('/root/.openclaw/workspace/scripts/state-event.sh', ['mc_chat', 'controltower', JSON.stringify({ input: text.slice(0, 240), reply: reply.slice(0, 240) })], { encoding: 'utf8', timeout: 30000 });
+
+      return sendJson(res, 200, { ok: true, reply });
+    }
+
+    // 21) GET /mc/replays - replay library
     if (req.method === 'GET' && pathname === '/mc/replays') {
       const lib = readJson(REPLAY_LIBRARY_FILE, { version: 1, scenarios: [] });
       const scenarios = Array.isArray(lib?.scenarios) ? lib.scenarios : [];
@@ -1137,13 +1179,15 @@ const server = http.createServer(async (req, res) => {
       const jobList = Array.isArray(jobs?.jobs) ? jobs.jobs : [];
       const openPm = Array.isArray(pms) ? pms.filter(x => String(x.status || '').toLowerCase() === 'open').length : 0;
       const failedJobs = jobList.filter(j => String(j.status || '').toLowerCase() === 'failed').length;
-      const doneRuns = runs.filter(r => String(r.status || '').toLowerCase() === 'done').length;
-      const runSuccess = runs.length ? (doneRuns / runs.length) * 100 : 100;
+      const terminal = runs.filter(r => ['done', 'failed'].includes(String(r.status || '').toLowerCase()));
+      const doneRuns = terminal.filter(r => String(r.status || '').toLowerCase() === 'done').length;
+      const failedRuns = terminal.filter(r => String(r.status || '').toLowerCase() === 'failed').length;
+      const runSuccess = terminal.length ? (doneRuns / terminal.length) * 100 : 100;
 
       let score = 100;
       score -= Math.min(40, openPm * 12);
       score -= Math.min(25, failedJobs * 10);
-      score -= Math.max(0, Math.round((95 - runSuccess) * 0.8));
+      score -= Math.max(0, Math.round((85 - runSuccess) * 0.55));
       score = Math.max(0, Math.min(100, Math.round(score)));
 
       const level = score >= 90 ? 'excellent' : score >= 80 ? 'good' : score >= 60 ? 'warning' : 'critical';
@@ -1156,7 +1200,8 @@ const server = http.createServer(async (req, res) => {
           open_postmortems: openPm,
           failed_jobs: failedJobs,
           run_success_rate_pct: Number(runSuccess.toFixed(1)),
-          recent_runs: runs.length
+          recent_runs: terminal.length,
+          failed_runs: failedRuns
         }
       });
     }

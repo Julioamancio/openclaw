@@ -1,11 +1,12 @@
 # Self-Improving Active Profile
 
-- Active: **DEFAULT**
-- Updated: 2026-03-06 20:58:52 UTC
+- Active: **GUARDIAN**
+- Updated: 2026-03-07 01:34:28 UTC
 
 ## Runtime directives
-- Reflection depth: medium
-- Max self-review passes: 1-2
-- Memory writes: meaningful decisions and recurring lessons
-- Response style: balanced clarity + speed
-- Use for: daily engineering and automation work
+- Reflection depth: high
+- Max self-review passes: 2+
+- Memory writes: full risk/decision/mitigation trail
+- Response style: rigorous, explicit trade-offs
+- Use for: production, security, migration, irreversible changes
+- Safety gate: require confirmation before sensitive/destructive actions
