@@ -766,5 +766,720 @@
       "notes": "Verificação iniciada",
       "severity": "info"
     }
+  },
+  {
+    "id": "act_1772847491498_yu0ry",
+    "timestamp": "2026-03-07T01:38:11.498Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772847605114_5ust7",
+    "timestamp": "2026-03-07T01:40:05.114Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772847729462_pgykm",
+    "timestamp": "2026-03-07T01:42:09.462Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772847840180_01vyv",
+    "timestamp": "2026-03-07T01:44:00.180Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772847969188_7pa3m",
+    "timestamp": "2026-03-07T01:46:09.188Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848150925_233b0",
+    "timestamp": "2026-03-07T01:49:10.925Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848273503_e13ll",
+    "timestamp": "2026-03-07T01:51:13.503Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848393878_cq9m3",
+    "timestamp": "2026-03-07T01:53:13.878Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848515252_kdh8a",
+    "timestamp": "2026-03-07T01:55:15.252Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848646153_q9uso",
+    "timestamp": "2026-03-07T01:57:26.153Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848758719_ppum9",
+    "timestamp": "2026-03-07T01:59:18.719Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772848918950_j36m6",
+    "timestamp": "2026-03-07T02:01:58.950Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849067565_sg70w",
+    "timestamp": "2026-03-07T02:04:27.565Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849191893_j2hr0",
+    "timestamp": "2026-03-07T02:06:31.893Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849308469_f0kes",
+    "timestamp": "2026-03-07T02:08:28.469Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849440667_93g0r",
+    "timestamp": "2026-03-07T02:10:40.667Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849476901_54pme",
+    "timestamp": "2026-03-07T02:11:16.901Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849502958_rzu9b",
+    "timestamp": "2026-03-07T02:11:42.958Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849539206_gbtud",
+    "timestamp": "2026-03-07T02:12:19.206Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849566174_wxvs3",
+    "timestamp": "2026-03-07T02:12:46.174Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849602399_vfloq",
+    "timestamp": "2026-03-07T02:13:22.399Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849699020_j13z6",
+    "timestamp": "2026-03-07T02:14:59.020Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849735261_2sf41",
+    "timestamp": "2026-03-07T02:15:35.261Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849757542_jra6b",
+    "timestamp": "2026-03-07T02:15:57.542Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849793776_pdmcw",
+    "timestamp": "2026-03-07T02:16:33.776Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849826072_6mnan",
+    "timestamp": "2026-03-07T02:17:06.073Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849862308_wgtas",
+    "timestamp": "2026-03-07T02:17:42.308Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849887512_oh6dq",
+    "timestamp": "2026-03-07T02:18:07.512Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849923747_4gen5",
+    "timestamp": "2026-03-07T02:18:43.747Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849948781_utxka",
+    "timestamp": "2026-03-07T02:19:08.781Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772849985004_16m2g",
+    "timestamp": "2026-03-07T02:19:45.004Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850068083_ckjtt",
+    "timestamp": "2026-03-07T02:21:08.083Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850104309_9vj5i",
+    "timestamp": "2026-03-07T02:21:44.309Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850126801_20gai",
+    "timestamp": "2026-03-07T02:22:06.801Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850163023_ucj2b",
+    "timestamp": "2026-03-07T02:22:43.023Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850193099_5q17c",
+    "timestamp": "2026-03-07T02:23:13.099Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850229317_6ywap",
+    "timestamp": "2026-03-07T02:23:49.317Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850345609_sesnm",
+    "timestamp": "2026-03-07T02:25:45.609Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850381852_rc7np",
+    "timestamp": "2026-03-07T02:26:21.852Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850404382_1f37o",
+    "timestamp": "2026-03-07T02:26:44.382Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850440632_5hjrr",
+    "timestamp": "2026-03-07T02:27:20.632Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850473874_nr6kq",
+    "timestamp": "2026-03-07T02:27:53.874Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850510124_69tf0",
+    "timestamp": "2026-03-07T02:28:30.124Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850536062_m8txm",
+    "timestamp": "2026-03-07T02:28:56.062Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850572302_dc4bs",
+    "timestamp": "2026-03-07T02:29:32.302Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850596437_dldg9",
+    "timestamp": "2026-03-07T02:29:56.437Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850632669_7qch9",
+    "timestamp": "2026-03-07T02:30:32.669Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850661538_rv9ge",
+    "timestamp": "2026-03-07T02:31:01.538Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850697776_h7knc",
+    "timestamp": "2026-03-07T02:31:37.776Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850728089_8gxtf",
+    "timestamp": "2026-03-07T02:32:08.089Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850764322_jw5dr",
+    "timestamp": "2026-03-07T02:32:44.322Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850800074_oqfg6",
+    "timestamp": "2026-03-07T02:33:20.074Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850836310_fgql2",
+    "timestamp": "2026-03-07T02:33:56.310Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850960672_36r5i",
+    "timestamp": "2026-03-07T02:36:00.672Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772850996931_gli4s",
+    "timestamp": "2026-03-07T02:36:36.931Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851032891_zygh2",
+    "timestamp": "2026-03-07T02:37:12.891Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851069124_h7uou",
+    "timestamp": "2026-03-07T02:37:49.124Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851131203_2t607",
+    "timestamp": "2026-03-07T02:38:51.203Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851167438_4304k",
+    "timestamp": "2026-03-07T02:39:27.438Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851211843_adpub",
+    "timestamp": "2026-03-07T02:40:11.843Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851248090_5i7k7",
+    "timestamp": "2026-03-07T02:40:48.090Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851376644_u6pim",
+    "timestamp": "2026-03-07T02:42:56.644Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851412868_1qg3c",
+    "timestamp": "2026-03-07T02:43:32.868Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851546774_hs8sk",
+    "timestamp": "2026-03-07T02:45:46.774Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> running",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Verificação iniciada",
+      "severity": "info"
+    }
+  },
+  {
+    "id": "act_1772851583009_1f3rs",
+    "timestamp": "2026-03-07T02:46:23.009Z",
+    "title": "Ops Job",
+    "message": "Check remetentes -> done",
+    "meta": {
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo",
+      "severity": "info"
+    }
   }
 ]

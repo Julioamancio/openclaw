@@ -13,23 +13,30 @@ const AUTO_BOT_LOG = path.join(LOG_DIR, 'auto-bot.log');
 const AUTO_SUP_LOG = path.join(LOG_DIR, 'auto-supervisor.log');
 const BOT_MODE_FILE = path.join(LOG_DIR, 'bot-mode.json');
 const BRAND_FILE = path.join(LOG_DIR, 'brand.json');
-const ENV_PATH = path.join(__dirname, '.env');
+const ENV_PATH = '/root/.openclaw/workspace/.env.trading';
+const LEGACY_ENV_PATH = path.join(__dirname, '.env');
 
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
 
-function loadEnv() {
-  const out = {};
-  if (!fs.existsSync(ENV_PATH)) return out;
-  const lines = fs.readFileSync(ENV_PATH, 'utf8').split('\n');
+function parseEnvFile(file, out) {
+  if (!fs.existsSync(file)) return;
+  const lines = fs.readFileSync(file, 'utf8').split('\n');
   for (const raw of lines) {
     const line = raw.trim();
     if (!line || line.startsWith('#')) continue;
     const idx = line.indexOf('=');
     if (idx <= 0) continue;
     const k = line.slice(0, idx).trim();
-    const v = line.slice(idx + 1).trim();
+    let v = line.slice(idx + 1).trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
     out[k] = v;
   }
+}
+
+function loadEnv() {
+  const out = {};
+  parseEnvFile(LEGACY_ENV_PATH, out);
+  parseEnvFile(ENV_PATH, out);
   return out;
 }
 
@@ -222,6 +229,24 @@ async function marketScan(limit = 8) {
 
 function logTrade(trade) { fs.appendFileSync(TRADES_LOG, JSON.stringify(trade) + '\n', 'utf8'); }
 
+async function getSymbolTradingMeta(symbol) {
+  const info = await binancePublic('/api/v3/exchangeInfo', `symbol=${symbol}`);
+  const s = info?.symbols?.[0];
+  if (!s) return { minQty: 0, stepSize: 0, minNotional: 0 };
+  const lot = (s.filters || []).find(f => f.filterType === 'LOT_SIZE');
+  const minNotionalFilter = (s.filters || []).find(f => f.filterType === 'MIN_NOTIONAL' || f.filterType === 'NOTIONAL');
+  return {
+    minQty: Number(lot?.minQty || 0),
+    stepSize: Number(lot?.stepSize || 0),
+    minNotional: Number(minNotionalFilter?.minNotional || minNotionalFilter?.notional || 0)
+  };
+}
+
+function getAssetFree(account, asset) {
+  const b = (account?.balances || []).find(x => x.asset === asset);
+  return Number(b?.free || 0);
+}
+
 function serveStatic(req, res) {
   let pathname = new URL(req.url, `http://${req.headers.host}`).pathname;
   if (pathname === '/') pathname = '/index.html';
@@ -246,6 +271,16 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, makerCommission: acc.makerCommission, takerCommission: acc.takerCommission });
     }
 
+    if (url.pathname === '/api/wallet' && req.method === 'GET') {
+      const acc = await binanceSigned('GET', '/api/v3/account');
+      const balances = (acc.balances || [])
+        .map(b => ({ asset: b.asset, free: Number(b.free), locked: Number(b.locked) }))
+        .filter(b => b.free > 0 || b.locked > 0)
+        .sort((a, b) => b.free - a.free)
+        .slice(0, 30);
+      return sendJson(res, 200, { ok: true, mode: BINANCE_MODE, balances });
+    }
+
     if (url.pathname === '/api/signal' && req.method === 'GET') {
       const symbol = (url.searchParams.get('symbol') || 'BTCUSDT').toUpperCase();
       const interval = url.searchParams.get('interval') || '15m';
@@ -264,8 +299,68 @@ const server = http.createServer(async (req, res) => {
       const body = await parseBody(req);
       const symbol = (body.symbol || 'BTCUSDT').toUpperCase();
       const side = (body.side || 'LONG') === 'SHORT' ? 'SELL' : 'BUY';
-      const quantity = Number(body.qty || 0).toFixed(6);
+      const quantityNum = Number(body.qty || 0);
+      const quantity = quantityNum.toFixed(6);
       if (!quantity || Number(quantity) <= 0) return sendJson(res, 400, { ok: false, error: 'invalid_qty' });
+
+      const meta = await getSymbolTradingMeta(symbol);
+      const ticker = await binancePublic('/api/v3/ticker/price', `symbol=${symbol}`);
+      const mark = Number(ticker?.price || 0);
+      const notional = mark * Number(quantity);
+
+      if (BINANCE_MODE === 'paper') {
+        const order = {
+          orderId: `paper_${Date.now()}`,
+          symbol,
+          side,
+          status: 'FILLED',
+          type: 'MARKET',
+          executedQty: quantity,
+          cummulativeQuoteQty: String(notional),
+          price: String(mark),
+          transactTime: Date.now(),
+          paper: true
+        };
+        logTrade({ id: order.orderId, mode: 'paper', symbol, side, quantity, status: order.status, createdAt: new Date().toISOString(), paperPrice: mark });
+        return sendJson(res, 200, { ok: true, order, paper: true });
+      }
+
+      if (meta.minQty && Number(quantity) < meta.minQty) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'min_qty',
+          message: `Quantidade abaixo do mínimo para ${symbol}. Mínimo: ${meta.minQty}`
+        });
+      }
+
+      if (meta.minNotional && notional < meta.minNotional) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'min_notional',
+          message: `Você não tem valor mínimo para operar ${symbol}. Mínimo de ordem: ${meta.minNotional} USDT.`
+        });
+      }
+
+      const account = await binanceSigned('GET', '/api/v3/account');
+      const baseAsset = symbol.replace(/USDT$/, '');
+      const usdtFree = getAssetFree(account, 'USDT');
+      const baseFree = getAssetFree(account, baseAsset);
+
+      if (side === 'BUY' && usdtFree < notional) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'insufficient_usdt',
+          message: `Saldo insuficiente. Disponível: ${usdtFree.toFixed(4)} USDT, necessário: ${notional.toFixed(4)} USDT.`
+        });
+      }
+
+      if (side === 'SELL' && baseFree < Number(quantity)) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'insufficient_asset',
+          message: `Saldo insuficiente de ${baseAsset}. Disponível: ${baseFree.toFixed(6)}, necessário: ${Number(quantity).toFixed(6)}.`
+        });
+      }
 
       const order = await binanceSigned('POST', '/api/v3/order', {
         symbol,
@@ -276,7 +371,7 @@ const server = http.createServer(async (req, res) => {
       });
 
       logTrade({ id: order.orderId, mode: BINANCE_MODE, symbol, side, quantity, status: order.status, createdAt: new Date().toISOString() });
-      return sendJson(res, 200, { ok: true, order });
+      return sendJson(res, 200, { ok: true, order, wallet: { usdtFree, baseAsset, baseFree } });
     }
 
     if (url.pathname === '/api/confirm' && req.method === 'POST') {
@@ -367,6 +462,21 @@ const server = http.createServer(async (req, res) => {
       });
       reloadEnv();
       return sendJson(res, 200, { ok: true, cleared: true });
+    }
+
+    if (url.pathname === '/api/credentials/mode' && req.method === 'POST') {
+      const body = await parseBody(req);
+      const next = String(body.mode || '').toLowerCase();
+      if (!['real', 'testnet', 'paper'].includes(next)) return sendJson(res, 400, { ok: false, error: 'invalid_mode' });
+      const baseUrl = next === 'testnet' ? 'https://testnet.binance.vision' : 'https://api.binance.com';
+      writeEnv({
+        BINANCE_MODE: next,
+        BINANCE_BASE_URL: baseUrl,
+        BINANCE_API_KEY: BINANCE_API_KEY || '',
+        BINANCE_API_SECRET: BINANCE_API_SECRET || ''
+      });
+      reloadEnv();
+      return sendJson(res, 200, { ok: true, mode: BINANCE_MODE, baseUrl: BINANCE_BASE_URL });
     }
 
     if (url.pathname === '/api/credentials/status' && req.method === 'GET') {

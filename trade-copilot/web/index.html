@@ -13,6 +13,9 @@
     .top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
     .brand{font-weight:900;font-size:20px}.brand span{color:var(--gold)}
     .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#0d1320;padding:6px 10px;border-radius:999px;font-size:12px}
+    .on-chip{display:flex;align-items:center;gap:8px;border:1px solid rgba(14,203,129,.45);background:rgba(14,203,129,.14);color:#bff7df;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800}
+    .dot{width:8px;height:8px;border-radius:50%;background:#0ecb81;box-shadow:0 0 0 rgba(14,203,129,.8);animation:pulse 1.4s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(14,203,129,.7)}70%{box-shadow:0 0 0 9px rgba(14,203,129,0)}100%{box-shadow:0 0 0 0 rgba(14,203,129,0)}}
     .grid{display:grid;gap:10px}
     .ticker{overflow:hidden;border:1px solid var(--line);background:#0d1320;border-radius:10px;padding:8px 0;margin-bottom:10px}
     .ticker-track{display:inline-block;white-space:nowrap;animation:ticker 28s linear infinite;padding-left:100%}
@@ -81,7 +84,7 @@
         <button class="chip" id="envTopBtn" onclick="toggleEnvTop()" style="cursor:pointer">Ambiente: --</button>
       </div>
     </div>
-    <div class="chips"><div class="chip" id="modePill">MODE --</div><div class="chip" id="clock">--:--:-- UTC</div></div>
+    <div class="chips"><div class="on-chip" id="botOnChip"><span class="dot"></span>ROBÔ ON</div><div class="chip" id="modePill">MODE --</div><div class="chip" id="clock">--:--:-- UTC</div></div>
   </div>
 
   <div class="ticker">
@@ -148,6 +151,7 @@
       <div class="row"><span class="l">Trades hoje</span><b id="tradesToday">--</b></div>
       <div class="row"><span class="l">Trade aberto</span><b id="openTrade">--</b></div>
       <div class="row"><span class="l">Último trade</span><b id="lastTrade">--</b></div>
+      <div class="row"><span class="l">Carteira Real (USDT)</span><b id="walletUsdt">--</b></div>
       <div class="row"><span class="l">Expectancy</span><b id="expectancy">--</b></div>
       <div class="row"><span class="l">Profit Factor</span><b id="profitFactor">--</b></div>
       <div class="row"><span class="l">Max Drawdown</span><b id="maxDrawdown">--</b></div>
@@ -276,19 +280,24 @@ async function refreshTopEnv(){
 async function toggleEnvTop(){
   const s=await (await fetch('/api/credentials/status')).json();
   const next=(s.mode==='real'?'testnet':'real');
-  const baseUrl=next==='real'?'https://api.binance.com':'https://testnet.binance.vision';
-  const payload={apiKey:'',apiSecret:'',exchangeMode:next,baseUrl};
-  const hasApi=s.hasApi;
-  if(hasApi){
-    alert('Troca rápida de ambiente disponível na aba API para preservar sua chave com segurança.');
-    location.href='/api.html';
-    return;
-  }
-  await fetch('/api/credentials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+  const r=await fetch('/api/credentials/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:next})});
+  const j=await r.json();
+  if(!j.ok) return alert('Falha ao trocar ambiente');
   await refreshTopEnv();
 }
 
-async function loadAutoState(){const j=await (await fetch('/api/auto-state')).json();$('modePill').textContent=`EXCHANGE:${j.mode||'--'} • BOT:${(j.botMode||'--').toUpperCase()}`;paintModeButtons(j.botMode||'ultra');const s=j.state;if(!s)return;const st=s.stats||{},wr=st.total?((st.wins/st.total)*100):0,pnl=Number(st.pnlUsd||0),eq=100+pnl;$('winrate').textContent=st.total?`${wr.toFixed(1)}%`:'--';$('pnl').textContent=usd(pnl);$('pnl').className='v '+(pnl>=0?'ok':'bad');$('equity').textContent=usd(eq);$('loops').textContent=s.loops??'--';$('errors').textContent=s.errors??'--';$('tradesToday').textContent=s.tradesToday??'--';$('openTrade').textContent=s.openTrade?`${s.openTrade.symbol} ${s.openTrade.side}`:'NÃO';$('lastTrade').textContent=s.lastTradeAt||'--';$('botLogs').textContent=(j.botLog||[]).slice(0,18).join('\n')||'--';$('supLogs').textContent=(j.supLog||[]).slice(0,10).join('\n')||'--';equitySeries.push(eq);if(equitySeries.length>120)equitySeries.shift();updatePerf(st);drawEquity();}
+async function refreshWallet(){
+  try{
+    const w=await (await fetch('/api/wallet')).json();
+    if(!w.ok){$('walletUsdt').textContent='indisponível'; return null;}
+    const usdt=(w.balances||[]).find(x=>x.asset==='USDT');
+    const val = usdt ? Number(usdt.free) : 0;
+    $('walletUsdt').textContent = val.toFixed(4);
+    return val;
+  }catch{ $('walletUsdt').textContent='indisponível'; return null; }
+}
+
+async function loadAutoState(){const j=await (await fetch('/api/auto-state')).json();$('modePill').textContent=`EXCHANGE:${j.mode||'--'} • BOT:${(j.botMode||'--').toUpperCase()}`;paintModeButtons(j.botMode||'ultra');const s=j.state;if(!s){$('botOnChip').innerHTML='<span class="dot"></span>ROBÔ ON';return;}const st=s.stats||{},wr=st.total?((st.wins/st.total)*100):0,pnl=Number(st.pnlUsd||0);$('winrate').textContent=st.total?`${wr.toFixed(1)}%`:'--';$('pnl').textContent=usd(pnl);$('pnl').className='v '+(pnl>=0?'ok':'bad');let eq=100+pnl;const walletUsdt=await refreshWallet();if((j.mode||'').toLowerCase()==='real' && walletUsdt!==null){eq=walletUsdt;}$('equity').textContent=usd(eq);$('loops').textContent=s.loops??'--';$('errors').textContent=s.errors??'--';$('tradesToday').textContent=s.tradesToday??'--';$('openTrade').textContent=s.openTrade?`${s.openTrade.symbol} ${s.openTrade.side}`:'NÃO';$('lastTrade').textContent=s.lastTradeAt||'--';$('botLogs').textContent=(j.botLog||[]).slice(0,18).join('\n')||'--';$('supLogs').textContent=(j.supLog||[]).slice(0,10).join('\n')||'--';$('botOnChip').innerHTML = (Number(s.errors||0) > 10) ? '<span class="dot" style="background:#f6465d"></span>ROBÔ INSTÁVEL' : '<span class="dot"></span>ROBÔ ON';equitySeries.push(eq);if(equitySeries.length>120)equitySeries.shift();updatePerf(st);drawEquity();}
 setInterval(()=>{$('clock').textContent=new Date().toISOString().slice(11,19)+' UTC';},1000);
 setInterval(loadSignal,30000);setInterval(loadScan,45000);setInterval(loadTrades,30000);setInterval(loadAutoState,15000);setInterval(refreshTicker,20000);setInterval(()=>{if(currentSignal?.signal?.entry)renderBook(Number(currentSignal.signal.entry)+rand(-5,5));},1200);
 loadBrand();refreshTopEnv();loadSignal();loadScan();loadTrades();loadAutoState();drawEquity();refreshTicker();

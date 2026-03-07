@@ -7,7 +7,9 @@ ENV_FILE="$WORKSPACE/.env.local"
 MARK_SCRIPT="$WORKSPACE/scripts/ops-job-mark.sh"
 TASK_NAME="Check remetentes"
 LOCK_FILE="/tmp/check-emails.lock"
-IMAP_TIMEOUT_SEC="${IMAP_TIMEOUT_SEC:-10}"
+IMAP_TIMEOUT_SEC="${IMAP_TIMEOUT_SEC:-4}"
+MAX_RUNTIME_SEC="${MAX_RUNTIME_SEC:-70}"
+SCRIPT_START_EPOCH="$(date +%s)"
 
 mark_job() {
   local status="$1"
@@ -78,6 +80,14 @@ check_account() {
   local found_any=0
 
   for sender in "${SENDERS[@]}"; do
+    local now elapsed
+    now=$(date +%s)
+    elapsed=$((now - SCRIPT_START_EPOCH))
+    if [ "$elapsed" -ge "$MAX_RUNTIME_SEC" ]; then
+      echo "⚠️ Tempo limite da verificação atingido (${elapsed}s). Encerrando de forma segura."
+      break
+    fi
+
     local tag1 tag2 tag3
     tag1=$(gen_tag)
     tag2=$(gen_tag)

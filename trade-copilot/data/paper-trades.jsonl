@@ -17,3 +17,16 @@
 {"id":"learn_1772846417189_close","mode":"paper-learn","symbol":"ETHUSDT","side":"BUY","quantity":0.0487601,"status":"CLOSED_TIME_EXIT","pnlUsd":0.6129,"createdAt":"2026-03-07T01:26:22.105Z"}
 {"id":"learn_1772846784830","mode":"paper-learn","symbol":"ETHUSDT","side":"SELL","quantity":0.04063342,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T01:26:24.830Z"}
 {"id":"learn_1772846784830_close","mode":"paper-learn","symbol":"ETHUSDT","side":"BUY","quantity":0.04063342,"status":"CLOSED_TIME_EXIT","pnlUsd":-0.0378,"createdAt":"2026-03-07T01:32:32.498Z"}
+{"id":"learn_1772847442433","mode":"paper-learn","symbol":"ETHUSDT","side":"SELL","quantity":0.04151248,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T01:37:22.433Z"}
+{"id":"learn_1772847442433_close","mode":"paper-learn","symbol":"ETHUSDT","side":"BUY","quantity":0.04151248,"status":"CLOSED_TIME_EXIT","pnlUsd":0.0901,"createdAt":"2026-03-07T01:43:27.505Z"}
+{"id":"learn_1772847810495","mode":"paper-learn","symbol":"ETHUSDT","side":"SELL","quantity":0.04084395,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T01:43:30.495Z"}
+{"id":"learn_1772847810495_close","mode":"paper-learn","symbol":"ETHUSDT","side":"BUY","quantity":0.04084395,"status":"CLOSED_TIME_EXIT","pnlUsd":-0.1282,"createdAt":"2026-03-07T01:49:36.006Z"}
+{"id":"learn_1772848178963","mode":"paper-learn","symbol":"BTCUSDT","side":"SELL","quantity":0.00177302,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T01:49:38.963Z"}
+{"id":"learn_1772848178963_close","mode":"paper-learn","symbol":"BTCUSDT","side":"BUY","quantity":0.00177302,"status":"CLOSED_SIGNAL_FLIP","pnlUsd":-0.0842,"createdAt":"2026-03-07T01:52:38.950Z"}
+{"id":"learn_1772848772203","mode":"paper-learn","symbol":"OPNUSDT","side":"SELL","quantity":35.43944917,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T01:59:32.203Z"}
+{"id":"learn_1772848772203_close","mode":"paper-learn","symbol":"OPNUSDT","side":"BUY","quantity":35.43944917,"status":"CLOSED_SIGNAL_FLIP","pnlUsd":0.0035,"createdAt":"2026-03-07T02:01:26.265Z"}
+{"id":"learn_1772850148692","mode":"paper-learn","symbol":"BTCUSDT","side":"SELL","quantity":0.00073115,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T02:22:28.692Z"}
+{"id":"learn_1772850148692_close","mode":"paper-learn","symbol":"BTCUSDT","side":"BUY","quantity":0.00073115,"status":"CLOSED_TIME_EXIT","pnlUsd":0.0823,"createdAt":"2026-03-07T02:28:29.962Z"}
+{"id":"learn_1772850512441","mode":"paper-learn","symbol":"BTCUSDT","side":"SELL","quantity":0.00070969,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T02:28:32.441Z"}
+{"id":"learn_1772850512441_close","mode":"paper-learn","symbol":"BTCUSDT","side":"BUY","quantity":0.00070969,"status":"CLOSED_TIME_EXIT","pnlUsd":-0.0191,"createdAt":"2026-03-07T02:34:39.806Z"}
+{"id":"learn_1772851114022","mode":"paper-learn","symbol":"ETHUSDT","side":"SELL","quantity":0.04292372,"status":"OPENED_AUTO","strategy":"trend_follow_short@15m","createdAt":"2026-03-07T02:38:34.022Z"}

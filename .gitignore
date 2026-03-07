@@ -22,8 +22,10 @@ __pycache__/
 
 # Local secrets
 .env.local
+.env.trading
 secrets.env
 email-monitor/.env
+trade-copilot/.env
 
 # IDEs
 .vscode/

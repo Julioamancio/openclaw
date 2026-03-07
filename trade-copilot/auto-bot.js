@@ -11,11 +11,11 @@ const BOT_MODE_FILE = path.join(DATA_DIR, 'bot-mode.json');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const MODES = {
-  slow: { loopMs: 60_000, riskUsd: 0.30, minHint: 45, minScore: 40, minRR: 1.8, maxTradesPerDay: 8, cooldownMin: 20, maxHoldMin: 120, mode: 'slow' },
-  conservative: { loopMs: 30_000, riskUsd: 0.30, minHint: 35, minScore: 30, minRR: 1.7, maxTradesPerDay: 20, cooldownMin: 8, maxHoldMin: 60, mode: 'conservative' },
-  fast: { loopMs: 15_000, riskUsd: 0.30, minHint: 25, minScore: 28, minRR: 1.6, maxTradesPerDay: 50, cooldownMin: 3, maxHoldMin: 25, mode: 'fast' },
-  turbo: { loopMs: 10_000, riskUsd: 0.28, minHint: 20, minScore: 26, minRR: 1.5, maxTradesPerDay: 80, cooldownMin: 1, maxHoldMin: 10, mode: 'turbo' },
-  ultra: { loopMs: 7_000, riskUsd: 0.25, minHint: 18, minScore: 24, minRR: 1.4, maxTradesPerDay: 140, cooldownMin: 0.5, maxHoldMin: 6, mode: 'ultra' }
+  slow: { loopMs: 60_000, riskUsd: 0.30, minHint: 45, minScore: 40, minRR: 1.8, minVolPct: 0.0009, requireUnanimous: true, maxTradesPerDay: 8, cooldownMin: 20, maxHoldMin: 120, mode: 'slow' },
+  conservative: { loopMs: 30_000, riskUsd: 0.30, minHint: 35, minScore: 30, minRR: 1.7, minVolPct: 0.0008, requireUnanimous: true, maxTradesPerDay: 20, cooldownMin: 8, maxHoldMin: 60, mode: 'conservative' },
+  fast: { loopMs: 15_000, riskUsd: 0.30, minHint: 25, minScore: 28, minRR: 1.6, minVolPct: 0.0007, requireUnanimous: false, maxTradesPerDay: 50, cooldownMin: 3, maxHoldMin: 25, mode: 'fast' },
+  turbo: { loopMs: 10_000, riskUsd: 0.28, minHint: 20, minScore: 26, minRR: 1.5, minVolPct: 0.00065, requireUnanimous: false, maxTradesPerDay: 80, cooldownMin: 1, maxHoldMin: 10, mode: 'turbo' },
+  ultra: { loopMs: 7_000, riskUsd: 0.25, minHint: 18, minScore: 24, minRR: 1.45, minVolPct: 0.00075, requireUnanimous: true, maxTradesPerDay: 140, cooldownMin: 0.5, maxHoldMin: 6, mode: 'ultra' }
 };
 
 const DEFAULT_MODE = 'ultra';
@@ -63,6 +63,9 @@ function defaultState() {
       avgWin: 0,
       avgLoss: 0,
       byStrategy: {}
+    },
+    ml: {
+      byRegimeStrategy: {}
     }
   };
 }
@@ -72,6 +75,8 @@ function loadState() {
   try {
     const s = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
     if (!s.stats) s.stats = defaultState().stats;
+    if (!s.ml) s.ml = defaultState().ml;
+    if (!s.ml.byRegimeStrategy) s.ml.byRegimeStrategy = {};
     return s;
   } catch { return defaultState(); }
 }
@@ -97,7 +102,34 @@ function calcRR(sig) {
   return reward / risk;
 }
 
-async function bestSignalForSymbol(symbol, riskUsd) {
+function detectRegime(sig) {
+  const e20 = Number(sig?.indicators?.ema20 || 0);
+  const e50 = Number(sig?.indicators?.ema50 || 0);
+  const atr = Number(sig?.indicators?.atr14 || 0);
+  const entry = Number(sig?.signal?.entry || 1);
+  const trend = Math.abs(e20 - e50) / entry;
+  const vol = atr / entry;
+  if (trend > 0.0015 && vol > 0.001) return 'trend_high_vol';
+  if (trend > 0.001) return 'trend';
+  if (vol > 0.0012) return 'choppy_high_vol';
+  return 'range';
+}
+
+function getMlWeight(state, regime, strategyKey) {
+  const key = `${regime}|${strategyKey}`;
+  const v = Number(state.ml?.byRegimeStrategy?.[key] || 0);
+  return Math.max(-2.5, Math.min(2.5, v));
+}
+
+function updateMlWeight(state, regime, strategyKey, pnlNorm) {
+  const key = `${regime}|${strategyKey}`;
+  const prev = Number(state.ml?.byRegimeStrategy?.[key] || 0);
+  const lr = 0.18;
+  const next = (1 - lr) * prev + lr * pnlNorm;
+  state.ml.byRegimeStrategy[key] = n(Math.max(-3, Math.min(3, next)), 4);
+}
+
+async function bestSignalForSymbol(symbol, riskUsd, cfg) {
   const intervals = ['1m', '5m', '15m'];
   const candidates = [];
 
@@ -105,18 +137,28 @@ async function bestSignalForSymbol(symbol, riskUsd) {
     try {
       const sig = await jget(`${BASE}/api/signal?symbol=${symbol}&interval=${interval}&riskUsd=${riskUsd}`);
       if (sig?.signal?.side && sig.signal.side !== 'FLAT') {
-        candidates.push({ ...sig, interval });
+        const atr = Number(sig?.indicators?.atr14 || 0);
+        const entry = Number(sig?.signal?.entry || 0);
+        const volPct = entry > 0 ? atr / entry : 0;
+        candidates.push({ ...sig, interval, volPct });
       }
     } catch {}
   }
 
   if (!candidates.length) return null;
 
-  const longVotes = candidates.filter(c => c.signal.side === 'LONG').length;
-  const shortVotes = candidates.filter(c => c.signal.side === 'SHORT').length;
-  const votedSide = longVotes === shortVotes ? null : (longVotes > shortVotes ? 'LONG' : 'SHORT');
+  const volFiltered = candidates.filter(c => c.volPct >= (cfg.minVolPct || 0));
+  if (!volFiltered.length) return null;
 
-  const filtered = votedSide ? candidates.filter(c => c.signal.side === votedSide) : candidates;
+  const longVotes = volFiltered.filter(c => c.signal.side === 'LONG').length;
+  const shortVotes = volFiltered.filter(c => c.signal.side === 'SHORT').length;
+
+  if (cfg.requireUnanimous && !((longVotes === volFiltered.length) || (shortVotes === volFiltered.length))) {
+    return null;
+  }
+
+  const votedSide = longVotes === shortVotes ? null : (longVotes > shortVotes ? 'LONG' : 'SHORT');
+  const filtered = votedSide ? volFiltered.filter(c => c.signal.side === votedSide) : volFiltered;
   filtered.sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
   return filtered[0];
 }
@@ -156,6 +198,8 @@ function closeTrade(state, reason, markPrice) {
     pnlUsd: n(pnl, 4)
   };
   updateStatsOnClose(state, closed);
+  const pnlNorm = closed.riskUsd ? (closed.pnlUsd / closed.riskUsd) : 0;
+  updateMlWeight(state, closed.regime || 'unknown', closed.strategy || 'unknown', pnlNorm);
   appendTrade({
     id: `${closed.id}_close`,
     mode: 'paper-learn',
@@ -191,7 +235,7 @@ async function manageOpenTrade(state, cfg) {
     return closeTrade(state, 'time_exit', mark);
   }
 
-  const sig = await bestSignalForSymbol(t.symbol, t.riskUsd);
+  const sig = await bestSignalForSymbol(t.symbol, t.riskUsd, cfg);
   if (!sig) return;
 
   if ((t.side === 'LONG' && sig.signal.side === 'SHORT') || (t.side === 'SHORT' && sig.signal.side === 'LONG')) {
@@ -220,7 +264,7 @@ async function maybeOpenTrade(state, cfg) {
     return log('skip:weakSetup', { symbol: best.symbol, hint: best.profitabilityHint, score: best.score, side: best.side });
   }
 
-  const sig = await bestSignalForSymbol(best.symbol, cfg.riskUsd);
+  const sig = await bestSignalForSymbol(best.symbol, cfg.riskUsd, cfg);
   if (!sig || !sig.signal || sig.signal.side === 'FLAT' || sig.signal.qty <= 0) {
     return log('skip:invalidSignal', { symbol: best.symbol });
   }
@@ -231,9 +275,15 @@ async function maybeOpenTrade(state, cfg) {
   }
 
   const strategyKey = `${sig.strategy}@${sig.interval}`;
+  const regime = detectRegime(sig);
+  const mlWeight = getMlWeight(state, regime, strategyKey);
   const stg = state.stats?.byStrategy?.[strategyKey];
   if (stg && stg.total >= 8 && stg.pnlUsd < -0.6) {
     return log('skip:badStrategyWindow', { strategy: strategyKey, pnl: stg.pnlUsd, total: stg.total });
+  }
+
+  if (mlWeight < -0.65) {
+    return log('skip:mlNegativeBias', { strategy: strategyKey, regime, mlWeight: n(mlWeight, 3) });
   }
 
   state.openTrade = {
@@ -241,6 +291,8 @@ async function maybeOpenTrade(state, cfg) {
     symbol: sig.symbol,
     side: sig.signal.side,
     strategy: `${sig.strategy}@${sig.interval}`,
+    regime,
+    mlWeight: n(mlWeight, 3),
     openedAt: nowIso(),
     entry: Number(sig.signal.entry),
     stop: Number(sig.signal.stop),
@@ -273,6 +325,8 @@ async function maybeOpenTrade(state, cfg) {
     take: state.openTrade.take,
     riskUsd: state.openTrade.riskUsd,
     rr: state.openTrade.rr,
+    regime: state.openTrade.regime,
+    mlWeight: state.openTrade.mlWeight,
     tradesToday: state.tradesToday
   });
 }

@@ -1,18 +1,18 @@
 {
   "day": "2026-03-07",
-  "tradesToday": 10,
-  "lastTradeAt": "2026-03-07T01:26:24.830Z",
+  "tradesToday": 17,
+  "lastTradeAt": "2026-03-07T02:38:34.022Z",
   "lastSymbol": null,
   "lastSide": null,
-  "loops": 335,
+  "loops": 783,
   "errors": 1,
   "stats": {
-    "total": 10,
-    "wins": 3,
-    "losses": 7,
-    "pnlUsd": -0.0915,
-    "avgWin": 0.2906,
-    "avgLoss": -0.1376,
+    "total": 16,
+    "wins": 6,
+    "losses": 10,
+    "pnlUsd": -0.1471,
+    "avgWin": 0.1746,
+    "avgLoss": -0.1194,
     "byStrategy": {
       "trend_follow_short": {
         "total": 1,
@@ -21,10 +21,10 @@
         "pnlUsd": -0.1458
       },
       "trend_follow_short@15m": {
-        "total": 7,
-        "wins": 3,
-        "losses": 4,
-        "pnlUsd": 0.1315
+        "total": 13,
+        "wins": 6,
+        "losses": 7,
+        "pnlUsd": 0.0759
       },
       "trend_follow_long@5m": {
         "total": 2,
@@ -34,5 +34,26 @@
       }
     }
   },
-  "openTrade": null
+  "openTrade": {
+    "id": "learn_1772851114022",
+    "symbol": "ETHUSDT",
+    "side": "SHORT",
+    "strategy": "trend_follow_short@15m",
+    "regime": "trend_high_vol",
+    "mlWeight": -0.014,
+    "openedAt": "2026-03-07T02:38:34.022Z",
+    "entry": 1975.41,
+    "stop": 1981.2343,
+    "take": 1963.2761,
+    "qty": 0.04292372,
+    "riskUsd": 0.25,
+    "score": 48.03,
+    "rr": 2.083
+  },
+  "ml": {
+    "byRegimeStrategy": {
+      "unknown|trend_follow_short@15m": 0.0593,
+      "trend_high_vol|trend_follow_short@15m": -0.0138
+    }
+  }
 }

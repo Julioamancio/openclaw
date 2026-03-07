@@ -64,6 +64,7 @@
       <button class="b-red" onclick="clearApi()">Limpar API + Secret</button>
     </div>
     <div class="status" id="apiStatus" style="margin-top:8px">Carregando status...</div>
+    <div class="status" id="walletStatus" style="margin-top:8px">Carteira: --</div>
   </div>
 
   <div class="card">
@@ -99,16 +100,20 @@ function paintMode(mode){
   $('btnReal').classList.toggle('on', mode==='real');
 }
 
-function setMode(mode){
+async function setMode(mode){
+  const r = await fetch('/api/credentials/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode})});
+  const j = await r.json();
+  if(!j.ok) return alert('Falha ao trocar ambiente');
   $('exchangeMode').value = mode;
   $('baseUrl').value = mode==='testnet' ? 'https://testnet.binance.vision' : 'https://api.binance.com';
   paintMode(mode);
+  await loadStatus();
 }
 
 async function quickToggleMode(){
   const s=await (await fetch('/api/credentials/status')).json();
   const next=s.mode==='real'?'testnet':'real';
-  setMode(next);
+  await setMode(next);
 }
 
 async function loadStatus(){
@@ -121,6 +126,20 @@ async function loadStatus(){
   $('baseUrl').value = s.baseUrl || (currentMode==='real' ? 'https://api.binance.com' : 'https://testnet.binance.vision');
   paintMode(currentMode);
   $('envTabBtn').textContent = `Ambiente: ${currentMode==='real'?'REAL':'TESTE'}`;
+
+  try {
+    const w=await (await fetch('/api/wallet')).json();
+    if(w.ok){
+      const usdt=(w.balances||[]).find(x=>x.asset==='USDT');
+      $('walletStatus').textContent = usdt
+        ? `Carteira (${currentMode.toUpperCase()}): USDT livre ${Number(usdt.free).toFixed(4)}`
+        : `Carteira (${currentMode.toUpperCase()}): sem USDT disponível`;
+    } else {
+      $('walletStatus').textContent = 'Carteira: indisponível (verifique API/IP/permissões)';
+    }
+  } catch {
+    $('walletStatus').textContent = 'Carteira: indisponível (verifique API/IP/permissões)';
+  }
 
   const b=await (await fetch('/api/brand')).json();
   const brand=b.brand||{};
@@ -161,8 +180,9 @@ async function saveBrand(){
   alert('Marca salva com sucesso.');
 }
 
-$('exchangeMode').addEventListener('change',()=>{
-  $('baseUrl').value = $('exchangeMode').value==='testnet' ? 'https://testnet.binance.vision' : 'https://api.binance.com';
+$('exchangeMode').addEventListener('change',async ()=>{
+  const mode = $('exchangeMode').value;
+  await setMode(mode);
 });
 
 loadStatus();
