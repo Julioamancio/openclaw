@@ -4,7 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const HOST = '0.0.0.0';
-const PORT = 8090;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8091;
 const WEB_DIR = path.join(__dirname, 'web');
 const LOG_DIR = path.join(__dirname, 'data');
 const TRADES_LOG = path.join(LOG_DIR, 'paper-trades.jsonl');
