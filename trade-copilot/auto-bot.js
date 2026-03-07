@@ -7,16 +7,22 @@ const STATE_FILE = path.join(DATA_DIR, 'auto-state.json');
 const LOG_FILE = path.join(DATA_DIR, 'auto-bot.log');
 const TRADES_FILE = path.join(DATA_DIR, 'paper-trades.jsonl');
 const BOT_MODE_FILE = path.join(DATA_DIR, 'bot-mode.json');
+// Saldo paper para sizing (pode vir de env ACCOUNT_BALANCE)
+const ACCOUNT_BALANCE = Number(process.env.ACCOUNT_BALANCE || 1000);
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const MODES = {
-  slow: { loopMs: 60_000, riskUsd: 0.30, minHint: 45, minScore: 40, minRR: 1.8, minVolPct: 0.0009, requireUnanimous: true, maxTradesPerDay: 8, cooldownMin: 20, maxHoldMin: 120, mode: 'slow' },
-  conservative: { loopMs: 30_000, riskUsd: 0.30, minHint: 35, minScore: 30, minRR: 1.7, minVolPct: 0.0008, requireUnanimous: true, maxTradesPerDay: 20, cooldownMin: 8, maxHoldMin: 60, mode: 'conservative' },
-  fast: { loopMs: 15_000, riskUsd: 0.30, minHint: 25, minScore: 28, minRR: 1.6, minVolPct: 0.0007, requireUnanimous: false, maxTradesPerDay: 50, cooldownMin: 3, maxHoldMin: 25, mode: 'fast' },
-  turbo: { loopMs: 10_000, riskUsd: 0.28, minHint: 20, minScore: 26, minRR: 1.5, minVolPct: 0.00065, requireUnanimous: false, maxTradesPerDay: 80, cooldownMin: 1, maxHoldMin: 10, mode: 'turbo' },
-  ultra: { loopMs: 7_000, riskUsd: 0.25, minHint: 18, minScore: 24, minRR: 1.45, minVolPct: 0.00075, requireUnanimous: true, maxTradesPerDay: 140, cooldownMin: 0.5, maxHoldMin: 6, mode: 'ultra' }
+  slow: { loopMs: 60_000, riskUsd: 0.30, minHint: 45, minScore: 40, minRR: 1.8, minVolPct: 0.0009, requireUnanimous: true, maxTradesPerDay: 8, cooldownMin: 20, maxHoldMin: 120, minProfitPct: 0.10, mode: 'slow' },
+  conservative: { loopMs: 30_000, riskUsd: 0.30, minHint: 35, minScore: 30, minRR: 1.8, minVolPct: 0.0008, requireUnanimous: true, maxTradesPerDay: 20, cooldownMin: 10, maxHoldMin: 80, minProfitPct: 0.10, mode: 'conservative' },
+  fast: { loopMs: 15_000, riskUsd: 0.30, minHint: 25, minScore: 28, minRR: 1.7, minVolPct: 0.0007, requireUnanimous: false, maxTradesPerDay: 50, cooldownMin: 5, maxHoldMin: 25, minProfitPct: 0.10, mode: 'fast' },
+  turbo: { loopMs: 10_000, riskUsd: 0.28, minHint: 20, minScore: 26, minRR: 1.6, minVolPct: 0.00065, requireUnanimous: false, maxTradesPerDay: 80, cooldownMin: 3, maxHoldMin: 15, minProfitPct: 0.10, mode: 'turbo' },
+  // Ultra calibrado para 1h: menos ruído, hold maior, RR mais alto
+  ultra: { loopMs: 10_000, riskUsd: 0.25, minHint: 20, minScore: 26, minRR: 1.8, minVolPct: 0.00075, requireUnanimous: true, maxTradesPerDay: 10, cooldownMin: 12, maxHoldMin: 360, minProfitPct: 0.10, mode: 'ultra' }
 };
+
+// Restrição de símbolos: só ETH e BTC (spot)
+const ALLOWED_SYMBOLS = new Set(['ETHUSDT', 'BTCUSDT']);
 
 const DEFAULT_MODE = 'ultra';
 
@@ -54,7 +60,7 @@ function defaultState() {
     lastTradeAt: null,
     loops: 0,
     errors: 0,
-    openTrade: null,
+    openTrades: [],
     stats: {
       total: 0,
       wins: 0,
@@ -62,7 +68,9 @@ function defaultState() {
       pnlUsd: 0,
       avgWin: 0,
       avgLoss: 0,
-      byStrategy: {}
+      byStrategy: {},
+      consecutiveLosses: 0,
+      pausedUntil: null
     },
     ml: {
       byRegimeStrategy: {}
@@ -130,8 +138,11 @@ function updateMlWeight(state, regime, strategyKey, pnlNorm) {
 }
 
 async function bestSignalForSymbol(symbol, riskUsd, cfg) {
-  const intervals = ['1m', '5m', '15m'];
+  if (!ALLOWED_SYMBOLS.has(symbol)) return null;
+
+  const intervals = ['4h', '1h', '15m'];
   const candidates = [];
+  const signalsByTf = {};
 
   for (const interval of intervals) {
     try {
@@ -140,27 +151,53 @@ async function bestSignalForSymbol(symbol, riskUsd, cfg) {
         const atr = Number(sig?.indicators?.atr14 || 0);
         const entry = Number(sig?.signal?.entry || 0);
         const volPct = entry > 0 ? atr / entry : 0;
-        candidates.push({ ...sig, interval, volPct });
+        const rsi = Number(sig?.indicators?.rsi14 || 0);
+        const ema20 = Number(sig?.indicators?.ema20 || 0);
+        const ema50 = Number(sig?.indicators?.ema50 || 0);
+        const ema200 = Number(sig?.indicators?.ema200 || 0);
+
+        signalsByTf[interval] = { ...sig, entry, rsi, ema20, ema50, ema200, volPct };
+
+        // Filtros de 1h para evitar vender fundo e comprar sem retomada de tendência
+        if (interval === '1h') {
+          if (sig.signal.side === 'SHORT' && rsi && rsi < 30) continue;
+          if (sig.signal.side === 'LONG') {
+            if ((ema20 && entry < ema20) || (ema50 && entry < ema50) || (ema200 && entry < ema200)) continue;
+          }
+        }
+
+        candidates.push({ ...sig, interval, volPct, rsi, ema20, ema50, ema200 });
       }
     } catch {}
   }
 
   if (!candidates.length) return null;
 
-  const volFiltered = candidates.filter(c => c.volPct >= (cfg.minVolPct || 0));
+  // Confirmação multi-timeframe: 4h direção, 1h setup, 15m gatilho
+  const sig4h = signalsByTf['4h'];
+  const sig1h = signalsByTf['1h'];
+  const sig15m = signalsByTf['15m'];
+  if (!sig4h || !sig1h || !sig15m) return null;
+
+  const side4h = sig4h.signal.side;
+  const side1h = sig1h.signal.side;
+  const side15 = sig15m.signal.side;
+
+  // Tendência: exigir que 1h alinhe com 4h; gatilho 15m no mesmo sentido
+  if (side4h === 'FLAT' || side1h === 'FLAT' || side15 === 'FLAT') return null;
+  if (!(side4h === side1h && side1h === side15)) return null;
+
+  // Tendência estrutural: preço acima EMA200 para LONG; abaixo para SHORT
+  const entry1h = sig1h.signal.entry;
+  const ema200_1h = Number(sig1h.indicators?.ema200 || 0);
+  if (side1h === 'LONG' && ema200_1h && entry1h < ema200_1h) return null;
+  if (side1h === 'SHORT' && ema200_1h && entry1h > ema200_1h) return null;
+
+  // Voto final: usa o sinal do 15m como candidato principal
+  const volFiltered = candidates.filter(c => c.volPct >= (cfg.minVolPct || 0) && c.interval === '15m');
   if (!volFiltered.length) return null;
-
-  const longVotes = volFiltered.filter(c => c.signal.side === 'LONG').length;
-  const shortVotes = volFiltered.filter(c => c.signal.side === 'SHORT').length;
-
-  if (cfg.requireUnanimous && !((longVotes === volFiltered.length) || (shortVotes === volFiltered.length))) {
-    return null;
-  }
-
-  const votedSide = longVotes === shortVotes ? null : (longVotes > shortVotes ? 'LONG' : 'SHORT');
-  const filtered = votedSide ? volFiltered.filter(c => c.signal.side === votedSide) : volFiltered;
-  filtered.sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
-  return filtered[0];
+  volFiltered.sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
+  return { ...volFiltered[0], mtf: { side4h, side1h, side15 } };
 }
 
 function updateStatsOnClose(state, trade) {
@@ -168,7 +205,18 @@ function updateStatsOnClose(state, trade) {
   st.total += 1;
   st.pnlUsd = n(st.pnlUsd + trade.pnlUsd, 4);
   const win = trade.pnlUsd > 0;
-  if (win) st.wins += 1; else st.losses += 1;
+  if (win) {
+    st.wins += 1;
+    st.consecutiveLosses = 0;
+  } else {
+    st.losses += 1;
+    st.consecutiveLosses = (st.consecutiveLosses || 0) + 1;
+    // Circuit breaker: pausa 6h após 3 perdas seguidas
+    if (st.consecutiveLosses >= 3) {
+      const pauseMs = 6 * 60 * 60 * 1000;
+      st.pausedUntil = new Date(Date.now() + pauseMs).toISOString();
+    }
+  }
 
   const wins = st.wins || 1;
   const losses = st.losses || 1;
@@ -184,8 +232,8 @@ function updateStatsOnClose(state, trade) {
   st.byStrategy[key].pnlUsd = n(st.byStrategy[key].pnlUsd + trade.pnlUsd, 4);
 }
 
-function closeTrade(state, reason, markPrice) {
-  const t = state.openTrade;
+function closeTrade(state, idx, reason, markPrice) {
+  const t = state.openTrades[idx];
   if (!t) return;
   const dir = t.side === 'LONG' ? 1 : -1;
   const move = (markPrice - t.entry) * dir;
@@ -210,7 +258,7 @@ function closeTrade(state, reason, markPrice) {
     pnlUsd: closed.pnlUsd,
     createdAt: closed.closedAt
   });
-  state.openTrade = null;
+  state.openTrades.splice(idx,1);
   log('trade:closed', {
     symbol: closed.symbol,
     side: closed.side,
@@ -221,44 +269,55 @@ function closeTrade(state, reason, markPrice) {
   });
 }
 
-async function manageOpenTrade(state, cfg) {
-  const t = state.openTrade;
-  if (!t) return;
+async function manageOpenTrades(state, cfg) {
+  if (!state.openTrades || !state.openTrades.length) return;
+  for (let i = state.openTrades.length -1; i>=0; i--) {
+    const t = state.openTrades[i];
+    let mark = Number(t.entry);
+    try {
+      const fast = await jget(`${BASE}/api/signal?symbol=${t.symbol}&interval=1m&riskUsd=${t.riskUsd}`);
+      if (fast?.signal?.entry) mark = Number(fast.signal.entry);
+    } catch {}
 
-  let mark = Number(t.entry);
-  try {
-    const fast = await jget(`${BASE}/api/signal?symbol=${t.symbol}&interval=1m&riskUsd=${t.riskUsd}`);
-    if (fast?.signal?.entry) mark = Number(fast.signal.entry);
-  } catch {}
+    const profitPct = t.side === 'LONG'
+      ? (mark - t.entry) / t.entry
+      : (t.entry - mark) / t.entry;
+    const minProfitPct = cfg.minProfitPct || 0;
 
-  if (minsSince(t.openedAt) >= cfg.maxHoldMin) {
-    return closeTrade(state, 'time_exit', mark);
-  }
+    if (minsSince(t.openedAt) >= cfg.maxHoldMin) {
+      if (profitPct >= minProfitPct) { closeTrade(state, i, 'time_exit', mark); continue; }
+    }
 
-  const sig = await bestSignalForSymbol(t.symbol, t.riskUsd, cfg);
-  if (!sig) return;
+    const sig = await bestSignalForSymbol(t.symbol, t.riskUsd, cfg);
+    if (sig) {
+      if ((t.side === 'LONG' && sig.signal.side === 'SHORT') || (t.side === 'SHORT' && sig.signal.side === 'LONG')) {
+        if (profitPct >= minProfitPct) { closeTrade(state, i, 'signal_flip', mark); continue; }
+      }
+    }
 
-  if ((t.side === 'LONG' && sig.signal.side === 'SHORT') || (t.side === 'SHORT' && sig.signal.side === 'LONG')) {
-    return closeTrade(state, 'signal_flip', mark);
-  }
-
-  if (t.side === 'LONG') {
-    if (mark <= t.stop) return closeTrade(state, 'stop', mark);
-    if (mark >= t.take) return closeTrade(state, 'take', mark);
-  } else {
-    if (mark >= t.stop) return closeTrade(state, 'stop', mark);
-    if (mark <= t.take) return closeTrade(state, 'take', mark);
+    if (t.side === 'LONG') {
+      if (mark <= t.stop) { closeTrade(state, i, 'stop', mark); continue; }
+      if (mark >= t.take) { closeTrade(state, i, 'take', mark); continue; }
+    } else {
+      if (mark >= t.stop) { closeTrade(state, i, 'stop', mark); continue; }
+      if (mark <= t.take) { closeTrade(state, i, 'take', mark); continue; }
+    }
   }
 }
 
 async function maybeOpenTrade(state, cfg) {
-  if (state.openTrade) return;
+  if (!state.openTrades) state.openTrades = [];
+  if (state.openTrades.length >= 3) return log('skip:maxPositions', { open: state.openTrades.length });
+  if (state.stats?.pausedUntil && new Date(state.stats.pausedUntil) > new Date()) {
+    return log('skip:paused', { pausedUntil: state.stats.pausedUntil });
+  }
   if (state.tradesToday >= cfg.maxTradesPerDay) return log('skip:maxTradesPerDay', { tradesToday: state.tradesToday });
   if (minsSince(state.lastTradeAt) < cfg.cooldownMin) return log('skip:cooldown', { lastTradeAt: state.lastTradeAt });
 
-  const scan = await jget(`${BASE}/api/market-scan?limit=6`);
-  const best = scan.items && scan.items[0];
-  if (!best) return log('skip:noBest');
+  const scan = await jget(`${BASE}/api/market-scan?limit=10`);
+  const allowed = (scan.items || []).filter(it => ALLOWED_SYMBOLS.has(it.symbol));
+  const best = allowed[0];
+  if (!best) return log('skip:noBestAllowed');
 
   if (best.profitabilityHint < cfg.minHint || best.score < cfg.minScore || best.side === 'FLAT') {
     return log('skip:weakSetup', { symbol: best.symbol, hint: best.profitabilityHint, score: best.score, side: best.side });
@@ -274,6 +333,27 @@ async function maybeOpenTrade(state, cfg) {
     return log('skip:lowRR', { symbol: best.symbol, rr: n(rr, 3), minRR: cfg.minRR || 1.5 });
   }
 
+  // Sizing: risco 1% do saldo (paper). Exposição máx 5% e máx 3 posições
+  const balance = ACCOUNT_BALANCE;
+  const maxExposureUsd = balance * 0.05;
+  const riskUsd = balance * 0.01;
+  const stopDist = Math.abs(Number(sig.signal.entry) - Number(sig.signal.stop));
+  if (!stopDist) return log('skip:noStopDist', { symbol: best.symbol });
+  let qty = riskUsd / stopDist;
+  let exposureUsd = qty * Number(sig.signal.entry);
+  if (exposureUsd > maxExposureUsd) {
+    qty = maxExposureUsd / Number(sig.signal.entry);
+    exposureUsd = qty * Number(sig.signal.entry);
+  }
+
+  // Checa exposição agregada
+  const currentExposure = (state.openTrades || []).reduce((s,t)=> s + (Number(t.entry)*Number(t.qty)), 0);
+  if (currentExposure + exposureUsd > maxExposureUsd) {
+    return log('skip:aggExposure', { currentExposure, attempted: exposureUsd, maxExposureUsd });
+  }
+
+  if (qty <= 0) return log('skip:qtyZero', { symbol: best.symbol });
+
   const strategyKey = `${sig.strategy}@${sig.interval}`;
   const regime = detectRegime(sig);
   const mlWeight = getMlWeight(state, regime, strategyKey);
@@ -286,7 +366,19 @@ async function maybeOpenTrade(state, cfg) {
     return log('skip:mlNegativeBias', { strategy: strategyKey, regime, mlWeight: n(mlWeight, 3) });
   }
 
-  state.openTrade = {
+  // Enforce mínimo de lucro desejado no take (ex.: 10%)
+  const entry = Number(sig.signal.entry);
+  let take = Number(sig.signal.take);
+  const minProfitPct = cfg.minProfitPct || 0;
+  if (sig.signal.side === 'LONG') {
+    const minTake = entry * (1 + minProfitPct);
+    if (take < minTake) take = minTake;
+  } else {
+    const minTake = entry * (1 - minProfitPct);
+    if (take > minTake) take = minTake;
+  }
+
+  const newTrade = {
     id: `learn_${Date.now()}`,
     symbol: sig.symbol,
     side: sig.signal.side,
@@ -294,40 +386,47 @@ async function maybeOpenTrade(state, cfg) {
     regime,
     mlWeight: n(mlWeight, 3),
     openedAt: nowIso(),
-    entry: Number(sig.signal.entry),
+    entry,
     stop: Number(sig.signal.stop),
-    take: Number(sig.signal.take),
-    qty: Number(sig.signal.qty),
-    riskUsd: Number(sig.signal.riskUsd),
+    take: n(take, 6),
+    qty: n(qty, 6),
+    riskUsd: n(riskUsd, 4),
     score: Number(sig.score),
     rr: n(rr, 3)
   };
+  state.openTrades.push(newTrade);
   state.tradesToday += 1;
   state.lastTradeAt = nowIso();
 
   appendTrade({
-    id: state.openTrade.id,
+    id: newTrade.id,
     mode: 'paper-learn',
-    symbol: state.openTrade.symbol,
-    side: state.openTrade.side === 'LONG' ? 'BUY' : 'SELL',
-    quantity: state.openTrade.qty,
+    symbol: newTrade.symbol,
+    side: newTrade.side === 'LONG' ? 'BUY' : 'SELL',
+    quantity: newTrade.qty,
     status: 'OPENED_AUTO',
-    strategy: state.openTrade.strategy,
-    createdAt: state.openTrade.openedAt
+    strategy: newTrade.strategy,
+    entry: newTrade.entry,
+    stop: newTrade.stop,
+    take: newTrade.take,
+    riskUsd: newTrade.riskUsd,
+    rr: newTrade.rr,
+    createdAt: newTrade.openedAt
   });
 
   log('trade:opened', {
-    symbol: state.openTrade.symbol,
-    side: state.openTrade.side,
-    strategy: state.openTrade.strategy,
-    entry: state.openTrade.entry,
-    stop: state.openTrade.stop,
-    take: state.openTrade.take,
-    riskUsd: state.openTrade.riskUsd,
-    rr: state.openTrade.rr,
-    regime: state.openTrade.regime,
-    mlWeight: state.openTrade.mlWeight,
-    tradesToday: state.tradesToday
+    symbol: newTrade.symbol,
+    side: newTrade.side,
+    strategy: newTrade.strategy,
+    entry: newTrade.entry,
+    stop: newTrade.stop,
+    take: newTrade.take,
+    riskUsd: newTrade.riskUsd,
+    rr: newTrade.rr,
+    regime: newTrade.regime,
+    mlWeight: newTrade.mlWeight,
+    tradesToday: state.tradesToday,
+    openPositions: state.openTrades.length
   });
 }
 
@@ -339,7 +438,7 @@ async function cycle(cfg) {
   }
   state.loops += 1;
 
-  await manageOpenTrade(state, cfg);
+  await manageOpenTrades(state, cfg);
   await maybeOpenTrade(state, cfg);
 
   saveState(state);

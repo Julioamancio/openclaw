@@ -3562,5 +3562,50 @@
       return escapeHtml(str).replaceAll("`", "&#096;");
     }
   </script>
+
+  <!-- Ideias de Negócio -->
+  <section id="ideas-section" style="margin:24px auto; max-width:1100px; padding:24px; background:var(--card, rgba(255,255,255,0.05)); border:1px solid var(--border, rgba(255,255,255,0.06)); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.35);">
+    <header style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+      <div>
+        <div style="font-size:18px; font-weight:700; color:var(--text, #f5f7ff);">Ideias de Negócio</div>
+        <div style="font-size:13px; color:var(--muted, #9ba3b4);">Últimas ideias geradas (ordenadas por data)</div>
+      </div>
+      <button id="ideas-refresh" style="background:var(--accent, #7c5cff); color:#fff; border:none; border-radius:10px; padding:10px 14px; font-weight:600; cursor:pointer; box-shadow:0 8px 20px rgba(124,92,255,0.35);">Recarregar</button>
+    </header>
+    <div id="ideas-list" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px;"></div>
+  </section>
+
+  <script>
+    async function loadIdeas() {
+      const listEl = document.getElementById('ideas-list');
+      if (!listEl) return;
+      listEl.innerHTML = '<div style="color:var(--muted);">Carregando ideias...</div>';
+      try {
+        const res = await fetch('/ideias-negocio/index.json');
+        if (!res.ok) throw new Error('Erro ao carregar index.json');
+        const data = await res.json();
+        const sorted = [...data].sort((a,b) => (a.date < b.date ? 1 : -1));
+        if (!sorted.length) {
+          listEl.innerHTML = '<div style="color:var(--muted);">Nenhuma ideia cadastrada.</div>';
+          return;
+        }
+        listEl.innerHTML = sorted.map(item => `
+          <article style="background:var(--card-strong, rgba(255,255,255,0.08)); border:1px solid var(--border, rgba(255,255,255,0.06)); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:13px; color:var(--muted, #9ba3b4);">${escapeHtml(item.date)}</div>
+            <div style="font-size:15px; font-weight:700; color:var(--text, #f5f7ff);">${escapeHtml(item.name || item.title || 'Ideia')}</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <span style="font-size:12px; color:var(--muted, #9ba3b4);">${escapeHtml(item.title || 'Ideia')}</span>
+              <a href="/ideias-negocio/${encodeURIComponent(item.file)}" style="font-size:13px; font-weight:600; color:var(--accent, #7c5cff); text-decoration:none;">Abrir</a>
+            </div>
+          </article>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+        listEl.innerHTML = '<div style="color:#ff8c8c;">Erro ao carregar ideias.</div>';
+      }
+    }
+    document.getElementById('ideas-refresh')?.addEventListener('click', loadIdeas);
+    loadIdeas();
+  </script>
 </body>
 </html>

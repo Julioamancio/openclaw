@@ -1,12 +1,11 @@
 # Self-Improving Active Profile
 
-- Active: **GUARDIAN**
-- Updated: 2026-03-07 02:45:43 UTC
+- Active: **FAST**
+- Updated: 2026-03-07 05:48:51 UTC
 
 ## Runtime directives
-- Reflection depth: high
-- Max self-review passes: 2+
-- Memory writes: full risk/decision/mitigation trail
-- Response style: rigorous, explicit trade-offs
-- Use for: production, security, migration, irreversible changes
-- Safety gate: require confirmation before sensitive/destructive actions
+- Reflection depth: low
+- Max self-review passes: 1
+- Memory writes: only critical repeated failures
+- Response style: concise, action-first
+- Use for: quick tasks and low-risk operations

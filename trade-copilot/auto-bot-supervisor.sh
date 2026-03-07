@@ -4,6 +4,7 @@ set -euo pipefail
 BASE_DIR="/root/.openclaw/workspace/trade-copilot"
 LOG_DIR="$BASE_DIR/data"
 SUP_LOG="$LOG_DIR/auto-supervisor.log"
+export ACCOUNT_BALANCE=${ACCOUNT_BALANCE:-10000}
 BOT_CMD="node $BASE_DIR/auto-bot.js"
 
 mkdir -p "$LOG_DIR"
