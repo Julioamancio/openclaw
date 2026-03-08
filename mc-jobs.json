@@ -21,8 +21,8 @@
       "schedule": "22:00 BRT",
       "agent": "Sistema",
       "status": "done",
-      "lastRun": "2026-03-06T16:03:13.963502+00:00",
-      "notes": "normalizado por manutenção"
+      "lastRun": "2026-03-08T01:24:24.605698+00:00",
+      "notes": "Backup executado com sucesso"
     },
     {
       "task": "Heartbeat técnico",
@@ -66,6 +66,34 @@
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-08T01:24:24.605698+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-08T01:24:24.477344+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    },
+    {
+      "ts": "2026-03-08T01:16:05.385688+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-08T01:16:03.729062+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    },
     {
       "ts": "2026-03-07T19:15:52.276079+00:00",
       "task": "Check remetentes",

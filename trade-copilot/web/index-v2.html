@@ -106,26 +106,6 @@
     <div class="card"><div class="k">Equity</div><div class="v" id="equity">--</div></div>
   </div>
 
-  <div class="card" style="margin-top:10px">
-    <h3 style="margin:4px 0 8px 0">Config do Bot (live)</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:13px;color:var(--muted);">
-      <div><div class="k">Saldo paper</div><div class="v" id="cfgBalance">--</div></div>
-      <div><div class="k">Risco/Trade</div><div class="v" id="cfgRisk">--</div></div>
-      <div><div class="k">Exposição Máx</div><div class="v" id="cfgExposure">--</div></div>
-      <div><div class="k">Posições Máx</div><div class="v" id="cfgPos">--</div></div>
-      <div><div class="k">Intervalos</div><div class="v" id="cfgIntervals">--</div></div>
-      <div><div class="k">Símbolos</div><div class="v" id="cfgSymbols">--</div></div>
-      <div><div class="k">minRR / lucro mín</div><div class="v" id="cfgRR">--</div></div>
-      <div><div class="k">Cool/Hold</div><div class="v" id="cfgTimes">--</div></div>
-      <div><div class="k">Trades/dia</div><div class="v" id="cfgMaxTrades">--</div></div>
-      <div><div class="k">Circuit breaker</div><div class="v" id="cfgCb">--</div></div>
-    </div>
-    <div style="margin-top:8px;font-size:12px;color:var(--muted);">
-      <div>MTF: 4h direção, 1h setup, 15m gatilho; LONG acima EMA200/50/20; SHORT bloqueado RSI&lt;30.</div>
-      <div>Lucro mínimo 10%; minRR 1.8; maxHold 6h; cooldown 12 min; máx 3 posições; exposição total ≤5%.</div>
-    </div>
-  </div>
-
   <div class="grid desk" style="margin-top:10px">
     <div class="card">
       <div class="toolbar">
@@ -200,6 +180,25 @@
         <details open><summary>Logs do Bot</summary><pre id="botLogs">--</pre></details>
         <details><summary>Logs do Supervisor</summary><pre id="supLogs">--</pre></details>
       </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <h3 style="margin:4px 0 8px 0">Config do Bot (live)</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:13px;color:var(--muted);">
+      <div><div class="k">Saldo paper</div><div class="v" id="cfgBalance">--</div></div>
+      <div><div class="k">Risco/Trade</div><div class="v" id="cfgRisk">--</div></div>
+      <div><div class="k">Exposição Máx</div><div class="v" id="cfgExposure">--</div></div>
+      <div><div class="k">Posições Máx</div><div class="v" id="cfgPos">--</div></div>
+      <div><div class="k">Intervalos</div><div class="v" id="cfgIntervals">--</div></div>
+      <div><div class="k">Símbolos</div><div class="v" id="cfgSymbols">--</div></div>
+      <div><div class="k">minRR / lucro mín</div><div class="v" id="cfgRR">--</div></div>
+      <div><div class="k">Cool/Hold</div><div class="v" id="cfgTimes">--</div></div>
+      <div><div class="k">Trades/dia</div><div class="v" id="cfgMaxTrades">--</div></div>
+      <div><div class="k">Circuit breaker</div><div class="v" id="cfgCb">--</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);">
+      <div>MTF: 4h direção, 1h setup, 15m gatilho; LONG acima EMA200/50/20; SHORT bloqueado RSI&lt;30.</div>
+      <div>Lucro mínimo 10%; minRR 1.8; maxHold 6h; cooldown 12 min; máx 3 posições; exposição total ≤5%.</div>
     </div>
   </div>
 </div>
