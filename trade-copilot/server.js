@@ -134,6 +134,53 @@ function atr(klines, period = 14) {
   return trs.slice(-period).reduce((a, b) => a + b, 0) / period;
 }
 
+function rsi(values, period = 14) {
+  if (values.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = values.length - period; i < values.length; i++) {
+    const diff = values[i] - values[i - 1];
+    if (diff >= 0) gains += diff; else losses -= diff;
+  }
+  const rs = losses === 0 ? 100 : gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+
+function vwap(klines) {
+  let pv = 0, v = 0;
+  for (const k of klines) {
+    const high = Number(k[2]);
+    const low = Number(k[3]);
+    const close = Number(k[4]);
+    const vol = Number(k[5]);
+    const tp = (high + low + close) / 3;
+    pv += tp * vol;
+    v += vol;
+  }
+  return v ? pv / v : 0;
+}
+
+function bollinger(values, period = 20, mult = 2) {
+  if (values.length < period) return { mid: values[values.length - 1], upper: values[values.length - 1], lower: values[values.length - 1] };
+  const slice = values.slice(-period);
+  const mean = slice.reduce((a, b) => a + b, 0) / period;
+  const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period;
+  const std = Math.sqrt(variance);
+  return { mid: mean, upper: mean + mult * std, lower: mean - mult * std };
+}
+
+function macd(values, fast = 12, slow = 26, signal = 9) {
+  if (values.length < slow + signal) return { macd: 0, signal: 0, hist: 0 };
+  const macdSeries = values.map((_, i) => {
+    const slice = values.slice(0, i + 1);
+    const eFast = ema(slice, fast);
+    const eSlow = ema(slice, slow);
+    return eFast - eSlow;
+  });
+  const macdLine = macdSeries[macdSeries.length - 1];
+  const signalLine = ema(macdSeries.slice(-signal - 5), signal);
+  return { macd: macdLine, signal: signalLine, hist: macdLine - signalLine };
+}
+
 function number(v, d = 2) { return Number(v.toFixed(d)); }
 
 async function buildSignal(symbol = 'BTCUSDT', interval = '15m', riskUsd = 0.5) {
@@ -144,41 +191,58 @@ async function buildSignal(symbol = 'BTCUSDT', interval = '15m', riskUsd = 0.5) 
   const volumes = klines.map((k) => Number(k[5]));
 
   const last = closes[closes.length - 1];
-  const e20 = ema(closes.slice(-50), 20);
+  const prev = closes[closes.length - 2] || last;
+  const e21 = ema(closes, 21);
   const e50 = ema(closes, 50);
+  const e200 = ema(closes, 200);
   const a = atr(klines, 14);
+  const r = rsi(closes, 14);
+  const m = macd(closes, 12, 26, 9);
+  const vw = vwap(klines);
+  const bb = bollinger(closes, 20, 2);
   const vNow = volumes[volumes.length - 1];
   const vAvg = volumes.slice(-21, -1).reduce((x, y) => x + y, 0) / 20;
   const hh20 = Math.max(...highs.slice(-20));
   const ll20 = Math.min(...lows.slice(-20));
 
-  const trendUp = e20 > e50;
-  const trendDown = e20 < e50;
-  const volumeBoost = vNow >= vAvg;
-  const breakoutUp = last >= hh20 * 0.999;
-  const breakoutDown = last <= ll20 * 1.001;
+  const trendLong = last > e200 && e21 > e50;
+  const trendShort = last < e200 && e21 < e50;
+  const volumeBoost = vNow >= vAvg * 1.05;
+
+  const pullbackLong = last <= e21 * 1.002 && last >= e50 * 0.995 && r > 40 && last > prev;
+  const pullbackShort = last >= e21 * 0.998 && last <= e50 * 1.005 && r < 60 && last < prev;
+
+  const breakoutUp = last >= hh20 * 0.999 && prev < hh20 * 0.995 && volumeBoost;
+  const breakoutDown = last <= ll20 * 1.001 && prev > ll20 * 1.005 && volumeBoost;
+
+  const reversalLong = r < 30 && last <= bb.lower * 1.01 && last > prev;
+  const reversalShort = r > 70 && last >= bb.upper * 0.99 && last < prev;
 
   let side = 'FLAT';
   let strategy = 'none';
 
-  if (trendUp && volumeBoost && breakoutUp) { side = 'LONG'; strategy = 'trend_breakout_long'; }
-  else if (trendDown && volumeBoost && breakoutDown) { side = 'SHORT'; strategy = 'trend_breakout_short'; }
-  else if (trendUp && volumeBoost) { side = 'LONG'; strategy = 'trend_follow_long'; }
-  else if (trendDown && volumeBoost) { side = 'SHORT'; strategy = 'trend_follow_short'; }
+  if (trendLong && pullbackLong) { side = 'LONG'; strategy = 'trend_pullback_long'; }
+  else if (trendShort && pullbackShort) { side = 'SHORT'; strategy = 'trend_pullback_short'; }
+  else if (trendLong && breakoutUp) { side = 'LONG'; strategy = 'breakout_retest_long'; }
+  else if (trendShort && breakoutDown) { side = 'SHORT'; strategy = 'breakout_retest_short'; }
+  else if (reversalLong) { side = 'LONG'; strategy = 'reversal_long'; }
+  else if (reversalShort) { side = 'SHORT'; strategy = 'reversal_short'; }
 
   let entry = last, stop = last, take = last;
   if (side === 'LONG') {
-    stop = entry - Math.max(a * 1.2, entry * 0.002);
-    take = entry + Math.max(a * 2.5, entry * 0.004);
+    stop = Math.min(ll20, entry - Math.max(a * 1.2, entry * 0.002));
+    const risk = Math.abs(entry - stop);
+    take = entry + (risk * 2);
   } else if (side === 'SHORT') {
-    stop = entry + Math.max(a * 1.2, entry * 0.002);
-    take = entry - Math.max(a * 2.5, entry * 0.004);
+    stop = Math.max(hh20, entry + Math.max(a * 1.2, entry * 0.002));
+    const risk = Math.abs(entry - stop);
+    take = entry - (risk * 2);
   }
 
   const dist = Math.abs(entry - stop) || 1;
   const qty = side === 'FLAT' ? 0 : riskUsd / dist;
 
-  const trendScore = Math.min(100, Math.abs((e20 - e50) / last) * 10000);
+  const trendScore = Math.min(100, Math.abs((e21 - e50) / last) * 10000);
   const volumeScore = Math.min(100, (vNow / (vAvg || 1)) * 50);
   const volatilityScore = Math.min(100, (a / last) * 10000);
   const totalScore = number((trendScore * 0.45) + (volumeScore * 0.30) + (volatilityScore * 0.25), 2);
@@ -186,8 +250,10 @@ async function buildSignal(symbol = 'BTCUSDT', interval = '15m', riskUsd = 0.5) 
   return {
     symbol, interval, time: new Date().toISOString(), strategy, score: totalScore,
     indicators: {
-      ema20: number(e20, 4), ema50: number(e50, 4), atr14: number(a, 4),
-      volumeNow: number(vNow, 3), volumeAvg20: number(vAvg, 3), hh20: number(hh20, 4), ll20: number(ll20, 4)
+      ema21: number(e21, 4), ema50: number(e50, 4), ema200: number(e200, 4),
+      rsi14: number(r, 2), macd: number(m.macd, 4), macdSignal: number(m.signal, 4), macdHist: number(m.hist, 4),
+      vwap: number(vw, 4), bbUpper: number(bb.upper, 4), bbLower: number(bb.lower, 4), bbMid: number(bb.mid, 4),
+      atr14: number(a, 4), volumeNow: number(vNow, 3), volumeAvg20: number(vAvg, 3), hh20: number(hh20, 4), ll20: number(ll20, 4)
     },
     signal: {
       side, entry: number(entry, 4), stop: number(stop, 4), take: number(take, 4),
@@ -198,12 +264,25 @@ async function buildSignal(symbol = 'BTCUSDT', interval = '15m', riskUsd = 0.5) 
 
 async function marketScan(limit = 8) {
   const ticker24 = await binancePublic('/api/v3/ticker/24hr');
-  const candidates = ticker24
+  const top20 = new Set(['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT','AVAXUSDT','TRXUSDT','DOTUSDT','LINKUSDT','MATICUSDT','TONUSDT','SHIBUSDT','ICPUSDT','LTCUSDT','BCHUSDT','APTUSDT','ATOMUSDT','ARBUSDT']);
+
+  const base = ticker24
     .filter((t) => t.symbol.endsWith('USDT'))
     .filter((t) => !t.symbol.includes('UPUSDT') && !t.symbol.includes('DOWNUSDT') && !t.symbol.includes('BULL') && !t.symbol.includes('BEAR'))
-    .filter((t) => Number(t.quoteVolume) > 15000000)
-    .sort((a, b) => Number(b.quoteVolume) - Number(a.quoteVolume))
-    .slice(0, 18);
+    .filter((t) => Number(t.quoteVolume) > 8000000);
+
+  const topVolume = [...base].sort((a, b) => Number(b.quoteVolume) - Number(a.quoteVolume)).slice(0, 30);
+  const topChange = [...base].sort((a, b) => Math.abs(Number(b.priceChangePercent)) - Math.abs(Number(a.priceChangePercent))).slice(0, 20);
+
+  const bySymbol = new Map();
+  for (const t of base) bySymbol.set(t.symbol, t);
+
+  const symbols = new Set();
+  for (const s of top20) symbols.add(s);
+  for (const t of topVolume) symbols.add(t.symbol);
+  for (const t of topChange) symbols.add(t.symbol);
+
+  const candidates = [...symbols].map(s => bySymbol.get(s)).filter(Boolean);
 
   const scored = [];
   for (const t of candidates) {
@@ -436,17 +515,20 @@ const server = http.createServer(async (req, res) => {
         riskPerTradePct: 1,
         maxExposurePct: 5,
         maxPositions: 3,
-        allowedSymbols: ['ETHUSDT','BTCUSDT'],
+        allowedSymbols: ['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT','AVAXUSDT','TRXUSDT','DOTUSDT','LINKUSDT','MATICUSDT','TONUSDT','SHIBUSDT','ICPUSDT','LTCUSDT','BCHUSDT','APTUSDT','ATOMUSDT','ARBUSDT'],
         intervals: ['4h','1h','15m'],
-        minRR: 1.8,
+        minRR: 2.0,
         minProfitPct: 0.10,
-        cooldownMin: 12,
+        cooldownMin: 0,
         maxHoldMin: 360,
         maxTradesPerDay: 10,
         circuitBreaker: { consecutiveLosses: 3, pauseHours: 6 },
         filters: {
-          longAboveEma: true,
-          shortBlockRsi30: true,
+          ema21_50_200: true,
+          rsi14: true,
+          macd: true,
+          vwap: true,
+          bollinger: true,
           mtfAligned: true,
         },
         mode: botMode,

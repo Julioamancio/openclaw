@@ -8,23 +8,29 @@ const LOG_FILE = path.join(DATA_DIR, 'auto-bot.log');
 const TRADES_FILE = path.join(DATA_DIR, 'paper-trades.jsonl');
 const BOT_MODE_FILE = path.join(DATA_DIR, 'bot-mode.json');
 // Saldo paper para sizing (pode vir de env ACCOUNT_BALANCE)
-const ACCOUNT_BALANCE = Number(process.env.ACCOUNT_BALANCE || 1000);
+const ACCOUNT_BALANCE = Number(process.env.ACCOUNT_BALANCE || 10000);
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-const MODES = {
-  slow: { loopMs: 60_000, riskUsd: 0.30, minHint: 45, minScore: 40, minRR: 1.8, minVolPct: 0.0009, requireUnanimous: true, maxTradesPerDay: 8, cooldownMin: 20, maxHoldMin: 120, minProfitPct: 0.10, mode: 'slow' },
-  conservative: { loopMs: 30_000, riskUsd: 0.30, minHint: 35, minScore: 30, minRR: 1.8, minVolPct: 0.0008, requireUnanimous: true, maxTradesPerDay: 20, cooldownMin: 10, maxHoldMin: 80, minProfitPct: 0.10, mode: 'conservative' },
-  fast: { loopMs: 15_000, riskUsd: 0.30, minHint: 25, minScore: 28, minRR: 1.7, minVolPct: 0.0007, requireUnanimous: false, maxTradesPerDay: 50, cooldownMin: 5, maxHoldMin: 25, minProfitPct: 0.10, mode: 'fast' },
-  turbo: { loopMs: 10_000, riskUsd: 0.28, minHint: 20, minScore: 26, minRR: 1.6, minVolPct: 0.00065, requireUnanimous: false, maxTradesPerDay: 80, cooldownMin: 3, maxHoldMin: 15, minProfitPct: 0.10, mode: 'turbo' },
-  // Ultra calibrado para 1h: menos ruído, hold maior, RR mais alto
-  ultra: { loopMs: 10_000, riskUsd: 0.25, minHint: 20, minScore: 26, minRR: 1.8, minVolPct: 0.00075, requireUnanimous: true, maxTradesPerDay: 10, cooldownMin: 12, maxHoldMin: 360, minProfitPct: 0.10, mode: 'ultra' }
+// Config única seguindo o prompt profissional
+const CONFIG = {
+  loopMs: 5 * 60_000,
+  minHint: 30,
+  minScore: 30,
+  minRR: 2.0,
+  minVolPct: 0.0006,
+  maxTradesPerDay: 10,
+  cooldownMin: 0,
+  maxHoldMin: 360,
+  minProfitPct: 0.10,
+  mode: 'pro'
 };
 
-// Restrição de símbolos: só ETH e BTC (spot)
-const ALLOWED_SYMBOLS = new Set(['ETHUSDT', 'BTCUSDT']);
-
-const DEFAULT_MODE = 'ultra';
+// Restrição de símbolos: BTC/ETH + Top20 (spot)
+const ALLOWED_SYMBOLS = new Set([
+  'BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT','AVAXUSDT','TRXUSDT','DOTUSDT',
+  'LINKUSDT','MATICUSDT','TONUSDT','SHIBUSDT','ICPUSDT','LTCUSDT','BCHUSDT','APTUSDT','ATOMUSDT','ARBUSDT'
+]);
 
 
 function nowIso() { return new Date().toISOString(); }
@@ -43,14 +49,8 @@ function appendTrade(entry) {
 }
 
 function loadRuntimeCfg() {
-  let mode = DEFAULT_MODE;
-  try {
-    if (fs.existsSync(BOT_MODE_FILE)) {
-      const raw = JSON.parse(fs.readFileSync(BOT_MODE_FILE, 'utf8'));
-      if (raw?.mode && MODES[raw.mode]) mode = raw.mode;
-    }
-  } catch {}
-  return MODES[mode];
+  // mantém compatibilidade, mas força config profissional única
+  return CONFIG;
 }
 
 function defaultState() {
@@ -111,11 +111,11 @@ function calcRR(sig) {
 }
 
 function detectRegime(sig) {
-  const e20 = Number(sig?.indicators?.ema20 || 0);
+  const e21 = Number(sig?.indicators?.ema21 || 0);
   const e50 = Number(sig?.indicators?.ema50 || 0);
   const atr = Number(sig?.indicators?.atr14 || 0);
   const entry = Number(sig?.signal?.entry || 1);
-  const trend = Math.abs(e20 - e50) / entry;
+  const trend = Math.abs(e21 - e50) / entry;
   const vol = atr / entry;
   if (trend > 0.0015 && vol > 0.001) return 'trend_high_vol';
   if (trend > 0.001) return 'trend';
@@ -152,21 +152,21 @@ async function bestSignalForSymbol(symbol, riskUsd, cfg) {
         const entry = Number(sig?.signal?.entry || 0);
         const volPct = entry > 0 ? atr / entry : 0;
         const rsi = Number(sig?.indicators?.rsi14 || 0);
-        const ema20 = Number(sig?.indicators?.ema20 || 0);
+        const ema21 = Number(sig?.indicators?.ema21 || 0);
         const ema50 = Number(sig?.indicators?.ema50 || 0);
         const ema200 = Number(sig?.indicators?.ema200 || 0);
 
-        signalsByTf[interval] = { ...sig, entry, rsi, ema20, ema50, ema200, volPct };
+        signalsByTf[interval] = { ...sig, entry, rsi, ema21, ema50, ema200, volPct };
 
         // Filtros de 1h para evitar vender fundo e comprar sem retomada de tendência
         if (interval === '1h') {
           if (sig.signal.side === 'SHORT' && rsi && rsi < 30) continue;
           if (sig.signal.side === 'LONG') {
-            if ((ema20 && entry < ema20) || (ema50 && entry < ema50) || (ema200 && entry < ema200)) continue;
+            if ((ema21 && entry < ema21) || (ema50 && entry < ema50) || (ema200 && entry < ema200)) continue;
           }
         }
 
-        candidates.push({ ...sig, interval, volPct, rsi, ema20, ema50, ema200 });
+        candidates.push({ ...sig, interval, volPct, rsi, ema21, ema50, ema200 });
       }
     } catch {}
   }
