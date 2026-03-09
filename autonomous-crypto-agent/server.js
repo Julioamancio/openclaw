@@ -1,0 +1,776 @@
+import express from 'express';
+import axios from 'axios';
+import dotenv from 'dotenv';
+import { WebSocketServer } from 'ws';
+import http from 'http';
+import crypto from 'crypto';
+import fs from 'fs';
+
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+app.disable('etag');
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path.endsWith('.html') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+app.use(express.static('public', { etag: false, maxAge: 0 }));
+
+const cfg = {
+  port: Number(process.env.PORT || 8787),
+  mode: process.env.TRADING_MODE || 'paper',
+  realEnabled: String(process.env.REAL_TRADING_ENABLED || 'false') === 'true',
+  paperStartDate: new Date(process.env.PAPER_START_DATE || Date.now()),
+  paperMinDays: Number(process.env.PAPER_MIN_DAYS || 7),
+  riskPerTrade: Number(process.env.RISK_PER_TRADE || 0.01),
+  maxSimultaneousTrades: Number(process.env.MAX_SIMULTANEOUS_TRADES || 3),
+  maxTotalExposure: Number(process.env.MAX_TOTAL_EXPOSURE || 0.05),
+  maxTradesPerDay: Number(process.env.MAX_TRADES_PER_DAY || 10),
+  circuitBreakerLosses: Number(process.env.CIRCUIT_BREAKER_LOSSES || 3),
+  circuitBreakerPauseHours: Number(process.env.CIRCUIT_BREAKER_PAUSE_HOURS || 6),
+  loopMs: Number(process.env.LOOP_INTERVAL_MS || 300000),
+  tradeProfile: process.env.TRADE_PROFILE || 'conservative'
+};
+
+const WATCHLIST = ['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT','TRXUSDT','AVAXUSDT','LINKUSDT'];
+
+const TRADE_PROFILES = {
+  conservative: { minScore: 70, tp1Mul: 1.015, tp2Mul: 1.03, slMul: 0.985, maxCandidatesPerAsset: 1, maxExposure: 0.05, maxSimTrades: 3, maxTradesPerDay: 10 },
+  balanced: { minScore: 60, tp1Mul: 1.012, tp2Mul: 1.024, slMul: 0.988, maxCandidatesPerAsset: 1, maxExposure: 0.08, maxSimTrades: 4, maxTradesPerDay: 30 },
+  aggressive: { minScore: 50, tp1Mul: 1.01, tp2Mul: 1.02, slMul: 0.99, maxCandidatesPerAsset: 2, maxExposure: 0.15, maxSimTrades: 6, maxTradesPerDay: 120 },
+  ultra: { minScore: 35, tp1Mul: 1.006, tp2Mul: 1.012, slMul: 0.993, maxCandidatesPerAsset: 3, maxExposure: 0.25, maxSimTrades: 10, maxTradesPerDay: 300 },
+  loucura: { minScore: 0, tp1Mul: 1.004, tp2Mul: 1.009, slMul: 0.994, maxCandidatesPerAsset: 4, maxExposure: 0.35, maxSimTrades: 12, martingaleMaxSteps: 3, maxTradesPerDay: 10000 }
+};
+
+function activeProfile() {
+  return TRADE_PROFILES[cfg.tradeProfile] || TRADE_PROFILES.conservative;
+}
+
+const state = {
+  startedAt: new Date().toISOString(),
+  mode: cfg.mode,
+  marketRegime: 'unknown',
+  volatility: 'normal',
+  account: {
+    balance: 10000, available: 10000, allocated: 0,
+    unrealizedPnL: 0, realizedPnL: 0, winRate: 0, lossRate: 0, profitFactor: 0
+  },
+  risk: {
+    riskPerTrade: cfg.riskPerTrade, currentExposure: 0,
+    consecutiveLosses: 0, circuitBreakerUntil: null,
+    maxTradesPerDay: cfg.maxTradesPerDay, tradesToday: 0
+  },
+  watchlist: [],
+  openPositions: [],
+  closedTrades: [],
+  signals: [],
+  executionFeed: [],
+  martingale: { step: 0, maxSteps: 3 },
+  logs: [],
+  wallet: {
+    source: 'paper',
+    fetchedAt: null,
+    totalUSDT: null,
+    assets: []
+  },
+  lastScan: null,
+  nextScanInSec: Math.floor(cfg.loopMs / 1000),
+  status: 'online'
+};
+
+const tfCache = new Map();
+
+function log(msg, obj = null) {
+  const item = { t: new Date().toISOString(), msg, ...(obj ? { obj } : {}) };
+  state.logs.unshift(item);
+  if (state.logs.length > 200) state.logs.pop();
+  console.log(`[agent] ${msg}`);
+}
+
+function pushExecution(type, pair, details) {
+  state.executionFeed.unshift({ ts: new Date().toISOString(), type, pair, details });
+  if (state.executionFeed.length > 300) state.executionFeed.pop();
+}
+
+function hasBinanceKeys() {
+  return Boolean(process.env.BINANCE_API_KEY && process.env.BINANCE_API_SECRET);
+}
+
+function realBlockReason() {
+  const paperDays = Math.floor((Date.now() - cfg.paperStartDate.getTime()) / 86400000);
+  if (!hasBinanceKeys()) return 'Configure BINANCE_API_KEY/BINANCE_API_SECRET na aba API';
+  if (!cfg.realEnabled) return 'REAL_TRADING_ENABLED está false (ative na aba API)';
+  if (paperDays < cfg.paperMinDays) return `Período de paper incompleto: ${paperDays}/${cfg.paperMinDays} dias`;
+  return null;
+}
+
+function persistEnvPair(key, value) {
+  const envPath = new URL('./.env', import.meta.url).pathname;
+  let txt = '';
+  try { txt = fs.readFileSync(envPath, 'utf8'); } catch { txt = ''; }
+  const re = new RegExp(`^${key}=.*$`, 'm');
+  if (re.test(txt)) txt = txt.replace(re, `${key}=${value}`);
+  else txt += `${txt.endsWith('\n') || txt.length===0 ? '' : '\n'}${key}=${value}\n`;
+  fs.writeFileSync(envPath, txt, 'utf8');
+}
+
+async function fetchBinanceWallet() {
+  if (!hasBinanceKeys()) return null;
+  const timestamp = Date.now();
+  const query = `recvWindow=5000&timestamp=${timestamp}`;
+  const signature = crypto.createHmac('sha256', process.env.BINANCE_API_SECRET).update(query).digest('hex');
+  const url = `https://api.binance.com/api/v3/account?${query}&signature=${signature}`;
+  const r = await axios.get(url, {
+    headers: { 'X-MBX-APIKEY': process.env.BINANCE_API_KEY },
+    timeout: 15000
+  });
+
+  const assets = (r.data?.balances || [])
+    .map(b => ({ asset: b.asset, free: Number(b.free), locked: Number(b.locked), total: Number(b.free) + Number(b.locked) }))
+    .filter(a => a.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 50);
+
+  const priceRes = await axios.get('https://api.binance.com/api/v3/ticker/price', { timeout: 10000 });
+  const priceMap = new Map(priceRes.data.map(p => [p.symbol, Number(p.price)]));
+
+  let totalUSDT = 0;
+  const enriched = assets.map(a => {
+    let usdtValue = null;
+    if (a.asset === 'USDT') usdtValue = a.total;
+    else if (a.asset === 'BUSD' || a.asset === 'USDC' || a.asset === 'FDUSD') usdtValue = a.total;
+    else {
+      const p = priceMap.get(`${a.asset}USDT`);
+      if (p) usdtValue = a.total * p;
+    }
+    if (usdtValue) totalUSDT += usdtValue;
+    return { ...a, usdtValue: usdtValue ? Number(usdtValue.toFixed(2)) : null };
+  });
+
+  return {
+    source: 'binance',
+    fetchedAt: new Date().toISOString(),
+    totalUSDT: Number(totalUSDT.toFixed(2)),
+    assets: enriched.slice(0, 20)
+  };
+}
+
+function sma(values, p) {
+  if (values.length < p) return null;
+  const s = values.slice(-p).reduce((a,b)=>a+b,0);
+  return s / p;
+}
+
+function std(values, p) {
+  if (values.length < p) return null;
+  const m = sma(values, p);
+  const v = values.slice(-p).reduce((a,b)=>a + (b - m) ** 2, 0) / p;
+  return Math.sqrt(v);
+}
+
+function ema(values, p) {
+  if (values.length < p) return null;
+  const k = 2 / (p + 1);
+  let r = values.slice(0, p).reduce((a, b) => a + b, 0) / p;
+  for (let i = p; i < values.length; i++) r = values[i] * k + r * (1 - k);
+  return r;
+}
+
+function macd(values) {
+  if (values.length < 35) return null;
+  const lineSeries = [];
+  for (let i = 26; i <= values.length; i++) {
+    const slice = values.slice(0, i);
+    const e12 = ema(slice, 12);
+    const e26 = ema(slice, 26);
+    if (e12 !== null && e26 !== null) lineSeries.push(e12 - e26);
+  }
+  if (lineSeries.length < 9) return null;
+  const signal = ema(lineSeries, 9);
+  const line = lineSeries[lineSeries.length - 1];
+  return { line, signal, hist: line - signal };
+}
+
+function rsi(values, p = 14) {
+  if (values.length < p + 1) return null;
+  let gains = 0, losses = 0;
+  for (let i = values.length - p; i < values.length; i++) {
+    const diff = values[i] - values[i - 1];
+    if (diff >= 0) gains += diff; else losses += Math.abs(diff);
+  }
+  if (losses === 0) return 100;
+  const rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+
+function bollinger(values, p = 20, m = 2) {
+  const mid = sma(values, p);
+  const d = std(values, p);
+  if (mid === null || d === null) return null;
+  return { upper: mid + d * m, mid, lower: mid - d * m };
+}
+
+function vwap(klines) {
+  if (!klines?.length) return null;
+  let pv = 0;
+  let vv = 0;
+  for (const k of klines) {
+    const h = Number(k[2]);
+    const l = Number(k[3]);
+    const c = Number(k[4]);
+    const v = Number(k[5]);
+    const tp = (h + l + c) / 3;
+    pv += tp * v;
+    vv += v;
+  }
+  return vv ? pv / vv : null;
+}
+
+function canTradeNow() {
+  const pf = activeProfile();
+  const maxSimTrades = pf.maxSimTrades || cfg.maxSimultaneousTrades;
+  const maxExposure = pf.maxExposure || cfg.maxTotalExposure;
+  const maxTradesPerDay = pf.maxTradesPerDay || cfg.maxTradesPerDay;
+  if (state.risk.circuitBreakerUntil && new Date(state.risk.circuitBreakerUntil) > new Date()) return false;
+  if (state.risk.tradesToday >= maxTradesPerDay) return false;
+  if (state.openPositions.length >= maxSimTrades) return false;
+  if (state.risk.currentExposure >= maxExposure) return false;
+  if (state.mode === 'real') {
+    const days = Math.floor((Date.now() - cfg.paperStartDate.getTime()) / 86400000);
+    const keysReady = hasBinanceKeys();
+    if (!cfg.realEnabled || days < cfg.paperMinDays || !keysReady) return false;
+  }
+  return true;
+}
+
+function trendBias(t) {
+  return t.e21 > t.e50 && t.close > t.e200 ? 'bull' : (t.e21 < t.e50 && t.close < t.e200 ? 'bear' : 'neutral');
+}
+
+function buildSignal(asset) {
+  const tf4h = asset.tf4h;
+  const tf1h = asset.tf1h;
+  const tf15m = asset.tf15m;
+  const price = tf1h.close;
+
+  const candidates = [];
+
+  // Strategy 1 — Trend Continuation Pullback
+  {
+    const checks = [];
+    if (trendBias(tf4h) === 'bull') checks.push('4H trend bull');
+    if (trendBias(tf1h) === 'bull') checks.push('1H trend confirm');
+    if (trendBias(tf15m) === 'bull') checks.push('15M entry aligned');
+    if (tf1h.rsi > 40 && tf1h.rsi < 70) checks.push('RSI healthy');
+    if (tf1h.macd?.hist > 0) checks.push('MACD positive');
+    if (tf1h.close > tf1h.vwap) checks.push('price above VWAP');
+    if (tf1h.bb && tf1h.close > tf1h.bb.mid && tf1h.close < tf1h.bb.upper) checks.push('Bollinger favorable');
+    candidates.push({ name: 'Trend Continuation Pullback', score: Math.min(100, checks.length * 14), rr: 2.1, checks });
+  }
+
+  // Strategy 2 — Breakout + Retest
+  {
+    const checks = [];
+    const prevHigh = Math.max(...tf1h.closes.slice(-20, -1));
+    const nearRetest = price > prevHigh * 0.995 && price < prevHigh * 1.01;
+    if (price > prevHigh) checks.push('breakout above recent resistance');
+    if (nearRetest) checks.push('retest zone respected');
+    if ((tf1h.macd?.hist || 0) > 0) checks.push('momentum expansion');
+    if (tf1h.rsi > 45 && tf1h.rsi < 72) checks.push('RSI supports breakout');
+    candidates.push({ name: 'Breakout + Retest', score: Math.min(100, checks.length * 18), rr: 2.0, checks });
+  }
+
+  // Strategy 3 — Reversal at Major Level
+  {
+    const checks = [];
+    if (tf1h.bb && price <= tf1h.bb.lower * 1.01) checks.push('near lower Bollinger extreme');
+    if (tf1h.rsi < 35) checks.push('RSI oversold zone');
+    if ((tf15m.macd?.hist || 0) > 0) checks.push('15M bullish momentum shift');
+    candidates.push({ name: 'Reversal at Major Level', score: Math.min(100, checks.length * 22), rr: 2.2, checks });
+  }
+
+  // Strategy 4 — Range Rotation
+  {
+    const checks = [];
+    const lo = Math.min(...tf1h.closes.slice(-40));
+    const hi = Math.max(...tf1h.closes.slice(-40));
+    const width = (hi - lo) / lo;
+    if (width > 0.01 && width < 0.07) checks.push('range detected');
+    if (price <= lo * 1.02) checks.push('price near range support');
+    if (tf1h.rsi < 45) checks.push('RSI supportive for bounce');
+    candidates.push({ name: 'Range Rotation', score: Math.min(100, checks.length * 20), rr: 2.0, checks });
+  }
+
+  const ordered = [...candidates].sort((a, b) => b.score - a.score);
+  const best = ordered[0];
+  const pf = activeProfile();
+  const approvedCandidates = ordered.filter(c => c.score >= pf.minScore && c.rr >= 2);
+  const approved = approvedCandidates.length > 0;
+
+  return {
+    ts: new Date().toISOString(),
+    pair: asset.symbol,
+    action: approved ? 'BUY' : 'REJECT',
+    strategy: best.name,
+    strength: best.score,
+    rr: best.rr,
+    reason: approved ? `Approved: ${best.checks.join(', ')}` : `Rejected: ${best.checks.join(', ') || 'low confluence'}`,
+    checks: best.checks,
+    approvedCandidates,
+    indicators: {
+      rsi: tf1h.rsi,
+      macdHist: tf1h.macd?.hist,
+      vwap: tf1h.vwap,
+      bbMid: tf1h.bb?.mid
+    }
+  };
+}
+
+function maybeExecutePaperTrade(signal, price) {
+  if (signal.action !== 'BUY' || !canTradeNow()) return;
+  if (state.openPositions.some(p => p.pair === signal.pair && p.strategy === signal.strategy)) return;
+
+  const pf = activeProfile();
+  const stop = price * pf.slMul;
+  const tp1 = price * pf.tp1Mul;
+  const tp2 = price * pf.tp2Mul;
+  const stopDistance = Math.abs(price - stop);
+  const riskValue = state.account.balance * cfg.riskPerTrade;
+  const pf2 = activeProfile();
+  const mgStep = Math.max(0, Math.min(state.martingale?.step || 0, pf2.martingaleMaxSteps || 0));
+  const mgMultiplier = cfg.tradeProfile === 'loucura' ? Math.pow(2, mgStep) : 1;
+  const qtyByRisk = (riskValue / stopDistance) * mgMultiplier;
+
+  const maxExposure = (activeProfile().maxExposure || cfg.maxTotalExposure);
+  const remainingExposure = Math.max(0, maxExposure - state.risk.currentExposure);
+  const maxNotionalAllowed = state.account.balance * remainingExposure;
+  const qtyByExposure = maxNotionalAllowed / price;
+
+  const rawQty = Math.min(qtyByRisk, qtyByExposure);
+  const qty = Math.floor(rawQty * 1e6) / 1e6;
+  if (!Number.isFinite(qty) || qty <= 0) {
+    if (cfg.tradeProfile !== 'loucura') pushExecution('REJECTED', signal.pair, 'Risk block: exposição máxima atingida');
+    return;
+  }
+
+  const notional = qty * price;
+  const exposure = notional / state.account.balance;
+  if (state.risk.currentExposure + exposure > maxExposure + 1e-9) {
+    if (cfg.tradeProfile !== 'loucura') pushExecution('REJECTED', signal.pair, 'Risk block: limite de exposição total');
+    return;
+  }
+
+  const pos = {
+    id: `pos_${Date.now()}_${signal.pair}`,
+    pair: signal.pair,
+    entry: price,
+    current: price,
+    stopLoss: stop,
+    tp1,
+    tp2,
+    qty,
+    riskPct: cfg.riskPerTrade,
+    strategy: signal.strategy,
+    openAt: new Date().toISOString(),
+    mode: cfg.mode,
+    tp1Hit: false
+  };
+
+  state.openPositions.push(pos);
+  state.risk.currentExposure += exposure;
+  state.risk.tradesToday += 1;
+  state.account.available -= notional;
+  state.account.allocated += notional;
+  pushExecution('BUY', pos.pair, `Entry ${pos.entry.toFixed(4)} | Qty ${pos.qty}`);
+  log('Paper trade executed', { pair: pos.pair, entry: pos.entry, qty: pos.qty });
+}
+
+function monitorPositions() {
+  for (const p of [...state.openPositions]) {
+    const wl = state.watchlist.find(x => x.symbol === p.pair);
+    if (!wl) continue;
+    p.current = wl.price;
+
+    if (!p.tp1Hit && p.current >= p.tp1) {
+      p.tp1Hit = true;
+      p.stopLoss = p.entry;
+      log('TP1 hit; SL moved to break-even', { pair: p.pair });
+    }
+
+    let closeReason = null;
+    let closePrice = p.current;
+    if (p.current <= p.stopLoss) closeReason = 'stop_loss';
+    if (p.current >= p.tp2) closeReason = 'tp2';
+
+    if (closeReason) {
+      const pnl = (closePrice - p.entry) * p.qty;
+      state.account.realizedPnL += pnl;
+      state.account.balance += pnl;
+      state.account.available += (p.qty * p.entry) + pnl;
+      state.account.allocated = Math.max(0, state.account.allocated - (p.qty * p.entry));
+      state.risk.currentExposure = Math.max(0, state.risk.currentExposure - ((p.qty * p.entry) / Math.max(1, state.account.balance)));
+
+      if (pnl < 0) state.risk.consecutiveLosses += 1; else state.risk.consecutiveLosses = 0;
+
+      if (cfg.tradeProfile === 'loucura' && String(p.strategy||'').includes('Loucura')) {
+        const maxSteps = activeProfile().martingaleMaxSteps || 3;
+        if (pnl < 0) state.martingale.step = Math.min(maxSteps, (state.martingale.step || 0) + 1);
+        else state.martingale.step = 0;
+      }
+
+      if (state.risk.consecutiveLosses >= cfg.circuitBreakerLosses) {
+        const until = new Date(Date.now() + cfg.circuitBreakerPauseHours * 3600000);
+        state.risk.circuitBreakerUntil = until.toISOString();
+        log('Circuit breaker activated', { until: state.risk.circuitBreakerUntil });
+      }
+
+      state.closedTrades.unshift({
+        pair: p.pair, entry: p.entry, exit: closePrice,
+        result: Number(pnl.toFixed(2)), strategy: p.strategy,
+        closeReason, ts: new Date().toISOString()
+      });
+      pushExecution(closeReason === 'tp2' ? 'SELL_TP' : 'SELL_SL', p.pair, `Exit ${closePrice.toFixed(4)} | PnL ${Number(pnl.toFixed(2))}`);
+      if (state.closedTrades.length > 200) state.closedTrades.pop();
+      state.openPositions = state.openPositions.filter(x => x.id !== p.id);
+      log('Position closed', { pair: p.pair, reason: closeReason, pnl: Number(pnl.toFixed(2)) });
+    }
+  }
+}
+
+async function fetchTf(symbol, interval, limit = 250) {
+  const key = `${symbol}:${interval}`;
+  const now = Date.now();
+  const hit = tfCache.get(key);
+  if (hit && now - hit.t < 45000) return hit.v;
+  const kl = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+  const closes = kl.data.map(k => Number(k[4]));
+  const out = {
+    close: closes[closes.length - 1],
+    closes,
+    e21: ema(closes, 21),
+    e50: ema(closes, 50),
+    e200: ema(closes, 200),
+    rsi: rsi(closes, 14),
+    macd: macd(closes),
+    bb: bollinger(closes, 20, 2),
+    vwap: vwap(kl.data)
+  };
+  tfCache.set(key, { t: now, v: out });
+  return out;
+}
+
+async function scanMarket() {
+  try {
+    const tickRes = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
+    const map = new Map(tickRes.data.map(x => [x.symbol, x]));
+
+    const out = [];
+    for (const sym of WATCHLIST) {
+      const t = map.get(sym);
+      if (!t) continue;
+
+      const tf4h = await fetchTf(sym, '4h', 250);
+      const tf1h = await fetchTf(sym, '1h', 250);
+      const tf15m = await fetchTf(sym, '15m', 250);
+
+      out.push({
+        symbol: sym,
+        price: Number(t.lastPrice),
+        change24h: Number(t.priceChangePercent),
+        quoteVolume: Number(t.quoteVolume),
+        tf4h, tf1h, tf15m,
+        e21: tf1h.e21, e50: tf1h.e50, e200: tf1h.e200, rsi: tf1h.rsi
+      });
+    }
+
+    state.watchlist = out.sort((a,b)=>Math.abs(b.change24h)-Math.abs(a.change24h));
+    const bull4h = state.watchlist.filter(x => trendBias(x.tf4h) === 'bull').length;
+    state.marketRegime = bull4h >= Math.ceil(state.watchlist.length * 0.6) ? 'trending' : 'ranging';
+
+    const signals = [];
+    for (const a of state.watchlist.slice(0, 10)) {
+      const s = buildSignal(a);
+      signals.push(s);
+      if (s.action === 'REJECT') pushExecution('REJECTED', s.pair, s.reason);
+
+      if (s.approvedCandidates?.length) {
+        const pf = activeProfile();
+        for (const c of s.approvedCandidates.slice(0, pf.maxCandidatesPerAsset || 1)) {
+          maybeExecutePaperTrade({
+            ...s,
+            action: 'BUY',
+            strategy: c.name,
+            strength: c.score,
+            rr: c.rr,
+            checks: c.checks,
+            reason: `Approved: ${c.checks.join(', ')}`
+          }, a.price);
+        }
+      }
+    }
+    state.signals = signals;
+
+    monitorPositions();
+
+    state.lastScan = new Date().toISOString();
+    state.nextScanInSec = Math.floor(cfg.loopMs / 1000);
+    state.account.unrealizedPnL = Number(state.openPositions.reduce((acc,p)=>acc + ((p.current - p.entry) * p.qty),0).toFixed(2));
+
+    const wins = state.closedTrades.filter(t=>t.result>0).length;
+    const losses = state.closedTrades.filter(t=>t.result<0).length;
+    const total = wins + losses;
+    state.account.winRate = total ? Number(((wins/total)*100).toFixed(1)) : 0;
+    state.account.lossRate = total ? Number(((losses/total)*100).toFixed(1)) : 0;
+
+    const grossProfit = state.closedTrades.filter(t=>t.result>0).reduce((a,b)=>a+b.result,0);
+    const grossLoss = Math.abs(state.closedTrades.filter(t=>t.result<0).reduce((a,b)=>a+b.result,0));
+    state.account.profitFactor = grossLoss ? Number((grossProfit/grossLoss).toFixed(2)) : (grossProfit>0 ? 99 : 0);
+
+    if (hasBinanceKeys()) {
+      try {
+        const wallet = await fetchBinanceWallet();
+        if (wallet) state.wallet = wallet;
+      } catch (e) {
+        log('Wallet fetch error', { error: e.message });
+      }
+    } else {
+      state.wallet = { source: 'paper', fetchedAt: new Date().toISOString(), totalUSDT: state.account.balance, assets: [{ asset: 'USDT', free: state.account.available, locked: 0, total: state.account.available }] };
+    }
+
+    log('Cycle completed', { signals: signals.length, positions: state.openPositions.length, regime: state.marketRegime });
+    state.status = 'online';
+  } catch (e) {
+    log('Scan error', { error: e.message });
+    state.status = 'warning';
+  }
+}
+
+async function loucuraTick() {
+  try {
+    if (cfg.tradeProfile !== 'loucura' || state.mode !== 'paper') return;
+    if (!canTradeNow()) return;
+    const maxExposure = (activeProfile().maxExposure || cfg.maxTotalExposure);
+    const remainingExposure = maxExposure - state.risk.currentExposure;
+    if (remainingExposure < 0.01) return;
+    let target = null;
+    if (state.watchlist?.length) {
+      target = [...state.watchlist].sort((a,b)=>Math.abs(b.change24h)-Math.abs(a.change24h))[0];
+    } else {
+      const r = await axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+      target = { symbol: 'BTCUSDT', price: Number(r.data?.price || 0), change24h: 0 };
+    }
+    if (!target?.symbol || !target?.price) return;
+    maybeExecutePaperTrade({
+      action: 'BUY',
+      pair: target.symbol,
+      strategy: `Loucura Martingale S${state.martingale?.step||0}`,
+      strength: 99,
+      rr: 1.5,
+      reason: 'Timer 1s (paper only)'
+    }, target.price);
+  } catch {}
+}
+
+function loucuraForceSellTick() {
+  try {
+    if (cfg.tradeProfile !== 'loucura' || state.mode !== 'paper') return;
+    const now = Date.now();
+    for (const p of [...state.openPositions]) {
+      const openedAt = new Date(p.openAt).getTime();
+      if (!openedAt || now - openedAt < 5000) continue;
+      const wl = state.watchlist.find(x => x.symbol === p.pair);
+      const closePrice = Number(wl?.price || p.current || p.entry);
+      const pnl = (closePrice - p.entry) * p.qty;
+
+      state.account.realizedPnL += pnl;
+      state.account.balance += pnl;
+      state.account.available += (p.qty * p.entry) + pnl;
+      state.account.allocated = Math.max(0, state.account.allocated - (p.qty * p.entry));
+      state.risk.currentExposure = Math.max(0, state.risk.currentExposure - ((p.qty * p.entry) / Math.max(1, state.account.balance)));
+
+      if (pnl < 0) state.risk.consecutiveLosses += 1; else state.risk.consecutiveLosses = 0;
+      if (cfg.tradeProfile === 'loucura' && String(p.strategy||'').includes('Loucura')) {
+        const maxSteps = activeProfile().martingaleMaxSteps || 3;
+        if (pnl < 0) state.martingale.step = Math.min(maxSteps, (state.martingale.step || 0) + 1);
+        else state.martingale.step = 0;
+      }
+
+      state.closedTrades.unshift({ pair: p.pair, entry: p.entry, exit: closePrice, result: Number(pnl.toFixed(2)), strategy: p.strategy, closeReason: 'loucura_5s_exit', ts: new Date().toISOString() });
+      if (state.closedTrades.length > 200) state.closedTrades.pop();
+      pushExecution('SELL_5S', p.pair, `Exit ${closePrice.toFixed(4)} | PnL ${Number(pnl.toFixed(2))}`);
+      state.openPositions = state.openPositions.filter(x => x.id !== p.id);
+    }
+  } catch {}
+}
+
+setInterval(() => {
+  state.nextScanInSec = Math.max(0, state.nextScanInSec - 1);
+}, 1000);
+
+setInterval(scanMarket, cfg.loopMs);
+setInterval(loucuraTick, 1000);
+setInterval(loucuraForceSellTick, 5000);
+scanMarket();
+
+function buildPublicState() {
+  const paperDays = Math.floor((Date.now() - cfg.paperStartDate.getTime()) / 86400000);
+  const keysReady = hasBinanceKeys();
+
+  const byStrategy = {};
+  const exitBreakdown = {};
+  for (const t of state.closedTrades) {
+    const k = t.strategy || 'Unknown';
+    byStrategy[k] ||= { strategy: k, trades: 0, wins: 0, losses: 0, pnl: 0 };
+    byStrategy[k].trades += 1;
+    if (t.result > 0) byStrategy[k].wins += 1;
+    if (t.result < 0) byStrategy[k].losses += 1;
+    byStrategy[k].pnl += t.result;
+
+    const ek = t.closeReason || 'unknown';
+    exitBreakdown[ek] = (exitBreakdown[ek] || 0) + 1;
+  }
+  const strategyPerformance = Object.values(byStrategy).map(x => ({ ...x, winRate: x.trades ? Number(((x.wins / x.trades) * 100).toFixed(1)) : 0, pnl: Number(x.pnl.toFixed(2)) }));
+
+  return {
+    ...state,
+    strategyPerformance,
+    exitBreakdown,
+    controls: {
+      realEnabled: cfg.realEnabled,
+      hasApiKeys: keysReady,
+      paperDays,
+      paperMinDays: cfg.paperMinDays,
+      tradeProfile: cfg.tradeProfile,
+      profiles: Object.keys(TRADE_PROFILES),
+      profileConfig: activeProfile(),
+      martingaleStep: state.martingale?.step || 0,
+      realReady: keysReady && cfg.realEnabled && paperDays >= cfg.paperMinDays,
+      blockReason: realBlockReason()
+    }
+  };
+}
+
+app.get('/api/state', (_req, res) => {
+  res.json(buildPublicState());
+});
+app.get('/api/wallet', async (_req, res) => {
+  try {
+    if (!hasBinanceKeys()) return res.status(400).json({ ok: false, error: 'Missing BINANCE API keys' });
+    const wallet = await fetchBinanceWallet();
+    state.wallet = wallet || state.wallet;
+    return res.json({ ok: true, wallet: state.wallet });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/klines', async (req, res) => {
+  try {
+    const symbol = String(req.query.symbol || 'BTCUSDT');
+    const interval = String(req.query.interval || '15m');
+    const limit = Math.min(500, Math.max(50, Number(req.query.limit || 200)));
+    const r = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+    const data = r.data.map(k => ({
+      time: Math.floor(Number(k[0]) / 1000),
+      open: Number(k[1]),
+      high: Number(k[2]),
+      low: Number(k[3]),
+      close: Number(k[4]),
+      volume: Number(k[5])
+    }));
+    res.json({ symbol, interval, data });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+app.post('/api/credentials', (req, res) => {
+  try {
+    const { apiKey, apiSecret, realEnabled } = req.body || {};
+    if (typeof apiKey === 'string' && apiKey.trim()) {
+      process.env.BINANCE_API_KEY = apiKey.trim();
+      persistEnvPair('BINANCE_API_KEY', process.env.BINANCE_API_KEY);
+    }
+    if (typeof apiSecret === 'string' && apiSecret.trim()) {
+      process.env.BINANCE_API_SECRET = apiSecret.trim();
+      persistEnvPair('BINANCE_API_SECRET', process.env.BINANCE_API_SECRET);
+    }
+    if (typeof realEnabled === 'boolean') {
+      cfg.realEnabled = realEnabled;
+      persistEnvPair('REAL_TRADING_ENABLED', realEnabled ? 'true' : 'false');
+    }
+    return res.json({ ok: true, hasApiKeys: hasBinanceKeys(), realEnabled: cfg.realEnabled, blockReason: realBlockReason() });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.post('/api/profile', (req, res) => {
+  const { profile } = req.body || {};
+  const p = String(profile || '').toLowerCase();
+  if (!TRADE_PROFILES[p]) return res.status(400).json({ ok: false, error: 'Invalid profile' });
+  cfg.tradeProfile = p;
+  pushExecution('MODE', '-', `Trade profile alterado para ${p.toUpperCase()}`);
+  return res.json({ ok: true, tradeProfile: cfg.tradeProfile, profileConfig: activeProfile() });
+});
+
+app.post('/api/paper/reset', (req, res) => {
+  const amountRaw = Number((req.body || {}).amount || 10000);
+  const amount = Number.isFinite(amountRaw) && amountRaw > 0 ? amountRaw : 10000;
+
+  state.account.balance = amount;
+  state.account.available = amount;
+  state.account.allocated = 0;
+  state.account.unrealizedPnL = 0;
+  state.account.realizedPnL = 0;
+  state.account.winRate = 0;
+  state.account.lossRate = 0;
+  state.account.profitFactor = 0;
+
+  state.openPositions = [];
+  state.closedTrades = [];
+  state.risk.currentExposure = 0;
+  state.risk.consecutiveLosses = 0;
+  state.risk.circuitBreakerUntil = null;
+  state.risk.tradesToday = 0;
+  state.martingale.step = 0;
+
+  pushExecution('MODE', '-', `Paper reset para $${amount.toFixed(2)}`);
+  return res.json({ ok: true, amount });
+});
+
+app.post('/api/mode', async (req, res) => {
+  const { mode, realEnabled } = req.body || {};
+  if (typeof realEnabled === 'boolean') cfg.realEnabled = realEnabled;
+
+  if (mode && ['paper','real'].includes(mode)) {
+    // Permite alternar visualmente para REAL para ver wallet/dados.
+    // A execução segue bloqueada por canTradeNow() até cumprir os requisitos.
+    state.mode = mode;
+    cfg.mode = mode;
+    pushExecution('MODE', '-', `Modo alterado para ${mode.toUpperCase()}`);
+    if (mode === 'real' && hasBinanceKeys()) {
+      try {
+        const w = await fetchBinanceWallet();
+        if (w) state.wallet = w;
+      } catch {}
+    }
+  }
+
+  res.json({ ok: true, mode: state.mode, realEnabled: cfg.realEnabled, blockReason: realBlockReason() });
+});
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: '/ws' });
+
+function broadcast() {
+  const payload = JSON.stringify(buildPublicState());
+  for (const c of wss.clients) if (c.readyState === 1) c.send(payload);
+}
+setInterval(broadcast, 2000);
+
+server.listen(cfg.port, () => log(`Autonomous Crypto Trading Agent online on :${cfg.port}`));

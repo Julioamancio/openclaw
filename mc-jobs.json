@@ -5,7 +5,7 @@
       "schedule": "08:00 e 16:00 BRT",
       "agent": "Daniela",
       "status": "done",
-      "lastRun": "2026-03-07T19:15:52.276079+00:00",
+      "lastRun": "2026-03-08T19:24:53.159826+00:00",
       "notes": "Nenhum e-mail novo"
     },
     {
@@ -13,15 +13,15 @@
       "schedule": "09:00 BRT",
       "agent": "Nexo",
       "status": "done",
-      "lastRun": "2026-03-07T12:00:05.188238+00:00",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-07.md"
+      "lastRun": "2026-03-08T12:00:04.860091+00:00",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-08.md"
     },
     {
       "task": "Backup GitHub",
       "schedule": "22:00 BRT",
       "agent": "Sistema",
       "status": "done",
-      "lastRun": "2026-03-08T01:24:24.605698+00:00",
+      "lastRun": "2026-03-09T01:02:27.790952+00:00",
       "notes": "Backup executado com sucesso"
     },
     {
@@ -66,6 +66,125 @@
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-09T01:02:27.790952+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-09T01:02:27.656898+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    },
+    {
+      "ts": "2026-03-09T01:01:02.936693+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-09T01:01:01.274143+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    },
+    {
+      "ts": "2026-03-08T19:24:53.159826+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-08T19:24:16.910066+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-08T19:23:26.978624+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-08T19:22:50.735066+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-08T19:00:37.754249+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-08T19:00:01.493665+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-08T14:20:39.027989+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-08T14:18:56.935579+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-08T14:18:20.674637+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-08T12:00:04.860091+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-08.md"
+    },
+    {
+      "ts": "2026-03-08T12:00:01.476993+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-08T11:00:37.573422+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-08T11:00:01.312238+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
     {
       "ts": "2026-03-08T01:24:24.605698+00:00",
       "task": "Backup GitHub",

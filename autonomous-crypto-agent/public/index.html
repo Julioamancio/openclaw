@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jarvis Trade Command Center</title>
+  <script src="/vendor/lightweight-charts.standalone.production.js?v=2"></script>
+  <style>
+    :root{--bg:#0a0f14;--card:#101722;--line:#1e2a3b;--txt:#e9f1ff;--muted:#7f8ea3;--green:#00ffa3;--cyan:#25c7ff;--red:#ff4d6d}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#0e1622,#0a0f14 35%);color:var(--txt);font-family:Inter,system-ui}
+    .wrap{padding:14px;display:grid;gap:10px;grid-template-columns:repeat(12,minmax(0,1fr));max-width:1680px;margin:0 auto}
+    .card{background:linear-gradient(180deg,#121b28,#0f1622);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 0 25px #00000055;overflow:hidden}
+    .kpi{grid-column:span 2}.chart{grid-column:span 7}.side{grid-column:span 5}.open{grid-column:span 8}.perf{grid-column:span 4}.trio{grid-column:span 4}.full{grid-column:1/-1}
+    .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.v{font-size:22px;font-weight:800}
+    .ok{color:var(--green)} .bad{color:var(--red)} .cy{color:var(--cyan)}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+    table{width:100%;border-collapse:collapse;font-size:12px;display:block;overflow-x:auto} th,td{padding:7px;border-bottom:1px solid #1b2432;text-align:left;white-space:nowrap}
+    #chart{height:300px !important;overflow:hidden;position:relative}
+    #chart *{max-height:100%}
+    #chart table{display:table !important;overflow:visible !important}
+    .open-table th,.open-table td{font-size:11px}
+    .side table{display:table;width:100%;table-layout:fixed}
+    .side th,.side td{font-size:11px;white-space:normal;word-break:break-word;vertical-align:top}
+    #sig td,#sig th{overflow-wrap:anywhere}
+    #chart{height:320px !important}
+    .badge{padding:3px 8px;border-radius:8px;border:1px solid #21415d;background:#112338;color:var(--cyan);font-size:12px}
+    .bot-indicator{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;border:1px solid #2a3b52;font-size:12px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.green{background:#00ff8c;box-shadow:0 0 10px #00ff8c;animation:pulseGreen 1s infinite}
+    .dot.red{background:#ff4d6d;box-shadow:0 0 10px #ff4d6d;animation:pulseRed 1s infinite}
+    @keyframes pulseGreen{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:.7}}
+    @keyframes pulseRed{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:.7}}
+    select{background:#0c1624;color:#dbe8ff;border:1px solid #253750;border-radius:8px;padding:5px;max-width:100%}
+    input{max-width:100%;min-width:0}
+    .api-grid{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;margin-top:6px}
+    @media(max-width:1400px){.chart{grid-column:span 7}.side{grid-column:span 5}.kpi{grid-column:span 3}.open,.perf{grid-column:span 6}.trio{grid-column:span 6}}
+    @media(max-width:1200px){.chart,.side,.open,.perf,.trio{grid-column:span 12}.kpi{grid-column:span 4} #chart{height:300px !important}}
+    @media(max-width:900px){
+      .kpi{grid-column:span 6}
+      .api-grid{grid-template-columns:1fr}
+      button{font-size:12px;padding:6px 8px !important;flex:1 1 calc(50% - 8px)}
+      #modeMsg{font-size:11px}
+      #botIndicator{width:100%;justify-content:center}
+      .hide-sm{display:none}
+      #chart{height:260px !important}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card full" style="position:sticky;top:0;z-index:30;background:#0f1622e8;backdrop-filter: blur(6px)">
+    <div class="row" style="margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="t">Controls</span>
+        <span id="botIndicator" class="bot-indicator"><span id="botDot" class="dot red"></span><span id="botText">OFFLINE</span></span>
+      </div>
+    </div>
+    <div class="row" style="justify-content:flex-start;gap:8px">
+      <button id="paperBtn" style="background:#123;color:#fff;border:1px solid #355;border-radius:8px;padding:6px 10px;cursor:pointer">Paper</button>
+      <button id="realBtn" style="background:#311;color:#fff;border:1px solid #533;border-radius:8px;padding:6px 10px;cursor:pointer">Real</button>
+      <button id="walletBtn" style="background:#132;color:#fff;border:1px solid #355;border-radius:8px;padding:6px 10px;cursor:pointer">Atualizar Wallet</button>
+      <button id="apiToggleBtn" style="background:#1b1b35;color:#fff;border:1px solid #444a77;border-radius:8px;padding:6px 10px;cursor:pointer">API</button>
+    </div>
+    <div class="row" style="justify-content:flex-start;gap:6px;margin-top:6px">
+      <button id="pfConservative" style="background:#0f3b1f;color:#caffde;border:1px solid #2f8f58;border-radius:8px;padding:4px 8px;cursor:pointer">🟢 Conservador</button>
+      <button id="pfBalanced" style="background:#2f3b0f;color:#f2ffca;border:1px solid #8f8f2f;border-radius:8px;padding:4px 8px;cursor:pointer">🟡 Balanceado</button>
+      <button id="pfAggressive" style="background:#3b260f;color:#ffe3ca;border:1px solid #a36a2f;border-radius:8px;padding:4px 8px;cursor:pointer">🟠 Agressivo</button>
+      <button id="pfUltra" style="background:#3b0f16;color:#ffcfd7;border:1px solid #a32f45;border-radius:8px;padding:4px 8px;cursor:pointer">🔴 Ultra</button>
+      <button id="pfLoucura" style="background:#4b0016;color:#ffd2dc;border:1px solid #ff2f63;border-radius:8px;padding:4px 8px;cursor:pointer">🧨 Loucura (paper)</button>
+      <button id="paperResetBtn" style="background:#09304a;color:#d9f2ff;border:1px solid #2f8fbf;border-radius:8px;padding:4px 8px;cursor:pointer">♻️ Recarregar Paper</button>
+    </div>
+    <div id="profileDesc" style="font-size:11px;color:#9fb0ca;margin-top:4px"></div>
+    <div id="modeMsg" style="font-size:12px;color:#ff9f43;margin-top:6px;min-height:16px"></div>
+    <div id="apiPanel" style="display:none;margin-top:8px;border:1px solid #263047;padding:8px;border-radius:8px">
+      <div class="row"><div class="t">API Settings</div><div id="apiStatus" class="badge">Not Configured</div></div>
+      <div class="api-grid">
+        <input id="apiKey" placeholder="BINANCE_API_KEY" style="background:#0b1320;color:#d8e6ff;border:1px solid #28405f;border-radius:8px;padding:6px;width:100%" />
+        <input id="apiSecret" placeholder="BINANCE_API_SECRET" style="background:#0b1320;color:#d8e6ff;border:1px solid #28405f;border-radius:8px;padding:6px;width:100%" />
+        <label style="font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap"><input type="checkbox" id="realEnabled"/> habilitar real</label>
+        <button id="saveApiBtn" style="background:#133;color:#fff;border:1px solid #3a6;border-radius:8px;padding:6px 10px;cursor:pointer;width:100%">Salvar API</button>
+      </div>
+    </div>
+  </div>
+  <div class="card kpi"><div class="t">Balance</div><div id="balance" class="v ok">-</div></div>
+  <div class="card kpi"><div class="t">Unrealized PnL</div><div id="upnl" class="v">-</div></div>
+  <div class="card kpi"><div class="t">Win Rate</div><div id="win" class="v cy">-</div></div>
+  <div class="card kpi"><div class="t">Profit Factor</div><div id="pf" class="v cy">-</div></div>
+  <div class="card kpi"><div class="t">Exposure</div><div id="exp" class="v">-</div></div>
+  <div class="card kpi"><div class="t">Mode</div><div id="mode" class="v cy">-</div></div>
+
+  <div class="card chart">
+    <div class="row"><div class="t">Market Chart</div><div><select id="pair"></select> <select id="int"><option>15m</option><option>1h</option><option>4h</option></select></div></div>
+    <div id="chart" style="margin-top:8px"></div>
+  </div>
+  <div class="card side">
+    <div class="row"><div class="t">Bot Activity</div></div>
+    <div style="font-size:13px;line-height:1.7;margin-top:6px">
+      <div>Regime: <span id="regime" class="cy">-</span></div>
+      <div>Last scan: <span id="last">-</span></div>
+      <div>Next scan: <span id="next" class="cy">-</span> sec</div>
+      <div>Consecutive losses: <span id="losses" class="bad">-</span></div>
+      <div>Circuit breaker: <span id="cb" class="bad">inactive</span></div>
+      <div>Wallet USDT: <span id="wallet" class="cy">-</span></div>
+      <div>Real ready: <span id="realReady" class="cy">-</span></div>
+    </div>
+  </div>
+
+  <div class="card open"><div class="t">Open Positions (Quanto falta para vender)</div><table class="open-table"><thead><tr><th>Pair</th><th class="hide-sm">Entry</th><th>Atual</th><th class="hide-sm">SL</th><th class="hide-sm">TP1</th><th>TP2</th><th class="hide-sm">Qtd</th><th class="hide-sm">Falta TP1</th><th>Falta TP2</th><th>Distância SL</th></tr></thead><tbody id="positions"></tbody></table></div>
+
+  <div class="card perf"><div class="t">Performance por Estratégia</div><table><thead><tr><th>Strategy</th><th>Abertas</th><th>Fechadas</th><th>Win Rate</th><th>PnL</th></tr></thead><tbody id="stratPerf"></tbody></table></div>
+
+  <div class="card full"><div class="t">Latest Signals</div><table><thead><tr><th style="width:12%">Pair</th><th style="width:10%">Entry</th><th style="width:14%">Exec</th><th style="width:8%">Score</th><th style="width:56%">Motivo</th></tr></thead><tbody id="sig"></tbody></table></div>
+
+  <div class="card trio"><div class="t">Watchlist</div><table><thead><tr><th>Pair</th><th>Price</th><th>24h%</th><th>RSI</th><th>Bias</th><th>Action</th></tr></thead><tbody id="watch"></tbody></table></div>
+
+  <div class="card trio"><div class="t">Execution Card (Comprado / Vendido / Rejeitado)</div><table><thead><tr><th>Hora</th><th>Tipo</th><th>Pair</th><th>Detalhes</th></tr></thead><tbody id="exec"></tbody></table></div>
+
+  <div class="card trio"><div class="t">Raw Wallet Assets (Real)</div><table><thead><tr><th>Asset</th><th>Free</th><th>Locked</th><th>Total</th><th>USDT Value</th></tr></thead><tbody id="walletAssets"></tbody></table></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id); const fmt=n=>typeof n==='number'?n.toLocaleString(undefined,{maximumFractionDigits:2}):'-';
+let chart,candle,ema21,ema50,chartReady=false;
+function initChart(){
+  if (!window.LightweightCharts) {
+    $('chart').innerHTML = '<div style="padding:14px;color:#7f8ea3">Chart library blocked on this network/device. Metrics still update normally.</div>';
+    chartReady = false;
+    return;
+  }
+  const el = $('chart');
+  chart = LightweightCharts.createChart(el, {layout:{background:{color:'#0f1622'},textColor:'#9fb0ca'},grid:{vertLines:{color:'#172132'},horzLines:{color:'#172132'}},rightPriceScale:{borderColor:'#223148'},timeScale:{borderColor:'#223148'}});
+  candle = chart.addCandlestickSeries({upColor:'#00ffa3',downColor:'#ff4d6d',borderVisible:false,wickUpColor:'#00ffa3',wickDownColor:'#ff4d6d'});
+  ema21 = chart.addLineSeries({color:'#25c7ff',lineWidth:2});
+  ema50 = chart.addLineSeries({color:'#f5b342',lineWidth:2});
+  chart.resize(el.clientWidth, el.clientHeight);
+  window.addEventListener('resize', ()=>{ try{ chart.resize(el.clientWidth, el.clientHeight); }catch{} });
+  chartReady = true;
+}
+function ema(arr,p){const k=2/(p+1);let out=[];let prev=arr[0]?.close||0;for(const c of arr){prev=c.close*k+prev*(1-k);out.push({time:c.time,value:prev});}return out;}
+async function loadChart(){
+  if (!chartReady) return;
+  const symbol=$('pair').value||'BTCUSDT', interval=$('int').value||'15m';
+  const r=await fetch(`/api/klines?symbol=${symbol}&interval=${interval}&limit=250`,{cache:'no-store'}); const j=await r.json();
+  candle.setData(j.data||[]); ema21.setData(ema(j.data||[],21)); ema50.setData(ema(j.data||[],50));
+}
+function render(s){
+  const shownBalance = (s.mode === 'real' && s.wallet?.totalUSDT != null) ? s.wallet.totalUSDT : s.account.available;
+  $('balance').textContent=`$ ${fmt(shownBalance)}`;
+  $('upnl').textContent=`$ ${fmt(s.account.unrealizedPnL)}`; $('upnl').className='v '+(s.account.unrealizedPnL>=0?'ok':'bad');
+  $('win').textContent=`${fmt(s.account.winRate)}%`; $('pf').textContent=fmt(s.account.profitFactor); $('exp').textContent=`${fmt(s.risk.currentExposure*100)}%`;
+  $('mode').textContent=s.mode; $('regime').textContent=s.marketRegime;
+  const isOnline = (s.status||'').toLowerCase()==='online';
+  $('botText').textContent = isOnline ? 'ROBOT ONLINE' : 'ROBOT OFFLINE';
+  $('botDot').className = 'dot ' + (isOnline ? 'green' : 'red');
+  $('last').textContent=s.lastScan||'-'; $('next').textContent=s.nextScanInSec; $('losses').textContent=s.risk.consecutiveLosses; $('cb').textContent=s.risk.circuitBreakerUntil||'inactive';
+  $('wallet').textContent = s.wallet?.totalUSDT!=null ? ('$ '+fmt(s.wallet.totalUSDT)) : 'n/a';
+  $('realReady').textContent = s.controls?.realReady ? 'YES' : 'NO';
+  const profileLabel = (s.controls?.tradeProfile || 'conservative').toUpperCase();
+  const pc = s.controls?.profileConfig || {};
+  const speedMap = { conservative:'Lento', balanced:'Médio', aggressive:'Rápido', ultra:'Muito rápido', loucura:'Extremo (1s/5s)' };
+  const sp = String((s.controls?.tradeProfile||'conservative')).toLowerCase();
+  const mg = s.controls?.martingaleStep ?? 0;
+  const cadence = sp==='loucura' ? 'cadência BUY 1s / SELL 5s' : (sp==='ultra' ? 'cadência por scan (60s)' : 'cadência por scan');
+  $('profileDesc').textContent = `${speedMap[sp]||'Custom'} • ${cadence} • score≥${pc.minScore ?? '-'} • TP1 ${pc.tp1Mul?((pc.tp1Mul-1)*100).toFixed(2):'-'}% • TP2 ${pc.tp2Mul?((pc.tp2Mul-1)*100).toFixed(2):'-'}% • SL ${pc.slMul?((1-pc.slMul)*100).toFixed(2):'-'}% • candidatos/ativo ${pc.maxCandidatesPerAsset ?? '-'} • max/dia ${pc.maxTradesPerDay ?? '-'} • martingale step ${mg}`;
+  if (typeof s.controls?.realEnabled === 'boolean') $('realEnabled').checked = s.controls.realEnabled;
+  const configured = !!s.controls?.hasApiKeys;
+  $('apiStatus').textContent = configured ? 'Configured' : 'Not Configured';
+  $('apiStatus').style.color = configured ? '#00ffa3' : '#ff4d6d';
+  if (s.controls?.blockReason) {
+    const pd = s.controls?.paperDays ?? 0;
+    const pm = s.controls?.paperMinDays ?? 7;
+    if (String(s.controls.blockReason).includes('REAL_TRADING_ENABLED')) $('modeMsg').textContent = `[${profileLabel}] Modo real disponível para visualização. Execução real desativada (ative na aba API).`;
+    else if (String(s.controls.blockReason).includes('Paper')) $('modeMsg').textContent = `[${profileLabel}] Aprendizado em PAPER: dia ${pd}/${pm}. Execução real bloqueada até completar o período.`;
+    else $('modeMsg').textContent = `[${profileLabel}] ` + s.controls.blockReason;
+  } else {
+    $('modeMsg').textContent = `[${profileLabel}] Perfil ativo`;
+  }
+
+  const pairs=(s.watchlist||[]).map(x=>x.symbol); if($('pair').options.length===0){ pairs.forEach(p=>{const o=document.createElement('option');o.value=o.textContent=p;$('pair').appendChild(o)}); loadChart(); }
+
+  $('sig').innerHTML=(s.signals||[]).slice(0,7).map(g=>{
+    const ready = g.action==='BUY' ? 'YES' : 'NO';
+    const why = (g.reason||'-').replace(/^Approved:\s*/,'').replace(/^Rejected:\s*/,'');
+    const ex = (s.executionFeed||[]).find(e=>e.pair===g.pair);
+    let execStatus = '-';
+    let execClass = 'cy';
+    if (g.action !== 'BUY') { execStatus = 'SETUP_REJ'; execClass='bad'; }
+    else if (ex?.type === 'BUY') { execStatus = 'EXEC'; execClass='ok'; }
+    else if (ex?.type === 'REJECTED' && String(ex.details||'').includes('Risk block')) { execStatus = 'RISK_BLOCK'; execClass='bad'; }
+    else if (ex?.type === 'REJECTED') { execStatus = 'REJ'; execClass='bad'; }
+    return `<tr><td>${g.pair}</td><td class="${g.action==='BUY'?'ok':'bad'}">${ready==='YES'?'READY':'NO'}</td><td class="${execClass}">${execStatus}</td><td>${g.strength}</td><td>${why}</td></tr>`;
+  }).join('');
+  $('watch').innerHTML=(s.watchlist||[]).slice(0,12).map(w=>{
+    const sg=(s.signals||[]).find(x=>x.pair===w.symbol); const bias=(w.tf1h?.e21>w.tf1h?.e50&&w.price>w.tf1h?.e200)?'bull':'mixed';
+    return `<tr><td>${w.symbol}</td><td>${fmt(w.price)}</td><td class="${w.change24h>=0?'ok':'bad'}">${fmt(w.change24h)}%</td><td>${fmt(w.rsi)}</td><td>${bias}</td><td>${sg?.action||'-'}</td></tr>`;
+  }).join('');
+
+  $('positions').innerHTML=(s.openPositions||[]).map(p=>{
+    const cur=Number(p.current||0), tp1=Number(p.tp1||0), tp2=Number(p.tp2||0), sl=Number(p.stopLoss||0);
+    const toTp1Abs = tp1-cur;
+    const toTp2Abs = tp2-cur;
+    const toTp1Pct = cur ? ((tp1/cur)-1)*100 : 0;
+    const toTp2Pct = cur ? ((tp2/cur)-1)*100 : 0;
+    const toSlPct = sl ? ((cur/sl)-1)*100 : 0;
+    return `<tr><td>${p.pair}</td><td class="hide-sm">${fmt(p.entry)}</td><td>${fmt(cur)}</td><td class="hide-sm">${fmt(sl)}</td><td class="hide-sm">${fmt(tp1)}</td><td>${fmt(tp2)}</td><td class="hide-sm">${fmt(p.qty)}</td><td class="cy hide-sm">${fmt(toTp1Abs)} (${fmt(toTp1Pct)}%)</td><td class="ok">${fmt(toTp2Abs)} (${fmt(toTp2Pct)}%)</td><td class="bad">${fmt(toSlPct)}%</td></tr>`;
+  }).join('') || '<tr><td colspan="10">Sem posições abertas</td></tr>';
+
+  $('exec').innerHTML=(s.executionFeed||[]).slice(0,25).map(e=>`<tr><td>${e.ts}</td><td class="${e.type.includes('BUY')?'ok':(e.type.includes('SELL')?'cy':'bad')}">${e.type}</td><td>${e.pair||'-'}</td><td>${e.details||'-'}</td></tr>`).join('') || '<tr><td colspan="4">Sem execuções ainda</td></tr>';
+
+  $('walletAssets').innerHTML=(s.wallet?.assets||[]).map(a=>`<tr><td>${a.asset}</td><td>${fmt(a.free)}</td><td>${fmt(a.locked)}</td><td>${fmt(a.total)}</td><td>${a.usdtValue!=null?fmt(a.usdtValue):'n/a'}</td></tr>`).join('') || '<tr><td colspan="5">Sem ativos retornados</td></tr>';
+  const openByStrategy = {};
+  (s.openPositions||[]).forEach(p=>{ openByStrategy[p.strategy]=(openByStrategy[p.strategy]||0)+1; });
+  const perfRows = (s.strategyPerformance||[]).map(p=>({strategy:p.strategy, open:openByStrategy[p.strategy]||0, closed:p.trades, winRate:p.winRate, pnl:p.pnl}));
+  for (const [k,v] of Object.entries(openByStrategy)) if(!perfRows.find(r=>r.strategy===k)) perfRows.push({strategy:k, open:v, closed:0, winRate:0, pnl:0});
+  $('stratPerf').innerHTML=perfRows.map(p=>`<tr><td>${p.strategy}</td><td>${p.open}</td><td>${p.closed}</td><td>${fmt(p.winRate)}%</td><td class="${p.pnl>=0?'ok':'bad'}">${fmt(p.pnl)}</td></tr>`).join('') || '<tr><td colspan="5">Sem trades ainda</td></tr>';
+}
+async function boot(){
+  initChart();
+  $('pair').onchange=loadChart; $('int').onchange=loadChart;
+
+  async function setMode(mode){
+    $('modeMsg').textContent='Aplicando...';
+    try{
+      const r = await fetch('/api/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode})});
+      const j = await r.json();
+      if(!r.ok){ $('modeMsg').textContent = j.error || 'Erro ao mudar modo'; return; }
+      $('modeMsg').textContent = `Modo ativo: ${j.mode}`;
+      if (j.mode === 'real') {
+        try { await fetch('/api/wallet',{cache:'no-store'}); } catch {}
+      }
+      refreshState();
+    }catch{
+      $('modeMsg').textContent='Falha de conexão ao mudar modo';
+    }
+  }
+  $('paperBtn').onclick=()=>setMode('paper');
+  $('realBtn').onclick=()=>setMode('real');
+  async function setProfile(profile){
+    $('modeMsg').textContent='Aplicando perfil...';
+    try{
+      const r=await fetch('/api/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile})});
+      const j=await r.json();
+      if(!r.ok){ $('modeMsg').textContent=j.error||'Erro ao alterar perfil'; return; }
+      $('modeMsg').textContent=`Perfil ativo: ${String(j.tradeProfile||profile).toUpperCase()}`;
+      refreshState();
+    }catch{ $('modeMsg').textContent='Falha ao alterar perfil'; }
+  }
+  $('pfConservative').onclick=()=>setProfile('conservative');
+  $('pfBalanced').onclick=()=>setProfile('balanced');
+  $('pfAggressive').onclick=()=>setProfile('aggressive');
+  $('pfUltra').onclick=()=>setProfile('ultra');
+  $('pfLoucura').onclick=()=>setProfile('loucura');
+  $('paperResetBtn').onclick=async()=>{
+    const v = prompt('Valor inicial do paper (USD):','10000');
+    const amount = Number(v||10000);
+    $('modeMsg').textContent='Recarregando paper...';
+    try{
+      const r=await fetch('/api/paper/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount})});
+      const j=await r.json();
+      if(!r.ok){ $('modeMsg').textContent=j.error||'Erro no reset'; return; }
+      $('modeMsg').textContent=`Paper recarregado: $${Number(j.amount||amount).toFixed(2)}`;
+      refreshState();
+    }catch{ $('modeMsg').textContent='Falha ao recarregar paper'; }
+  };
+  $('apiToggleBtn').onclick=()=>{ $('apiPanel').style.display = $('apiPanel').style.display==='none' ? 'block' : 'none'; };
+  $('saveApiBtn').onclick=async()=>{
+    $('modeMsg').textContent='Salvando API...';
+    try{
+      const body={ apiKey:$('apiKey').value.trim(), apiSecret:$('apiSecret').value.trim(), realEnabled:$('realEnabled').checked };
+      const r=await fetch('/api/credentials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json();
+      if(!r.ok){ $('modeMsg').textContent=j.error||'Erro ao salvar API'; return; }
+      $('modeMsg').textContent = j.blockReason ? `Salvo. ${j.blockReason}` : 'API salva e real pronto';
+      refreshState();
+    }catch{ $('modeMsg').textContent='Falha ao salvar API'; }
+  };
+  $('walletBtn').onclick=async()=>{
+    $('modeMsg').textContent='Atualizando wallet...';
+    try{
+      const r=await fetch('/api/wallet',{cache:'no-store'});
+      const j=await r.json();
+      if(!r.ok){ $('modeMsg').textContent=j.error||'Erro wallet'; return; }
+      $('modeMsg').textContent='Wallet atualizada com sucesso';
+      refreshState();
+    }catch{ $('modeMsg').textContent='Falha ao atualizar wallet'; }
+  };
+
+  async function refreshState(){
+    try {
+      const r=await fetch('/api/state',{cache:'no-store'});
+      if(!r.ok) throw new Error('api not ok');
+      render(await r.json());
+    } catch {
+      $('botText').textContent='ROBOT OFFLINE';
+      $('botDot').className='dot red';
+    }
+  }
+
+  await refreshState();
+
+  const ws=new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/ws');
+  ws.onmessage=e=>{try{render(JSON.parse(e.data));}catch{}};
+  ws.onerror=()=>{};
+  ws.onclose=()=>{};
+
+  // Fallback polling to avoid 'frozen' UI when WS is blocked by network/browser.
+  setInterval(refreshState, 3000);
+  setInterval(()=>loadChart().catch(()=>{}),15000);
+}
+boot();
+</script>
+</body>
+</html>

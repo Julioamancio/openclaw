@@ -1262,9 +1262,9 @@
           <h3 class="section-title">Chat com Mike (tempo real)</h3>
           <div class="ops-meta" style="margin:-.2rem 0 .7rem 0;">Converse direto com o agente sem sair do Mission Control.</div>
           <div id="mcChatLog" class="ops-list" style="max-height:52vh;overflow:auto;padding-right:.2rem;"></div>
-          <div class="ops-actions" style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-            <textarea id="mcChatInput" class="textarea" placeholder="Digite sua mensagem para o Mike..." style="min-height:72px;flex:1;min-width:320px;"></textarea>
-            <button id="mcChatSendBtn" class="btn">Enviar</button>
+          <div class="ops-actions" style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end;">
+            <textarea id="mcChatInput" class="textarea" placeholder="Digite sua mensagem para o Mike... (Enter envia)" style="min-height:96px;flex:1;min-width:0;width:100%;" onkeydown="if(!event.shiftKey && event.key==='Enter'){event.preventDefault();window.sendMcChatMessage&&window.sendMcChatMessage();}"></textarea>
+            <button id="mcChatSendBtn" class="btn" onclick="window.sendMcChatMessage&&window.sendMcChatMessage();return false;">Enviar</button>
           </div>
         </section>
       </section>
@@ -1541,7 +1541,7 @@
     };
 
     const SERVER = {
-      base: "http://localhost:8899",
+      base: window.location.origin,
       weatherCity: "Belo Horizonte/MG"
     };
 
@@ -2643,7 +2643,8 @@
       if (chatSend && chatInput) {
         chatSend.addEventListener('click', sendMcChatMessage);
         chatInput.addEventListener('keydown', (e) => {
-          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendMcChatMessage();
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMcChatMessage(); }
+          if (!e.shiftKey && e.key === 'Enter') { e.preventDefault(); sendMcChatMessage(); }
         });
         renderMcChat();
       }
@@ -2718,12 +2719,24 @@
       }
     }
 
+    let mcChatMemory = [];
+
     function getMcChatHistory() {
-      try { return JSON.parse(localStorage.getItem('mc.chat.history') || '[]'); } catch { return []; }
+      try {
+        const raw = localStorage.getItem('mc.chat.history');
+        if (!raw) return Array.isArray(mcChatMemory) ? mcChatMemory : [];
+        const parsed = JSON.parse(raw || '[]');
+        mcChatMemory = Array.isArray(parsed) ? parsed : [];
+        return mcChatMemory;
+      } catch {
+        return Array.isArray(mcChatMemory) ? mcChatMemory : [];
+      }
     }
 
     function setMcChatHistory(items) {
-      localStorage.setItem('mc.chat.history', JSON.stringify(items.slice(-60)));
+      const safe = (Array.isArray(items) ? items : []).slice(-60);
+      mcChatMemory = safe;
+      try { localStorage.setItem('mc.chat.history', JSON.stringify(safe)); } catch {}
     }
 
     function renderMcChat() {
@@ -2768,6 +2781,8 @@
         btn.textContent = 'Enviar';
       }
     }
+
+    window.sendMcChatMessage = sendMcChatMessage;
 
     async function setControlTowerMode(mode) {
       try {

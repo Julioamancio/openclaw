@@ -30,6 +30,7 @@ const MISSION_BUDGETS_FILE = path.join(ROOT, 'mission-budgets.json');
 const JARVIS_STATE_FILE = path.join(ROOT, 'jarvis-state.json');
 const POLICY_FORMAL_FILE = path.join(ROOT, 'policy-formal.json');
 const SAFETY_INVARIANTS_FILE = path.join(ROOT, 'safety-invariants.json');
+const IDEIAS_DIR = path.join(ROOT, 'ideias-negocio');
 
 const startedAt = Date.now();
 let lastRefreshTs = new Date().toISOString();
@@ -175,6 +176,19 @@ const server = http.createServer(async (req, res) => {
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
       return sendText(res, 200, html, 'text/html; charset=utf-8');
+    }
+
+    // static ideas files: /ideias-negocio/index.json and markdown docs
+    if (req.method === 'GET' && pathname.startsWith('/ideias-negocio/')) {
+      const rel = decodeURIComponent(pathname.replace('/ideias-negocio/', ''));
+      const safeRel = path.normalize(rel).replace(/^\.\.(\/|\\|$)+/g, '');
+      const full = path.join(IDEIAS_DIR, safeRel || 'index.json');
+      if (!full.startsWith(IDEIAS_DIR)) return sendJson(res, 403, { error: 'Forbidden' });
+      if (!fs.existsSync(full) || !fs.statSync(full).isFile()) return sendJson(res, 404, { error: 'Not found' });
+      const ext = path.extname(full).toLowerCase();
+      const ctype = ext === '.json' ? 'application/json; charset=utf-8' : (ext === '.md' ? 'text/markdown; charset=utf-8' : 'text/plain; charset=utf-8');
+      const body = fs.readFileSync(full, 'utf8');
+      return sendText(res, 200, body, ctype);
     }
 
     // 1) GET /health (simple probe)
