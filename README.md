@@ -10,6 +10,23 @@ Este workspace contém a configuração completa de um agente AI operando via [O
 
 ---
 
+## 🔗 Links de Produção (fixar)
+
+- 🎮 **OTServer (site):** https://destruitor.com.br
+- 🧾 **Contábil (Painel):** https://destruitor.com.br/controlla
+- 📡 **Mission Control:** http://187.77.36.21:8899
+- 📈 **Trading (Autonomous Crypto Agent):** http://187.77.36.21:8787
+
+> Nota: Contábil e OTServer ainda compartilham domínio por enquanto. Migrar para subdomínio próprio quando disponível.
+
+## 💾 Backup recente (infra + apps)
+
+- **Arquivo:** `backups/full-backup-20260311-003838.tar.gz`
+- **SHA256:** `0fd4046b4047b52cbcebcdc04ba6febfbc76c03283f93b99d65a5e82ce3ad0c1`
+- **Conteúdo:** `controlla-fiscal`, `myaac`, nginx (`myaac.conf`), serviços systemd e cron de backup.
+
+---
+
 ## 🏗️ Arquitetura
 
 ```
