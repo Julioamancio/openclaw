@@ -1,6 +1,6 @@
 #!/bin/bash
-# spawn-nexo.sh - Invoca subagente Nexo para geração de ideia de negócio
-# Executado via cron - modo session (persistente, independente da sessão main)
+# spawn-nexo.sh - Invoca o agente Nexo para geração de ideia de negócio
+# Executado via cron usando a CLI compatível com esta versão do OpenClaw
 set -e
 
 WORKSPACE="/root/.openclaw/workspace"
@@ -36,21 +36,21 @@ TASK="Gere a IDEIA DO DIA para $(date '+%d/%m/%Y'). \
 📈 Tendência: [Por que agora]\
 \nSalve o resultado em: $OUTPUT_DIR/ideia-$DATE.md"
 
-# Invoca subagente via openclaw sessions spawn (modo session = persistente)
+# Invoca Nexo via `openclaw agent`, compatível com a CLI atual.
 if command -v openclaw &> /dev/null; then
     cd "$WORKSPACE"
-    
-    # Spawn com mode=session para persistência
-    openclaw sessions spawn \
-        --agent-id nexo \
-        --mode session \
-        --task "$TASK" \
+
+    openclaw agent \
+        --agent nexo \
+        --message "$TASK" \
         --timeout 600 \
-        --label "nexo-ideia-$(date +%s)" \
-        2>> "$LOG_FILE"
-    
+        --deliver \
+        --reply-channel telegram \
+        --reply-to telegram:720093594 \
+        >> "$LOG_FILE" 2>&1
+
     RESULT=$?
-    echo "[$TIMESTAMP] Subagente Nexo spawnado (exit: $RESULT)" >> "$LOG_FILE"
+    echo "[$TIMESTAMP] Agente Nexo executado (exit: $RESULT)" >> "$LOG_FILE"
 else
     echo "[$TIMESTAMP] ERRO: openclaw CLI não disponível" >> "$LOG_FILE"
     exit 1

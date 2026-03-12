@@ -1,6 +1,6 @@
 #!/bin/bash
-# spawn-daniela.sh - Invoca subagente Daniela para monitoramento de emails
-# Executado via cron - modo session (persistente, independente da sessão main)
+# spawn-daniela.sh - Invoca o agente Daniela para monitoramento de emails
+# Executado via cron usando a CLI compatível com esta versão do OpenClaw
 set -e
 
 WORKSPACE="/root/.openclaw/workspace"
@@ -25,22 +25,21 @@ Remetentes monitorados: carlos.fonseca, caroline.xavier, fernanda.campos, fernan
 Para cada email novo, reporte: remetente, assunto, hora. \
 Se não houver emails, confirme 'Nenhum email novo'."
 
-# Invoca subagente via openclaw sessions spawn (modo session = persistente)
+# Invoca Daniela via `openclaw agent`, compatível com a CLI atual.
 if command -v openclaw &> /dev/null; then
     cd "$WORKSPACE"
-    
-    # Usa sessions_spawn com mode=session para persistência
-    # O resultado vai para o file descriptor 3 que capturamos
-    openclaw sessions spawn \
-        --agent-id daniela \
-        --mode session \
-        --task "$TASK" \
+
+    openclaw agent \
+        --agent daniela \
+        --message "$TASK" \
         --timeout 180 \
-        --label "daniela-email-check-$(date +%s)" \
-        2>> "$LOG_FILE"
-    
+        --deliver \
+        --reply-channel telegram \
+        --reply-to telegram:720093594 \
+        >> "$LOG_FILE" 2>&1
+
     RESULT=$?
-    echo "[$TIMESTAMP] Subagente Daniela spawnado (exit: $RESULT)" >> "$LOG_FILE"
+    echo "[$TIMESTAMP] Agente Daniela executado (exit: $RESULT)" >> "$LOG_FILE"
 else
     echo "[$TIMESTAMP] ERRO: openclaw CLI não disponível" >> "$LOG_FILE"
     exit 1

@@ -34,3 +34,6 @@ trade-copilot/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# large backup archives (keep local)
+backups/*.tar.gz

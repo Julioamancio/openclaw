@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMINISTRADOR
+  CONTADOR
+  ASSISTENTE
+  VISUALIZADOR
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  title        String?
+  permissions  String?
+  managerId    String?
+  manager      User?    @relation("UserManager", fields: [managerId], references: [id])
+  subordinates User[]   @relation("UserManager")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  declarations Declaration[]      @relation("DeclarationOwner")
+  guides       InstallmentGuide[] @relation("GuideOwner")
+  activityLogs ActivityLog[]
+}
+
+model Client {
+  id                    String   @id @default(cuid())
+  internalCode          String   @unique
+  corporateName         String
+  tradeName             String?
+  document              String   @unique
+  stateRegistration     String?
+  municipalRegistration String?
+  taxRegime             String
+  contactName           String?
+  primaryEmail          String?
+  financialEmail        String?
+  phone                 String?
+  whatsapp              String?
+  address               String?
+  city                  String?
+  state                 String?
+  notes                 String?
+  portalUsername        String?
+  portalPassword        String?
+  portalSite            String?
+  simplesNotes          String?
+  active                Boolean  @default(true)
+  deletedAt             DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  declarations          Declaration[]
+  installmentGuides     InstallmentGuide[]
+  attachments           Attachment[]
+}
+
+model DeclarationType {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  sphere       String?
+  description  String?
+  active       Boolean  @default(true)
+  declarations Declaration[]
+}
+
+model Declaration {
+  id                String   @id @default(cuid())
+  clientId          String
+  declarationTypeId String
+  competence        String
+  yearBase          Int?
+  dueDate           DateTime
+  deliveredAt       DateTime?
+  status            String
+  priority          String
+  protocol          String?
+  notes             String?
+  ownerId           String?
+  deletedAt         DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  client            Client   @relation(fields: [clientId], references: [id])
+  declarationType   DeclarationType @relation(fields: [declarationTypeId], references: [id])
+  owner             User?    @relation("DeclarationOwner", fields: [ownerId], references: [id])
+}
+
+model InstallmentType {
+  id       String   @id @default(cuid())
+  name     String   @unique
+  active   Boolean  @default(true)
+  guides   InstallmentGuide[]
+}
+
+model InstallmentGuide {
+  id                String   @id @default(cuid())
+  clientId          String
+  installmentTypeId String
+  agency            String
+  agreementNumber   String?
+  reference         String?
+  installmentNumber Int?
+  amount            Float
+  dueDate           DateTime
+  issuedAt          DateTime?
+  sentAt            DateTime?
+  deliveryMethod    String?
+  status            String
+  receiptConfirmed  Boolean  @default(false)
+  confirmationDate  DateTime?
+  paymentStatus     String?
+  notes             String?
+  ownerId           String?
+  deletedAt         DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  client            Client   @relation(fields: [clientId], references: [id])
+  installmentType   InstallmentType @relation(fields: [installmentTypeId], references: [id])
+  owner             User?    @relation("GuideOwner", fields: [ownerId], references: [id])
+  sendHistory       GuideSendHistory[]
+}
+
+model GuideSendHistory {
+  id          String   @id @default(cuid())
+  guideId      String
+  sentAt       DateTime
+  method       String
+  message      String?
+  confirmed    Boolean  @default(false)
+  confirmedAt  DateTime?
+  guide        InstallmentGuide @relation(fields: [guideId], references: [id])
+}
+
+model Attachment {
+  id            String   @id @default(cuid())
+  clientId      String?
+  declarationId String?
+  guideId       String?
+  fileName      String
+  filePath      String
+  mimeType      String?
+  uploadedById  String?
+  createdAt     DateTime @default(now())
+  client        Client?  @relation(fields: [clientId], references: [id])
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId      String?
+  entityType  String
+  entityId    String
+  action      String
+  oldValues   String?
+  newValues   String?
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  title        String
+  body         String
+  level        String
+  read         Boolean  @default(false)
+  targetUserId String?
+  createdAt    DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

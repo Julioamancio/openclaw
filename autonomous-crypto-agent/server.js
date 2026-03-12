@@ -39,6 +39,20 @@ const cfg = {
 
 const WATCHLIST = ['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT','TRXUSDT','AVAXUSDT','LINKUSDT'];
 
+let STRATEGY_CFG = {
+  name: 'fallback',
+  gates: { minConfidence: 80, minConfluence: 3, minRR: 1.5, preferredRR: 2.0 },
+  risk: { riskPerTradeMin: 0.005, riskPerTradeMax: 0.01, maxConsecutiveLosses: 3, maxDailyDrawdownPct: 0.03, maxTradesPerSession: 6 },
+  newsFilter: { enabled: false, blockMinutesBefore: 15, blockMinutesAfter: 15, events: [] }
+};
+
+try {
+  const raw = fs.readFileSync(new URL('./strategy/strategy-config.json', import.meta.url).pathname, 'utf8');
+  STRATEGY_CFG = { ...STRATEGY_CFG, ...JSON.parse(raw) };
+} catch (e) {
+  console.warn('[agent] strategy-config.json not loaded, using defaults');
+}
+
 const TRADE_PROFILES = {
   conservative: { minScore: 70, tp1Mul: 1.015, tp2Mul: 1.03, slMul: 0.985, maxCandidatesPerAsset: 1, maxExposure: 0.05, maxSimTrades: 3, maxTradesPerDay: 10 },
   balanced: { minScore: 60, tp1Mul: 1.012, tp2Mul: 1.024, slMul: 0.988, maxCandidatesPerAsset: 1, maxExposure: 0.08, maxSimTrades: 4, maxTradesPerDay: 30 },
@@ -49,6 +63,16 @@ const TRADE_PROFILES = {
 
 function activeProfile() {
   return TRADE_PROFILES[cfg.tradeProfile] || TRADE_PROFILES.conservative;
+}
+
+function strategyGate() {
+  return STRATEGY_CFG?.gates || {};
+}
+
+function inNoTradeSessionWindow() {
+  // Janela de baixa participação (evita horário morto). UTC 00:00-02:59.
+  const h = new Date().getUTCHours();
+  return h >= 0 && h <= 2;
 }
 
 const state = {
@@ -63,7 +87,8 @@ const state = {
   risk: {
     riskPerTrade: cfg.riskPerTrade, currentExposure: 0,
     consecutiveLosses: 0, circuitBreakerUntil: null,
-    maxTradesPerDay: cfg.maxTradesPerDay, tradesToday: 0
+    maxTradesPerDay: cfg.maxTradesPerDay, tradesToday: 0,
+    tradeDay: new Date().toISOString().slice(0, 10)
   },
   watchlist: [],
   openPositions: [],
@@ -71,7 +96,17 @@ const state = {
   signals: [],
   executionFeed: [],
   martingale: { step: 0, maxSteps: 3 },
+  loucura: { lastPriceByPair: {}, lastTradeAtByPair: {} },
   logs: [],
+  signalHistory: {},
+  engine: {
+    bootAt: new Date().toISOString(),
+    lastCycleMs: null,
+    lastCycleAt: null,
+    lastError: null,
+    lastErrorAt: null,
+    apiLatencyMs: null
+  },
   wallet: {
     source: 'paper',
     fetchedAt: null,
@@ -85,6 +120,30 @@ const state = {
 
 const tfCache = new Map();
 
+function currentTradeDay() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function ensureDailyRiskWindow() {
+  const today = currentTradeDay();
+  if (state.risk.tradeDay !== today) {
+    state.risk.tradeDay = today;
+    state.risk.tradesToday = 0;
+    state.risk.consecutiveLosses = 0;
+    state.risk.circuitBreakerUntil = null;
+    log('Daily risk window reset', { tradeDay: today });
+  }
+}
+
+function reconcileAccountState() {
+  const allocated = state.openPositions.reduce((acc, p) => acc + ((Number(p.qty) || 0) * (Number(p.entry) || 0)), 0);
+  const unrealized = state.openPositions.reduce((acc, p) => acc + (((Number(p.current) || Number(p.entry) || 0) - (Number(p.entry) || 0)) * (Number(p.qty) || 0)), 0);
+  state.account.allocated = Number(allocated.toFixed(8));
+  state.account.unrealizedPnL = Number(unrealized.toFixed(2));
+  state.account.available = Number((state.account.balance - state.account.allocated).toFixed(8));
+  state.risk.currentExposure = state.account.balance > 0 ? Number((state.account.allocated / state.account.balance).toFixed(8)) : 0;
+}
+
 function log(msg, obj = null) {
   const item = { t: new Date().toISOString(), msg, ...(obj ? { obj } : {}) };
   state.logs.unshift(item);
@@ -95,6 +154,13 @@ function log(msg, obj = null) {
 function pushExecution(type, pair, details) {
   state.executionFeed.unshift({ ts: new Date().toISOString(), type, pair, details });
   if (state.executionFeed.length > 300) state.executionFeed.pop();
+}
+
+function touchSignalHistory(signal, patch = {}) {
+  const key = signal?.pair;
+  if (!key) return;
+  const prev = state.signalHistory[key] || {};
+  state.signalHistory[key] = { ...prev, pair: key, ...patch, updatedAt: new Date().toISOString() };
 }
 
 function hasBinanceKeys() {
@@ -232,14 +298,22 @@ function vwap(klines) {
 }
 
 function canTradeNow() {
+  ensureDailyRiskWindow();
   const pf = activeProfile();
-  const maxSimTrades = pf.maxSimTrades || cfg.maxSimultaneousTrades;
+  const rg = STRATEGY_CFG?.risk || {};
+  const maxSimTrades = Math.min((pf.maxSimTrades || cfg.maxSimultaneousTrades), Number(rg.maxTradesPerSession || pf.maxSimTrades || cfg.maxSimultaneousTrades));
   const maxExposure = pf.maxExposure || cfg.maxTotalExposure;
   const maxTradesPerDay = pf.maxTradesPerDay || cfg.maxTradesPerDay;
+  if (inNoTradeSessionWindow()) return false;
   if (state.risk.circuitBreakerUntil && new Date(state.risk.circuitBreakerUntil) > new Date()) return false;
   if (state.risk.tradesToday >= maxTradesPerDay) return false;
   if (state.openPositions.length >= maxSimTrades) return false;
   if (state.risk.currentExposure >= maxExposure) return false;
+
+  const dailyLoss = Math.abs(Math.min(0, Number(state.account.realizedPnL || 0)));
+  const ddLimit = Number(rg.maxDailyDrawdownPct || 0.03) * Number(state.account.balance || 0);
+  if (dailyLoss >= ddLimit && ddLimit > 0) return false;
+
   if (state.mode === 'real') {
     const days = Math.floor((Date.now() - cfg.paperStartDate.getTime()) / 86400000);
     const keysReady = hasBinanceKeys();
@@ -270,7 +344,7 @@ function buildSignal(asset) {
     if (tf1h.macd?.hist > 0) checks.push('MACD positive');
     if (tf1h.close > tf1h.vwap) checks.push('price above VWAP');
     if (tf1h.bb && tf1h.close > tf1h.bb.mid && tf1h.close < tf1h.bb.upper) checks.push('Bollinger favorable');
-    candidates.push({ name: 'Trend Continuation Pullback', score: Math.min(100, checks.length * 14), rr: 2.1, checks });
+    candidates.push({ name: 'Trend Continuation Pullback', score: Math.min(100, checks.length * 14), rr: 2.1, checks, timeframe: '4H/1H/15M', direction: 'long' });
   }
 
   // Strategy 2 — Breakout + Retest
@@ -282,7 +356,7 @@ function buildSignal(asset) {
     if (nearRetest) checks.push('retest zone respected');
     if ((tf1h.macd?.hist || 0) > 0) checks.push('momentum expansion');
     if (tf1h.rsi > 45 && tf1h.rsi < 72) checks.push('RSI supports breakout');
-    candidates.push({ name: 'Breakout + Retest', score: Math.min(100, checks.length * 18), rr: 2.0, checks });
+    candidates.push({ name: 'Breakout + Retest', score: Math.min(100, checks.length * 18), rr: 2.0, checks, timeframe: '1H/15M', direction: 'long' });
   }
 
   // Strategy 3 — Reversal at Major Level
@@ -291,7 +365,7 @@ function buildSignal(asset) {
     if (tf1h.bb && price <= tf1h.bb.lower * 1.01) checks.push('near lower Bollinger extreme');
     if (tf1h.rsi < 35) checks.push('RSI oversold zone');
     if ((tf15m.macd?.hist || 0) > 0) checks.push('15M bullish momentum shift');
-    candidates.push({ name: 'Reversal at Major Level', score: Math.min(100, checks.length * 22), rr: 2.2, checks });
+    candidates.push({ name: 'Reversal at Major Level', score: Math.min(100, checks.length * 22), rr: 2.2, checks, timeframe: '1H/15M', direction: 'long' });
   }
 
   // Strategy 4 — Range Rotation
@@ -303,14 +377,23 @@ function buildSignal(asset) {
     if (width > 0.01 && width < 0.07) checks.push('range detected');
     if (price <= lo * 1.02) checks.push('price near range support');
     if (tf1h.rsi < 45) checks.push('RSI supportive for bounce');
-    candidates.push({ name: 'Range Rotation', score: Math.min(100, checks.length * 20), rr: 2.0, checks });
+    candidates.push({ name: 'Range Rotation', score: Math.min(100, checks.length * 20), rr: 2.0, checks, timeframe: '1H', direction: 'long' });
   }
 
   const ordered = [...candidates].sort((a, b) => b.score - a.score);
   const best = ordered[0];
   const pf = activeProfile();
-  const approvedCandidates = ordered.filter(c => c.score >= pf.minScore && c.rr >= 2);
+  const sg = strategyGate();
+  const minScore = Number(sg.minConfidence || pf.minScore || 80);
+  const minRR = Number(sg.minRR || 1.5);
+  const minConfluence = Number(sg.minConfluence || 3);
+
+  const approvedCandidates = ordered.filter(c => c.score >= minScore && c.rr >= minRR && (c.checks?.length || 0) >= minConfluence);
   const approved = approvedCandidates.length > 0;
+  const stop = Number((price * pf.slMul).toFixed(6));
+  const tp1 = Number((price * pf.tp1Mul).toFixed(6));
+  const tp2 = Number((price * pf.tp2Mul).toFixed(6));
+  const setupQuality = best.score >= 90 ? 'A+' : (best.score >= 80 ? 'A' : (best.score >= 70 ? 'B' : (best.score >= 60 ? 'C' : 'D')));
 
   return {
     ts: new Date().toISOString(),
@@ -318,8 +401,18 @@ function buildSignal(asset) {
     action: approved ? 'BUY' : 'REJECT',
     strategy: best.name,
     strength: best.score,
+    confidence: setupQuality,
+    confidenceScore: best.score,
     rr: best.rr,
-    reason: approved ? `Approved: ${best.checks.join(', ')}` : `Rejected: ${best.checks.join(', ') || 'low confluence'}`,
+    timeframe: best.timeframe,
+    direction: best.direction,
+    entry: Number(price.toFixed(6)),
+    stopLoss: stop,
+    tp1,
+    tp2,
+    reason: approved
+      ? `Approved: ${best.checks.join(', ')}`
+      : `NO TRADE: score<${minScore} or RR<${minRR} or confluence<${minConfluence}`,
     checks: best.checks,
     approvedCandidates,
     indicators: {
@@ -332,15 +425,17 @@ function buildSignal(asset) {
 }
 
 function maybeExecutePaperTrade(signal, price) {
-  if (signal.action !== 'BUY' || !canTradeNow()) return;
-  if (state.openPositions.some(p => p.pair === signal.pair && p.strategy === signal.strategy)) return;
+  if (signal.action !== 'BUY' || !canTradeNow()) return false;
+  if (state.openPositions.some(p => p.pair === signal.pair && p.strategy === signal.strategy)) return false;
 
   const pf = activeProfile();
   const stop = price * pf.slMul;
   const tp1 = price * pf.tp1Mul;
   const tp2 = price * pf.tp2Mul;
   const stopDistance = Math.abs(price - stop);
-  const riskValue = state.account.balance * cfg.riskPerTrade;
+  const rg = STRATEGY_CFG?.risk || {};
+  const riskPerTrade = Math.min(Number(rg.riskPerTradeMax || cfg.riskPerTrade), Math.max(Number(rg.riskPerTradeMin || 0.005), Number(cfg.riskPerTrade || 0.01)));
+  const riskValue = state.account.balance * riskPerTrade;
   const pf2 = activeProfile();
   const mgStep = Math.max(0, Math.min(state.martingale?.step || 0, pf2.martingaleMaxSteps || 0));
   const mgMultiplier = cfg.tradeProfile === 'loucura' ? Math.pow(2, mgStep) : 1;
@@ -355,14 +450,14 @@ function maybeExecutePaperTrade(signal, price) {
   const qty = Math.floor(rawQty * 1e6) / 1e6;
   if (!Number.isFinite(qty) || qty <= 0) {
     if (cfg.tradeProfile !== 'loucura') pushExecution('REJECTED', signal.pair, 'Risk block: exposição máxima atingida');
-    return;
+    return false;
   }
 
   const notional = qty * price;
   const exposure = notional / state.account.balance;
   if (state.risk.currentExposure + exposure > maxExposure + 1e-9) {
     if (cfg.tradeProfile !== 'loucura') pushExecution('REJECTED', signal.pair, 'Risk block: limite de exposição total');
-    return;
+    return false;
   }
 
   const pos = {
@@ -374,23 +469,29 @@ function maybeExecutePaperTrade(signal, price) {
     tp1,
     tp2,
     qty,
-    riskPct: cfg.riskPerTrade,
+    riskPct: riskPerTrade,
     strategy: signal.strategy,
+    rr: signal.rr,
+    confidence: signal.confidence,
+    timeframe: signal.timeframe,
+    direction: signal.direction,
+    signalReason: signal.reason,
     openAt: new Date().toISOString(),
     mode: cfg.mode,
     tp1Hit: false
   };
 
   state.openPositions.push(pos);
-  state.risk.currentExposure += exposure;
   state.risk.tradesToday += 1;
-  state.account.available -= notional;
-  state.account.allocated += notional;
+  reconcileAccountState();
   pushExecution('BUY', pos.pair, `Entry ${pos.entry.toFixed(4)} | Qty ${pos.qty}`);
+  touchSignalHistory(signal, { lifecycle: 'executed', lastExecutionType: 'BUY', executedAt: new Date().toISOString(), strategy: signal.strategy });
   log('Paper trade executed', { pair: pos.pair, entry: pos.entry, qty: pos.qty });
+  return true;
 }
 
 function monitorPositions() {
+  ensureDailyRiskWindow();
   for (const p of [...state.openPositions]) {
     const wl = state.watchlist.find(x => x.symbol === p.pair);
     if (!wl) continue;
@@ -411,9 +512,6 @@ function monitorPositions() {
       const pnl = (closePrice - p.entry) * p.qty;
       state.account.realizedPnL += pnl;
       state.account.balance += pnl;
-      state.account.available += (p.qty * p.entry) + pnl;
-      state.account.allocated = Math.max(0, state.account.allocated - (p.qty * p.entry));
-      state.risk.currentExposure = Math.max(0, state.risk.currentExposure - ((p.qty * p.entry) / Math.max(1, state.account.balance)));
 
       if (pnl < 0) state.risk.consecutiveLosses += 1; else state.risk.consecutiveLosses = 0;
 
@@ -423,7 +521,8 @@ function monitorPositions() {
         else state.martingale.step = 0;
       }
 
-      if (state.risk.consecutiveLosses >= cfg.circuitBreakerLosses) {
+      const maxLosses = Number(STRATEGY_CFG?.risk?.maxConsecutiveLosses || cfg.circuitBreakerLosses);
+      if (state.risk.consecutiveLosses >= maxLosses) {
         const until = new Date(Date.now() + cfg.circuitBreakerPauseHours * 3600000);
         state.risk.circuitBreakerUntil = until.toISOString();
         log('Circuit breaker activated', { until: state.risk.circuitBreakerUntil });
@@ -435,8 +534,10 @@ function monitorPositions() {
         closeReason, ts: new Date().toISOString()
       });
       pushExecution(closeReason === 'tp2' ? 'SELL_TP' : 'SELL_SL', p.pair, `Exit ${closePrice.toFixed(4)} | PnL ${Number(pnl.toFixed(2))}`);
+      touchSignalHistory({ pair: p.pair }, { lifecycle: 'closed', lastExecutionType: closeReason === 'tp2' ? 'SELL_TP' : 'SELL_SL', closedAt: new Date().toISOString() });
       if (state.closedTrades.length > 200) state.closedTrades.pop();
       state.openPositions = state.openPositions.filter(x => x.id !== p.id);
+      reconcileAccountState();
       log('Position closed', { pair: p.pair, reason: closeReason, pnl: Number(pnl.toFixed(2)) });
     }
   }
@@ -464,9 +565,18 @@ async function fetchTf(symbol, interval, limit = 250) {
   return out;
 }
 
+
+async function fetchLivePrice(symbol) {
+  const r = await axios.get(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`, { timeout: 8000 });
+  return Number(r.data?.price || 0);
+}
+
 async function scanMarket() {
+  const cycleStartedAt = Date.now();
   try {
+    ensureDailyRiskWindow();
     const tickRes = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
+    state.engine.apiLatencyMs = Date.now() - cycleStartedAt;
     const map = new Map(tickRes.data.map(x => [x.symbol, x]));
 
     const out = [];
@@ -495,8 +605,12 @@ async function scanMarket() {
     const signals = [];
     for (const a of state.watchlist.slice(0, 10)) {
       const s = buildSignal(a);
+      touchSignalHistory(s, { lifecycle: s.action === 'BUY' ? 'new' : 'rejected', firstSeenAt: (state.signalHistory[s.pair]?.firstSeenAt || new Date().toISOString()), strategy: s.strategy, strength: s.strength });
       signals.push(s);
-      if (s.action === 'REJECT') pushExecution('REJECTED', s.pair, s.reason);
+      if (s.action === 'REJECT') {
+        pushExecution('REJECTED', s.pair, s.reason);
+        touchSignalHistory(s, { lifecycle: 'rejected', lastExecutionType: 'REJECTED' });
+      }
 
       if (s.approvedCandidates?.length) {
         const pf = activeProfile();
@@ -513,13 +627,21 @@ async function scanMarket() {
         }
       }
     }
-    state.signals = signals;
+    state.signals = signals.map(s => {
+      const hist = state.signalHistory[s.pair] || {};
+      return { ...s, lifecycle: hist.lifecycle || (s.action === 'BUY' ? 'new' : 'rejected'), firstSeenAt: hist.firstSeenAt || s.ts, lastExecutionType: hist.lastExecutionType || null };
+    });
+
+    const activePairs = new Set(signals.map(s => s.pair));
+    for (const [pair, meta] of Object.entries(state.signalHistory)) {
+      if (!activePairs.has(pair) && meta.lifecycle !== 'closed') state.signalHistory[pair] = { ...meta, lifecycle: 'expired', updatedAt: new Date().toISOString() };
+    }
 
     monitorPositions();
 
     state.lastScan = new Date().toISOString();
     state.nextScanInSec = Math.floor(cfg.loopMs / 1000);
-    state.account.unrealizedPnL = Number(state.openPositions.reduce((acc,p)=>acc + ((p.current - p.entry) * p.qty),0).toFixed(2));
+    reconcileAccountState();
 
     const wins = state.closedTrades.filter(t=>t.result>0).length;
     const losses = state.closedTrades.filter(t=>t.result<0).length;
@@ -542,9 +664,13 @@ async function scanMarket() {
       state.wallet = { source: 'paper', fetchedAt: new Date().toISOString(), totalUSDT: state.account.balance, assets: [{ asset: 'USDT', free: state.account.available, locked: 0, total: state.account.available }] };
     }
 
-    log('Cycle completed', { signals: signals.length, positions: state.openPositions.length, regime: state.marketRegime });
+    state.engine.lastCycleMs = Date.now() - cycleStartedAt;
+    state.engine.lastCycleAt = new Date().toISOString();
+    log('Cycle completed', { signals: signals.length, positions: state.openPositions.length, regime: state.marketRegime, cycleMs: state.engine.lastCycleMs });
     state.status = 'online';
   } catch (e) {
+    state.engine.lastError = e.message;
+    state.engine.lastErrorAt = new Date().toISOString();
     log('Scan error', { error: e.message });
     state.status = 'warning';
   }
@@ -557,41 +683,65 @@ async function loucuraTick() {
     const maxExposure = (activeProfile().maxExposure || cfg.maxTotalExposure);
     const remainingExposure = maxExposure - state.risk.currentExposure;
     if (remainingExposure < 0.01) return;
+
     let target = null;
     if (state.watchlist?.length) {
-      target = [...state.watchlist].sort((a,b)=>Math.abs(b.change24h)-Math.abs(a.change24h))[0];
+      const pool = state.watchlist.filter(w => ['BTCUSDT','ETHUSDT','SOLUSDT','XRPUSDT'].includes(w.symbol) || Number(w.quoteVolume||0) > 100000000);
+      target = (pool.length ? pool : state.watchlist).sort((a,b)=>Math.abs(b.change24h)-Math.abs(a.change24h))[0];
     } else {
-      const r = await axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-      target = { symbol: 'BTCUSDT', price: Number(r.data?.price || 0), change24h: 0 };
+      target = { symbol: 'BTCUSDT', price: 0, change24h: 0, quoteVolume: 0 };
     }
-    if (!target?.symbol || !target?.price) return;
-    maybeExecutePaperTrade({
+    if (!target?.symbol) return;
+
+    const pair = target.symbol;
+    const cur = Number(await fetchLivePrice(pair));
+    if (!cur) return;
+    const prev = Number(state.loucura?.lastPriceByPair?.[pair] || 0);
+    state.loucura.lastPriceByPair[pair] = cur;
+
+    const lastTradeAt = Number(state.loucura?.lastTradeAtByPair?.[pair] || 0);
+    if (lastTradeAt && (Date.now() - lastTradeAt) < 20000) return;
+
+    if (prev > 0) {
+      const microMovePct = ((cur / prev) - 1) * 100;
+      if (microMovePct < 0.05) return;
+    }
+
+    const executed = maybeExecutePaperTrade({
       action: 'BUY',
-      pair: target.symbol,
+      pair,
       strategy: `Loucura Martingale S${state.martingale?.step||0}`,
       strength: 99,
+      confidence: 'X',
+      timeframe: 'tick',
+      direction: 'long',
       rr: 1.5,
-      reason: 'Timer 1s (paper only)'
-    }, target.price);
+      reason: 'Live ticker + micro-momentum + cooldown (paper only)'
+    }, cur);
+
+    if (executed) state.loucura.lastTradeAtByPair[pair] = Date.now();
   } catch {}
 }
 
-function loucuraForceSellTick() {
+async function loucuraForceSellTick() {
   try {
     if (cfg.tradeProfile !== 'loucura' || state.mode !== 'paper') return;
     const now = Date.now();
     for (const p of [...state.openPositions]) {
       const openedAt = new Date(p.openAt).getTime();
-      if (!openedAt || now - openedAt < 5000) continue;
-      const wl = state.watchlist.find(x => x.symbol === p.pair);
-      const closePrice = Number(wl?.price || p.current || p.entry);
+      if (!openedAt || now - openedAt < 15000) continue;
+      const closePrice = Number(await fetchLivePrice(p.pair)) || Number(p.current || p.entry);
+      p.current = closePrice;
       const pnl = (closePrice - p.entry) * p.qty;
+      const pnlPct = p.entry ? ((closePrice / p.entry) - 1) * 100 : 0;
+
+      const hitMiniTp = pnlPct >= 0.18;
+      const hitMiniSl = pnlPct <= -0.12;
+      const hitTime = now - openedAt >= 30000;
+      if (!(hitMiniTp || hitMiniSl || hitTime)) continue;
 
       state.account.realizedPnL += pnl;
       state.account.balance += pnl;
-      state.account.available += (p.qty * p.entry) + pnl;
-      state.account.allocated = Math.max(0, state.account.allocated - (p.qty * p.entry));
-      state.risk.currentExposure = Math.max(0, state.risk.currentExposure - ((p.qty * p.entry) / Math.max(1, state.account.balance)));
 
       if (pnl < 0) state.risk.consecutiveLosses += 1; else state.risk.consecutiveLosses = 0;
       if (cfg.tradeProfile === 'loucura' && String(p.strategy||'').includes('Loucura')) {
@@ -600,10 +750,13 @@ function loucuraForceSellTick() {
         else state.martingale.step = 0;
       }
 
-      state.closedTrades.unshift({ pair: p.pair, entry: p.entry, exit: closePrice, result: Number(pnl.toFixed(2)), strategy: p.strategy, closeReason: 'loucura_5s_exit', ts: new Date().toISOString() });
+      const closeReason = hitMiniTp ? 'loucura_mini_tp' : (hitMiniSl ? 'loucura_mini_sl' : 'loucura_time_exit');
+      state.closedTrades.unshift({ pair: p.pair, entry: p.entry, exit: closePrice, result: Number(pnl.toFixed(2)), strategy: p.strategy, closeReason, ts: new Date().toISOString() });
       if (state.closedTrades.length > 200) state.closedTrades.pop();
-      pushExecution('SELL_5S', p.pair, `Exit ${closePrice.toFixed(4)} | PnL ${Number(pnl.toFixed(2))}`);
+      pushExecution(hitMiniTp ? 'SELL_TP_FAST' : (hitMiniSl ? 'SELL_SL_FAST' : 'SELL_TIME'), p.pair, `Exit ${closePrice.toFixed(4)} | PnL ${Number(pnl.toFixed(2))}`);
+      touchSignalHistory({ pair: p.pair }, { lifecycle: 'closed', lastExecutionType: hitMiniTp ? 'SELL_TP_FAST' : (hitMiniSl ? 'SELL_SL_FAST' : 'SELL_TIME'), closedAt: new Date().toISOString() });
       state.openPositions = state.openPositions.filter(x => x.id !== p.id);
+      reconcileAccountState();
     }
   } catch {}
 }
@@ -613,13 +766,34 @@ setInterval(() => {
 }, 1000);
 
 setInterval(scanMarket, cfg.loopMs);
-setInterval(loucuraTick, 1000);
+setInterval(loucuraTick, 3000);
 setInterval(loucuraForceSellTick, 5000);
 scanMarket();
 
 function buildPublicState() {
+  ensureDailyRiskWindow();
+  reconcileAccountState();
   const paperDays = Math.floor((Date.now() - cfg.paperStartDate.getTime()) / 86400000);
   const keysReady = hasBinanceKeys();
+  const latestExecution = state.executionFeed[0] || null;
+  const latestTrade = state.closedTrades[0] || state.openPositions[0] || null;
+  const today = currentTradeDay();
+  const nowMs = Date.now();
+  const tradesTodayList = state.closedTrades.filter(t => String(t.ts || '').slice(0, 10) === today);
+  const trades24hList = state.closedTrades.filter(t => t.ts && (nowMs - new Date(t.ts).getTime()) <= 86400000);
+  const trades7dList = state.closedTrades.filter(t => t.ts && (nowMs - new Date(t.ts).getTime()) <= 7 * 86400000);
+  const realizedToday = Number(tradesTodayList.reduce((acc, t) => acc + (Number(t.result) || 0), 0).toFixed(2));
+  const realized24h = Number(trades24hList.reduce((acc, t) => acc + (Number(t.result) || 0), 0).toFixed(2));
+  const realized7d = Number(trades7dList.reduce((acc, t) => acc + (Number(t.result) || 0), 0).toFixed(2));
+  const zeroPnLTrades = state.closedTrades.filter(t => (Number(t.result) || 0) === 0).length;
+  const telemetry = {
+    simulated: state.mode === 'paper',
+    usesRealWalletData: state.wallet?.source === 'binance',
+    metricsQuality: (cfg.tradeProfile === 'loucura' || zeroPnLTrades >= Math.max(20, Math.floor(state.closedTrades.length * 0.5))) ? 'degraded' : 'normal',
+    warnings: []
+  };
+  if (cfg.tradeProfile === 'loucura') telemetry.warnings.push('Perfil loucura usa ticker ao vivo e stress mode; ainda é simulação acelerada, não benchmark de edge.');
+  if (zeroPnLTrades >= Math.max(20, Math.floor(state.closedTrades.length * 0.5))) telemetry.warnings.push('Grande parte dos trades recentes fechou com PnL zero; win rate e profit factor ficam degradados.');
 
   const byStrategy = {};
   const exitBreakdown = {};
@@ -634,12 +808,43 @@ function buildPublicState() {
     const ek = t.closeReason || 'unknown';
     exitBreakdown[ek] = (exitBreakdown[ek] || 0) + 1;
   }
-  const strategyPerformance = Object.values(byStrategy).map(x => ({ ...x, winRate: x.trades ? Number(((x.wins / x.trades) * 100).toFixed(1)) : 0, pnl: Number(x.pnl.toFixed(2)) }));
+  const strategyPerformance = Object.values(byStrategy).map(x => ({ ...x, winRate: x.trades ? Number(((x.wins / x.trades) * 100).toFixed(1)) : 0, pnl: Number(x.pnl.toFixed(2)), avgPnL: x.trades ? Number((x.pnl / x.trades).toFixed(2)) : 0 }));
+
+  const health = {
+    cycleMs: state.engine.lastCycleMs,
+    lastCycleAt: state.engine.lastCycleAt,
+    apiLatencyMs: state.engine.apiLatencyMs,
+    lastError: state.engine.lastError,
+    lastErrorAt: state.engine.lastErrorAt,
+    status: state.status
+  };
+
+  const kpis = {
+    equity: Number((state.account.balance + state.account.unrealizedPnL).toFixed(2)),
+    balance: Number(state.account.balance.toFixed(2)),
+    available: Number(state.account.available.toFixed(2)),
+    allocated: Number(state.account.allocated.toFixed(2)),
+    unrealizedPnL: Number(state.account.unrealizedPnL.toFixed(2)),
+    realizedPnL: Number(state.account.realizedPnL.toFixed(2)),
+    realizedToday,
+    realized24h,
+    realized7d,
+    openPositions: state.openPositions.length,
+    closedTrades: state.closedTrades.length,
+    tradesToday: state.risk.tradesToday,
+    lastExecutionType: latestExecution?.type || null,
+    lastExecutionAt: latestExecution?.ts || null,
+    lastTradePair: latestTrade?.pair || null,
+    lastTradeAt: latestTrade?.ts || latestTrade?.openAt || null
+  };
 
   return {
     ...state,
     strategyPerformance,
     exitBreakdown,
+    telemetry,
+    kpis,
+    health,
     controls: {
       realEnabled: cfg.realEnabled,
       hasApiKeys: keysReady,
@@ -648,9 +853,16 @@ function buildPublicState() {
       tradeProfile: cfg.tradeProfile,
       profiles: Object.keys(TRADE_PROFILES),
       profileConfig: activeProfile(),
+      strategyConfig: {
+        name: STRATEGY_CFG?.name || 'custom',
+        minConfidence: Number(STRATEGY_CFG?.gates?.minConfidence || 80),
+        minConfluence: Number(STRATEGY_CFG?.gates?.minConfluence || 3),
+        minRR: Number(STRATEGY_CFG?.gates?.minRR || 1.5)
+      },
       martingaleStep: state.martingale?.step || 0,
       realReady: keysReady && cfg.realEnabled && paperDays >= cfg.paperMinDays,
-      blockReason: realBlockReason()
+      executionStatus: state.mode === 'real' && !realBlockReason() ? 'enabled' : 'blocked',
+      blockReason: inNoTradeSessionWindow() ? 'Janela de baixa participação (00:00-02:59 UTC): WAIT' : realBlockReason()
     }
   };
 }
@@ -737,7 +949,9 @@ app.post('/api/paper/reset', (req, res) => {
   state.risk.consecutiveLosses = 0;
   state.risk.circuitBreakerUntil = null;
   state.risk.tradesToday = 0;
+  state.risk.tradeDay = currentTradeDay();
   state.martingale.step = 0;
+  reconcileAccountState();
 
   pushExecution('MODE', '-', `Paper reset para $${amount.toFixed(2)}`);
   return res.json({ ok: true, amount });

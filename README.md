@@ -25,6 +25,15 @@ Este workspace contém a configuração completa de um agente AI operando via [O
 - **SHA256:** `0fd4046b4047b52cbcebcdc04ba6febfbc76c03283f93b99d65a5e82ce3ad0c1`
 - **Conteúdo:** `controlla-fiscal`, `myaac`, nginx (`myaac.conf`), serviços systemd e cron de backup.
 
+### 🆕 Atualizações rápidas — 2026-03-12
+
+- Refactor visual completo do painel do **Autonomous Crypto Agent** (`autonomous-crypto-agent/public/index.html`) com layout em abas e ajustes de usabilidade.
+- Ajuste no OTServer (`destruitor.com.br`) removendo itens da barra azul: **Download Client / Discord / Grupo Whatsapp**.
+- Troca do box lateral de **Discord** para **Grupo Whatsapp** nas templates ativas.
+- Recuperação da imagem perdida **`summer-update-2025.jpg`** no ambiente de produção.
+- Snapshot versionado dos arquivos de hotfix do OTServer em:
+  - `backups/otserver-hotfix-20260312/`
+
 ---
 
 ## 🏗️ Arquitetura

@@ -1,0 +1,48 @@
+{
+  "name": "jarvis-trade-elite-fast-daytrade-v1",
+  "mode": "institutional",
+  "timeframes": {
+    "bias": "15m",
+    "setup": "5m",
+    "entry": "1m"
+  },
+  "gates": {
+    "minConfidence": 80,
+    "minConfluence": 3,
+    "minRR": 1.5,
+    "preferredRR": 2.0,
+    "requireVolumeConfirmation": true,
+    "requireClearInvalidation": true
+  },
+  "risk": {
+    "riskPerTradeMin": 0.005,
+    "riskPerTradeMax": 0.01,
+    "maxConsecutiveLosses": 3,
+    "maxDailyDrawdownPct": 0.03,
+    "maxTradesPerSession": 6
+  },
+  "priorityOrder": [
+    "trend_vwap_pullback",
+    "breakout_volume_expansion",
+    "liquidity_grab_reclaim_reject",
+    "ema9_21_continuation",
+    "sr_reaction"
+  ],
+  "noTradeConditions": [
+    "ema200_flat_and_price_chop",
+    "vwap_slicing_no_respect",
+    "low_volume",
+    "timeframe_conflict",
+    "poor_rr",
+    "high_spread_or_slippage",
+    "overextended_move_no_pullback",
+    "weak_breakout_or_rejection"
+  ],
+  "newsFilter": {
+    "enabled": true,
+    "blockMinutesBefore": 15,
+    "blockMinutesAfter": 15,
+    "events": ["CPI", "FOMC", "NFP", "CPI Core", "Rate Decision"]
+  },
+  "allowedDecisions": ["EXECUTE_LONG", "EXECUTE_SHORT", "WAIT", "NO_TRADE"]
+}

@@ -43,6 +43,22 @@ Dashboard: `http://<server-ip>:8787`
 - Paper reset endpoint (`/api/paper/reset`)
 - Real-time dashboard (WS + polling fallback)
 
+## Strategy Pack (Jarvis Trade)
+- Production prompt: `strategy/JARVIS_TRADE_SYSTEM_PROMPT.md`
+- Execution policy: `strategy/strategy-config.json`
+
+Integrated in engine (`server.js`):
+- gate by `minConfidence`, `minConfluence`, `minRR`
+- risk clamped by `riskPerTradeMin/riskPerTradeMax`
+- max consecutive losses from strategy config
+- no-trade session window (00:00–02:59 UTC)
+
+Recommended defaults:
+- trade only when `confidence >= 80`
+- `RR >= 1:1.5` (prefer `1:2`)
+- at least `3` confluence factors
+- otherwise: `WAIT` / `NO TRADE`
+
 ## Important
 - Real execution remains guarded by policy checks.
 - Loucura mode is intended for paper stress testing only.

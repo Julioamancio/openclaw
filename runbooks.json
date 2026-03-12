@@ -47,13 +47,21 @@
       "strategies": {
         "l1": {
           "description": "rerun check-emails",
-          "attempts": 0,
-          "success": 0
+          "attempts": 2,
+          "success": 1,
+          "lastResult": "success",
+          "lastAt": "2026-03-09T19:05:46.611518+00:00",
+          "lastMode": "exploit",
+          "avgDurationSec": 12.9
         },
         "l2": {
           "description": "restart dependência + rerun",
-          "attempts": 0,
-          "success": 0
+          "attempts": 1,
+          "success": 0,
+          "lastResult": "failed",
+          "lastAt": "2026-03-09T19:05:10.285969+00:00",
+          "lastMode": "exploit",
+          "avgDurationSec": 9.0
         }
       }
     },

@@ -238,6 +238,68 @@
           "notes": "sem runbook para tarefa: Health Score abaixo de 80 (atual 0)"
         }
       ]
+    },
+    "alt_1773082801603_jkhke": {
+      "id": "alt_1773082801603_jkhke",
+      "state": "closed",
+      "createdAt": "2026-03-09T19:00:55.058418+00:00",
+      "updatedAt": "2026-03-09T19:05:46.757268+00:00",
+      "history": [
+        {
+          "ts": "2026-03-09T19:00:55.058449+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "ALERTA: [warning] Check remetentes falhou"
+        },
+        {
+          "ts": "2026-03-09T19:00:55.080379+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "risk assessment start"
+        },
+        {
+          "ts": "2026-03-09T19:00:55.144856+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "approved",
+          "notes": "policy check passed"
+        },
+        {
+          "ts": "2026-03-09T19:05:01.748401+00:00",
+          "action": "upsert",
+          "to": "detected",
+          "notes": "ALERTA: [warning] Check remetentes falhou"
+        },
+        {
+          "ts": "2026-03-09T19:05:01.772008+00:00",
+          "action": "transition",
+          "from": "detected",
+          "to": "assessed",
+          "notes": "risk assessment start"
+        },
+        {
+          "ts": "2026-03-09T19:05:01.841269+00:00",
+          "action": "transition",
+          "from": "assessed",
+          "to": "approved",
+          "notes": "policy check passed"
+        },
+        {
+          "ts": "2026-03-09T19:05:46.729217+00:00",
+          "action": "transition",
+          "from": "approved",
+          "to": "healed",
+          "notes": "recuperado com estratégia l1 (mode=exploit, duração=36s)"
+        },
+        {
+          "ts": "2026-03-09T19:05:46.757271+00:00",
+          "action": "transition",
+          "from": "healed",
+          "to": "closed",
+          "notes": "healed and closed"
+        }
+      ]
     }
   }
 }

@@ -156,5 +156,14 @@
     "status": "closed",
     "resolution": "auto-closed housekeeping after validation window",
     "closed_at": "2026-03-06T21:33:58.948952Z"
+  },
+  {
+    "id": "pm_1773083146768_5v4qs",
+    "created_at": "2026-03-09T19:05:46.768Z",
+    "incident": "ALERTA: [warning] Check remetentes falhou",
+    "probable_cause": "Falha operacional detectada automaticamente",
+    "action_taken": "Auto-heal aplicado com sucesso | risk=medium:45 | level=1 | recuperado com estratégia l1 (mode=exploit, duração=36s)",
+    "prevention": "Revisar runbook e fortalecer monitoramento",
+    "status": "closed"
   }
 ]

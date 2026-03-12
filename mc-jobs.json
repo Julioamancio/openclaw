@@ -5,7 +5,7 @@
       "schedule": "08:00 e 16:00 BRT",
       "agent": "Daniela",
       "status": "done",
-      "lastRun": "2026-03-08T19:24:53.159826+00:00",
+      "lastRun": "2026-03-12T19:14:55.381159+00:00",
       "notes": "Nenhum e-mail novo"
     },
     {
@@ -13,15 +13,15 @@
       "schedule": "09:00 BRT",
       "agent": "Nexo",
       "status": "done",
-      "lastRun": "2026-03-08T12:00:04.860091+00:00",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-08.md"
+      "lastRun": "2026-03-12T12:00:06.251928+00:00",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-12.md"
     },
     {
       "task": "Backup GitHub",
       "schedule": "22:00 BRT",
       "agent": "Sistema",
       "status": "done",
-      "lastRun": "2026-03-09T01:02:27.790952+00:00",
+      "lastRun": "2026-03-12T01:03:25.689515+00:00",
       "notes": "Backup executado com sucesso"
     },
     {
@@ -66,6 +66,1553 @@
     }
   ],
   "runs": [
+    {
+      "ts": "2026-03-12T19:14:55.381159+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T19:14:19.140976+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T19:00:37.624054+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T19:00:01.326618+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T13:11:38.742117+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T13:11:02.516047+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T12:40:34.580604+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T12:39:58.339061+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T12:39:25.778231+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T12:38:49.548614+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T12:06:33.856363+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T12:05:57.605996+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T12:00:06.251928+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-12.md"
+    },
+    {
+      "ts": "2026-03-12T12:00:01.564494+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-12T11:35:33.540182+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T11:34:57.300043+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T11:33:55.582058+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T11:33:19.339874+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T11:00:37.635311+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T11:00:01.328408+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-12T01:03:25.689515+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-12T01:03:23.954141+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    },
+    {
+      "ts": "2026-03-12T01:03:19.375942+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-12T01:02:43.145237+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T22:02:25.187487+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T22:01:48.952830+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T19:36:30.771680+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T19:35:54.535191+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T19:35:32.214828+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T19:34:55.975464+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T19:25:58.081437+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T19:25:21.839188+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T19:00:37.541788+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T19:00:01.270358+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T18:52:52.773685+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T18:52:16.536484+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T18:44:30.147561+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T18:43:53.897859+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T18:33:06.951215+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T18:32:30.705478+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T18:10:55.107624+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T18:10:18.871341+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T17:47:32.822666+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T17:46:56.592839+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T17:14:15.422702+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T17:13:39.194123+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T16:41:54.855943+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T16:41:18.617089+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T16:32:27.163850+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T16:31:50.917780+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T16:07:44.592690+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T16:07:08.353738+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T15:36:50.635966+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T15:36:14.378177+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T15:05:48.182405+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T15:05:11.943982+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T14:04:48.561968+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T14:04:12.317613+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T14:03:41.229801+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T14:03:04.982324+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T13:32:46.004434+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T13:32:09.780150+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T13:01:50.598253+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T13:01:14.373430+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T12:30:57.803049+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T12:30:21.563068+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T12:29:53.975233+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T12:29:17.749416+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T12:00:05.125147+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-11.md"
+    },
+    {
+      "ts": "2026-03-11T12:00:01.535374+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-11T11:58:58.010072+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T11:58:21.771679+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T11:28:00.643470+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T11:27:24.414820+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T11:00:37.644404+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T11:00:01.372196+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T10:27:02.325025+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T10:26:26.080607+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T02:46:07.792865+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T02:45:31.535808+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T02:44:51.282566+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T02:44:15.028748+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T02:13:38.874286+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T02:13:02.638493+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T01:42:24.916321+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T01:41:48.673595+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T01:12:39.488972+00:00",
+      "task": "Backup GitHub",
+      "status": "done",
+      "agent": "Sistema",
+      "notes": "Backup executado com sucesso"
+    },
+    {
+      "ts": "2026-03-11T01:12:37.860445+00:00",
+      "task": "Backup GitHub",
+      "status": "running",
+      "agent": "Sistema",
+      "notes": "Backup iniciado"
+    },
+    {
+      "ts": "2026-03-11T01:12:37.751916+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T01:12:01.485982+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T00:42:21.448494+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T00:41:45.191398+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T00:37:36.313511+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T00:37:00.071134+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T00:36:27.844650+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T00:35:51.593471+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T00:28:37.375901+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T00:28:01.114463+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-11T00:08:44.796993+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-11T00:08:08.542847+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T23:38:22.907211+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T23:37:46.652388+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T23:37:12.615760+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T23:36:36.357018+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T23:07:16.836992+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T23:06:40.588062+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T22:33:32.050036+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T22:32:55.810603+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T22:03:29.516201+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T22:02:53.282840+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T22:02:21.233471+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T22:01:44.995776+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T21:32:15.046688+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T21:31:38.810822+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T20:32:30.345137+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T20:31:54.113815+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T20:31:05.117225+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T20:30:28.857302+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T20:01:12.553205+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T20:00:36.303563+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T19:31:18.428909+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T19:30:42.182678+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T19:00:38.205268+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T19:00:01.943341+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-10T12:00:05.840766+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-10.md"
+    },
+    {
+      "ts": "2026-03-10T12:00:01.570252+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-10T11:00:37.674496+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-10T11:00:01.417720+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T19:05:46.636627+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=36s)"
+    },
+    {
+      "ts": "2026-03-09T19:05:46.547703+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T19:05:10.320809+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T19:00:58.289106+00:00",
+      "task": "Check remetentes",
+      "status": "failed",
+      "agent": "Daniela",
+      "notes": "Execução concorrente bloqueada por lock"
+    },
+    {
+      "ts": "2026-03-09T19:00:55.205418+00:00",
+      "task": "Check remetentes",
+      "status": "failed",
+      "agent": "Daniela",
+      "notes": "Execução concorrente bloqueada por lock"
+    },
+    {
+      "ts": "2026-03-09T19:00:44.967928+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T19:00:08.157392+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T19:00:01.552705+00:00",
+      "task": "Check remetentes",
+      "status": "failed",
+      "agent": "Daniela",
+      "notes": "Execução concorrente bloqueada por lock"
+    },
+    {
+      "ts": "2026-03-09T18:59:31.910626+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T18:31:26.387191+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T18:30:50.136691+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T18:00:16.410816+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:59:40.127438+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:58:30.069111+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:57:53.814298+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:57:13.553311+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:56:37.320310+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:24:29.494061+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:23:53.256290+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:19:08.882730+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:18:32.634993+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:15:59.026865+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:15:22.770294+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:14:50.380165+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:14:14.135277+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:13:39.834686+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:13:03.453829+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:06:28.173143+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:05:51.935420+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:03:51.427072+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:03:15.175519+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:02:54.845303+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:02:18.524046+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:01:40.469193+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:01:04.229143+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T17:00:39.690108+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T17:00:03.441672+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:59:28.371582+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:58:52.129041+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:58:06.031609+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:57:29.774788+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:54:31.419141+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:53:55.183811+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:53:05.543121+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:52:29.290261+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:41:12.563447+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:40:36.320719+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:39:57.048518+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:39:20.792661+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:31:50.689003+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:31:14.442350+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:17:53.466059+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:17:17.217949+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T16:16:44.159372+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T16:16:07.926635+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T15:45:28.934258+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T15:44:52.689641+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T15:14:23.301333+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T15:13:47.055111+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T14:43:15.184094+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T14:42:38.932474+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T14:12:00.642912+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T14:11:24.397389+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T13:41:03.036328+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T13:40:26.786777+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T13:09:46.751026+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T13:09:10.509572+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T13:08:47.409479+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T13:08:11.155603+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T12:37:26.356910+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T12:36:50.111869+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T12:00:04.692871+00:00",
+      "task": "Ideia de Negócio",
+      "status": "done",
+      "agent": "Nexo",
+      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-09.md"
+    },
+    {
+      "ts": "2026-03-09T12:00:01.293142+00:00",
+      "task": "Ideia de Negócio",
+      "status": "running",
+      "agent": "Nexo",
+      "notes": "Pesquisa e geração iniciadas"
+    },
+    {
+      "ts": "2026-03-09T11:52:23.270124+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T11:51:47.013497+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T11:19:32.315387+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T11:18:56.077660+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T11:18:22.104477+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T11:17:45.861747+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T11:16:55.001646+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T11:16:18.750149+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T11:07:16.931376+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T11:06:40.680121+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T11:00:37.392225+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T11:00:01.154767+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T10:35:14.510148+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T10:34:38.262863+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T10:34:06.759735+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T10:33:30.506946+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T10:33:03.895880+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T10:32:27.637821+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
+    {
+      "ts": "2026-03-09T10:01:53.176933+00:00",
+      "task": "Check remetentes",
+      "status": "done",
+      "agent": "Daniela",
+      "notes": "Nenhum e-mail novo"
+    },
+    {
+      "ts": "2026-03-09T10:01:16.914568+00:00",
+      "task": "Check remetentes",
+      "status": "running",
+      "agent": "Daniela",
+      "notes": "Verificação iniciada"
+    },
     {
       "ts": "2026-03-09T01:02:27.790952+00:00",
       "task": "Backup GitHub",
@@ -618,538 +2165,6 @@
       "status": "running",
       "agent": "Daniela",
       "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T02:12:19.192566+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-07T02:11:42.942277+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T02:11:16.887121+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-07T02:10:40.656327+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T02:08:28.453195+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T02:06:31.879242+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T02:04:27.550067+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T02:01:58.937061+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:59:18.706782+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:57:26.138350+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:55:15.239298+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:53:13.868068+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:51:13.483992+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:49:10.912348+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:46:09.175713+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:44:00.169331+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:42:09.448819+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:40:05.099479+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:38:11.486677+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T01:34:31.259186+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T00:58:30.496151+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-07T00:06:20.272256+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T21:48:40.697115+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T21:48:06.445635+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-06T21:46:36.216322+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T21:43:10.766360+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T21:33:22.294415+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-06T21:31:52.057156+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T20:58:59.472042+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T20:37:35.645667+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-06T20:36:05.414087+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T20:33:31.567517+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T19:18:10.751583+00:00",
-      "task": "State Machine Test",
-      "status": "failed",
-      "agent": "Mike",
-      "notes": "teste phase C"
-    },
-    {
-      "ts": "2026-03-06T19:01:32.304944+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-06T19:00:02.000976+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T16:45:49.406674+00:00",
-      "task": "Heartbeat técnico",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
-    },
-    {
-      "ts": "2026-03-06T16:45:46.560425+00:00",
-      "task": "Heartbeat técnico",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
-    },
-    {
-      "ts": "2026-03-06T16:45:07.011611+00:00",
-      "task": "Heartbeat técnico",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "Auto-heal L1: recuperado com estratégia l1 (mode=exploit, duração=3s)"
-    },
-    {
-      "ts": "2026-03-06T16:03:13.963502+00:00",
-      "task": "Backup GitHub",
-      "status": "done",
-      "agent": "Sistema",
-      "notes": "normalizado por manutenção"
-    },
-    {
-      "ts": "2026-03-06T16:03:13.922776+00:00",
-      "task": "Heartbeat técnico",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "normalizado por manutenção"
-    },
-    {
-      "ts": "2026-03-06T13:00:19.563368+00:00",
-      "task": "Gateway Risk Test",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "normalizado"
-    },
-    {
-      "ts": "2026-03-06T13:00:08.419802+00:00",
-      "task": "Gateway Risk Test",
-      "status": "failed",
-      "agent": "Mike",
-      "notes": "teste risk engine"
-    },
-    {
-      "ts": "2026-03-06T12:40:01.539384+00:00",
-      "task": "Ideia de Negócio",
-      "status": "done",
-      "agent": "Nexo",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
-    },
-    {
-      "ts": "2026-03-06T12:40:00.143952+00:00",
-      "task": "Ideia de Negócio",
-      "status": "failed",
-      "agent": "Nexo",
-      "notes": "Execução concorrente bloqueada por lock"
-    },
-    {
-      "ts": "2026-03-06T12:39:59.647010+00:00",
-      "task": "Ideia de Negócio",
-      "status": "running",
-      "agent": "Nexo",
-      "notes": "Pesquisa e geração iniciadas"
-    },
-    {
-      "ts": "2026-03-06T12:39:56.134606+00:00",
-      "task": "Ideia de Negócio",
-      "status": "done",
-      "agent": "Nexo",
-      "notes": "Auto-heal L1: run-nexo-task executado com sucesso"
-    },
-    {
-      "ts": "2026-03-06T12:39:56.095240+00:00",
-      "task": "Ideia de Negócio",
-      "status": "done",
-      "agent": "Nexo",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
-    },
-    {
-      "ts": "2026-03-06T12:39:53.596701+00:00",
-      "task": "Ideia de Negócio",
-      "status": "running",
-      "agent": "Nexo",
-      "notes": "Pesquisa e geração iniciadas"
-    },
-    {
-      "ts": "2026-03-06T12:39:42.167143+00:00",
-      "task": "Ideia de Negócio",
-      "status": "done",
-      "agent": "Nexo",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
-    },
-    {
-      "ts": "2026-03-06T12:39:38.774772+00:00",
-      "task": "Ideia de Negócio",
-      "status": "failed",
-      "agent": "Nexo",
-      "notes": "Execução concorrente bloqueada por lock"
-    },
-    {
-      "ts": "2026-03-06T12:39:38.734778+00:00",
-      "task": "Ideia de Negócio",
-      "status": "running",
-      "agent": "Nexo",
-      "notes": "Pesquisa e geração iniciadas"
-    },
-    {
-      "ts": "2026-03-06T12:16:08.908533+00:00",
-      "task": "Check remetentes",
-      "status": "done",
-      "agent": "Daniela",
-      "notes": "Nenhum e-mail novo"
-    },
-    {
-      "ts": "2026-03-06T12:15:50.692311+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T12:00:07.305971+00:00",
-      "task": "Ideia de Negócio",
-      "status": "done",
-      "agent": "Nexo",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
-    },
-    {
-      "ts": "2026-03-06T12:00:01.604494+00:00",
-      "task": "Ideia de Negócio",
-      "status": "running",
-      "agent": "Nexo",
-      "notes": "Pesquisa e geração iniciadas"
-    },
-    {
-      "ts": "2026-03-06T11:00:01.159672+00:00",
-      "task": "Check remetentes",
-      "status": "running",
-      "agent": "Daniela",
-      "notes": "Verificação iniciada"
-    },
-    {
-      "ts": "2026-03-06T09:51:12.285260+00:00",
-      "task": "Random Job XYZ",
-      "status": "pending",
-      "agent": "Sistema",
-      "notes": "normalizado apos teste L3"
-    },
-    {
-      "ts": "2026-03-06T09:51:07.524025+00:00",
-      "task": "Random Job XYZ",
-      "status": "failed",
-      "agent": "Sistema",
-      "notes": "teste escalonamento L3"
-    },
-    {
-      "ts": "2026-03-06T09:41:39.658147+00:00",
-      "task": "Gateway monitor",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "normalizado após teste"
-    },
-    {
-      "ts": "2026-03-06T09:41:24.219697+00:00",
-      "task": "Gateway monitor",
-      "status": "failed",
-      "agent": "Mike",
-      "notes": "teste auto-heal gateway"
-    },
-    {
-      "ts": "2026-03-06T09:41:16.553328+00:00",
-      "task": "Heartbeat técnico",
-      "status": "failed",
-      "agent": "Mike",
-      "notes": "teste auto-heal"
-    },
-    {
-      "ts": "2026-03-06T09:38:31.150794+00:00",
-      "task": "Backup GitHub",
-      "status": "done",
-      "agent": "Sistema",
-      "notes": "normalizado"
-    },
-    {
-      "ts": "2026-03-06T09:38:31.093198+00:00",
-      "task": "Heartbeat técnico",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "normalizado"
-    },
-    {
-      "ts": "2026-03-06T09:38:30.022819+00:00",
-      "task": "Backup GitHub",
-      "status": "failed",
-      "agent": "Sistema",
-      "notes": "teste severidade critical"
-    },
-    {
-      "ts": "2026-03-06T09:38:29.973856+00:00",
-      "task": "Heartbeat técnico",
-      "status": "failed",
-      "agent": "Mike",
-      "notes": "teste severidade warning"
-    },
-    {
-      "ts": "2026-03-06T09:28:28.579086+00:00",
-      "task": "Ideia de Negócio",
-      "status": "pending",
-      "agent": "Nexo",
-      "notes": "normalizado após falha"
-    },
-    {
-      "ts": "2026-03-06T09:28:25.528948+00:00",
-      "task": "Ideia de Negócio",
-      "status": "failed",
-      "agent": "Nexo",
-      "notes": "teste dedup 2"
-    },
-    {
-      "ts": "2026-03-06T09:28:25.478215+00:00",
-      "task": "Ideia de Negócio",
-      "status": "failed",
-      "agent": "Nexo",
-      "notes": "teste dedup 1"
-    },
-    {
-      "ts": "2026-03-06T09:26:19.695757+00:00",
-      "task": "Check remetentes",
-      "status": "pending",
-      "agent": "Daniela",
-      "notes": "Normalizado após teste guiado"
-    },
-    {
-      "ts": "2026-03-06T09:26:17.927518+00:00",
-      "task": "Check remetentes",
-      "status": "failed",
-      "agent": "Daniela",
-      "notes": "Teste guiado item4"
-    },
-    {
-      "ts": "2026-03-06T09:24:28.811223+00:00",
-      "task": "Heartbeat técnico",
-      "status": "pending",
-      "agent": "Mike",
-      "notes": "Status normalizado após teste de alertas"
-    },
-    {
-      "ts": "2026-03-06T09:24:21.281687+00:00",
-      "task": "Heartbeat técnico",
-      "status": "failed",
-      "agent": "Mike",
-      "notes": "Teste de alerta automatizado"
-    },
-    {
-      "ts": "2026-03-06T09:21:23.921105+00:00",
-      "task": "Ideia de Negócio",
-      "status": "done",
-      "agent": "Nexo",
-      "notes": "Ideia gerada em /root/.openclaw/workspace/ideias-negocio/ideia-2026-03-06.md"
-    },
-    {
-      "ts": "2026-03-06T09:21:21.251759+00:00",
-      "task": "Ideia de Negócio",
-      "status": "running",
-      "agent": "Nexo",
-      "notes": "Pesquisa e geração iniciadas"
-    },
-    {
-      "ts": "2026-03-06T01:27:46.192977+00:00",
-      "task": "Backup GitHub",
-      "status": "done",
-      "agent": "Sistema",
-      "notes": "Backup executado com sucesso"
-    },
-    {
-      "ts": "2026-03-06T01:27:46.110617+00:00",
-      "task": "Backup GitHub",
-      "status": "running",
-      "agent": "Sistema",
-      "notes": "Backup iniciado"
     }
   ]
 }

@@ -6,121 +6,225 @@
   <title>Jarvis Trade Command Center</title>
   <script src="/vendor/lightweight-charts.standalone.production.js?v=2"></script>
   <style>
-    :root{--bg:#0a0f14;--card:#101722;--line:#1e2a3b;--txt:#e9f1ff;--muted:#7f8ea3;--green:#00ffa3;--cyan:#25c7ff;--red:#ff4d6d}
-    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#0e1622,#0a0f14 35%);color:var(--txt);font-family:Inter,system-ui}
-    .wrap{padding:14px;display:grid;gap:10px;grid-template-columns:repeat(12,minmax(0,1fr));max-width:1680px;margin:0 auto}
-    .card{background:linear-gradient(180deg,#121b28,#0f1622);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 0 25px #00000055;overflow:hidden}
-    .kpi{grid-column:span 2}.chart{grid-column:span 7}.side{grid-column:span 5}.open{grid-column:span 8}.perf{grid-column:span 4}.trio{grid-column:span 4}.full{grid-column:1/-1}
-    .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.v{font-size:22px;font-weight:800}
+    :root{
+      --bg:#070b12;--bg2:#0d1524;--card:#111b2d;--line:#24344d;--txt:#e9f2ff;--muted:#8ea5c2;
+      --green:#18e89b;--cyan:#39bfff;--red:#ff627f;--amber:#ffbe74;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--txt);background:radial-gradient(1100px 500px at 50% -5%,#1b2b45 0%,#0a111d 48%,#070b12 100%)}
+    .wrap{max-width:1840px;margin:0 auto;padding:20px;display:grid;gap:14px;grid-template-columns:repeat(12,minmax(0,1fr))}
+    .card{background:linear-gradient(180deg,#132038,#0f1a2c);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 10px 25px #00000030;overflow:hidden}
+    .full{grid-column:1/-1}
+    .controls{position:relative;top:auto;z-index:1;background:#0d1728f0;backdrop-filter:blur(10px)}
+
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .t{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+    .v{font-size:24px;font-weight:800;line-height:1.1}
+    .muted-note{font-size:11px;color:#8ca2bf}
     .ok{color:var(--green)} .bad{color:var(--red)} .cy{color:var(--cyan)}
-    .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-    table{width:100%;border-collapse:collapse;font-size:12px;display:block;overflow-x:auto} th,td{padding:7px;border-bottom:1px solid #1b2432;text-align:left;white-space:nowrap}
-    #chart{height:300px !important;overflow:hidden;position:relative}
-    #chart *{max-height:100%}
-    #chart table{display:table !important;overflow:visible !important}
-    .open-table th,.open-table td{font-size:11px}
-    .side table{display:table;width:100%;table-layout:fixed}
-    .side th,.side td{font-size:11px;white-space:normal;word-break:break-word;vertical-align:top}
-    #sig td,#sig th{overflow-wrap:anywhere}
-    #chart{height:320px !important}
-    .badge{padding:3px 8px;border-radius:8px;border:1px solid #21415d;background:#112338;color:var(--cyan);font-size:12px}
-    .bot-indicator{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;border:1px solid #2a3b52;font-size:12px}
-    .dot{width:10px;height:10px;border-radius:50%}
-    .dot.green{background:#00ff8c;box-shadow:0 0 10px #00ff8c;animation:pulseGreen 1s infinite}
-    .dot.red{background:#ff4d6d;box-shadow:0 0 10px #ff4d6d;animation:pulseRed 1s infinite}
-    @keyframes pulseGreen{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:.7}}
-    @keyframes pulseRed{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:.7}}
-    select{background:#0c1624;color:#dbe8ff;border:1px solid #253750;border-radius:8px;padding:5px;max-width:100%}
-    input{max-width:100%;min-width:0}
+
+    .bot-indicator{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;border:1px solid #2c4260;font-size:12px}
+    .dot{width:9px;height:9px;border-radius:50%}
+    .dot.green{background:#18e89b;box-shadow:0 0 10px #18e89b;animation:pulse 1s infinite}
+    .dot.red{background:#ff627f;box-shadow:0 0 10px #ff627f;animation:pulse 1s infinite}
+    @keyframes pulse{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:.7}}
+
+    .controls-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+    .control-group{border:1px solid #2b4160;background:#0d1a2d;border-radius:10px;padding:10px}
+    .group-title{font-size:10px;color:#90a6c3;text-transform:uppercase;letter-spacing:.11em;margin-bottom:8px}
+    .button-row{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{border-radius:8px;padding:7px 10px;font-weight:600;cursor:pointer;border:1px solid #324b6d;color:#e9f2ff;background:#13243a}
+
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab-btn{padding:8px 12px;border-radius:10px;border:1px solid #2b4160;background:#102039;color:#cfe0f7;cursor:pointer;font-weight:700;font-size:12px}
+    .tab-btn.active{background:#1a3558;border-color:#3d6ca5;color:#fff}
+    .tab-pane{display:none;grid-column:1/-1;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+    .tab-pane.active{display:grid}
+
+    .kpi{grid-column:span 2;min-height:108px;display:flex;flex-direction:column;justify-content:space-between}
+    .hero-kpi{background:linear-gradient(180deg,#173457,#11233a);border-color:#315782}.hero-kpi .v{font-size:30px}
+    .banner{grid-column:1/-1}
+    .chart{grid-column:span 8;min-height:430px}
+    .side{grid-column:span 4}
+    .open{grid-column:span 8}
+    .perf{grid-column:span 4}
+    .trio{grid-column:span 4}
+
+    #chart{height:380px !important;border-radius:10px;overflow:hidden}
+    .panel-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+
+    .badge{padding:5px 10px;border-radius:999px;border:1px solid #295177;background:#102741;color:var(--cyan);font-size:11px;font-weight:700}
+    select,input{background:#0b1627;color:#deebff;border:1px solid #2b415f;border-radius:9px;padding:7px 9px;max-width:100%}
     .api-grid{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;margin-top:6px}
-    @media(max-width:1400px){.chart{grid-column:span 7}.side{grid-column:span 5}.kpi{grid-column:span 3}.open,.perf{grid-column:span 6}.trio{grid-column:span 6}}
-    @media(max-width:1200px){.chart,.side,.open,.perf,.trio{grid-column:span 12}.kpi{grid-column:span 4} #chart{height:300px !important}}
+
+    table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+    th,td{padding:8px;border-bottom:1px solid #1f3048;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    th{font-size:10px;color:#9eb3ce;text-transform:uppercase;letter-spacing:.08em;background:#111f33;position:sticky;top:0;z-index:2}
+    tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+    .table-wrap{max-height:320px;overflow:auto;border:1px solid #1e3048;border-radius:10px}
+    .open-table th,.open-table td,.side td{font-size:11px}
+    #sig td,#sig th{overflow-wrap:anywhere}
+
+    @media(max-width:1600px){.kpi{grid-column:span 3}.open,.perf{grid-column:span 12}.trio{grid-column:span 6}}
+    @media(max-width:1280px){.chart,.side,.open,.perf,.trio{grid-column:span 12}.kpi{grid-column:span 4}.controls-grid{grid-template-columns:1fr 1fr}#chart{height:320px !important}}
     @media(max-width:900px){
       .kpi{grid-column:span 6}
-      .api-grid{grid-template-columns:1fr}
-      button{font-size:12px;padding:6px 8px !important;flex:1 1 calc(50% - 8px)}
-      #modeMsg{font-size:11px}
-      #botIndicator{width:100%;justify-content:center}
+      .controls-grid,.api-grid{grid-template-columns:1fr}
       .hide-sm{display:none}
       #chart{height:260px !important}
+      .table-wrap{max-height:230px}
+      .tab-btn{flex:1 1 calc(50% - 8px)}
     }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="card full" style="position:sticky;top:0;z-index:30;background:#0f1622e8;backdrop-filter: blur(6px)">
-    <div class="row" style="margin-bottom:6px">
+  <div class="card full controls">
+    <div class="row">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="t">Controls</span>
+        <span class="t">Command Controls</span>
         <span id="botIndicator" class="bot-indicator"><span id="botDot" class="dot red"></span><span id="botText">OFFLINE</span></span>
       </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="summary">Resumo</button>
+        <button class="tab-btn" data-tab="trading">Operação</button>
+        <button class="tab-btn" data-tab="signals">Sinais</button>
+        <button class="tab-btn" data-tab="wallet">Wallet</button>
+      </div>
     </div>
-    <div class="row" style="justify-content:flex-start;gap:8px">
-      <button id="paperBtn" style="background:#123;color:#fff;border:1px solid #355;border-radius:8px;padding:6px 10px;cursor:pointer">Paper</button>
-      <button id="realBtn" style="background:#311;color:#fff;border:1px solid #533;border-radius:8px;padding:6px 10px;cursor:pointer">Real</button>
-      <button id="walletBtn" style="background:#132;color:#fff;border:1px solid #355;border-radius:8px;padding:6px 10px;cursor:pointer">Atualizar Wallet</button>
-      <button id="apiToggleBtn" style="background:#1b1b35;color:#fff;border:1px solid #444a77;border-radius:8px;padding:6px 10px;cursor:pointer">API</button>
+
+    <div class="controls-grid">
+      <div class="control-group">
+        <div class="group-title">Modo</div>
+        <div class="button-row">
+          <button id="paperBtn" class="btn">Paper</button>
+          <button id="realBtn" class="btn" style="background:#301828;border-color:#5e2f48">Real</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="group-title">Perfil</div>
+        <div class="button-row">
+          <button id="pfConservative" class="btn" style="background:#103322;border-color:#2f8f58">🟢 Conservador</button>
+          <button id="pfBalanced" class="btn" style="background:#2f3b0f;border-color:#8f8f2f">🟡 Balanceado</button>
+          <button id="pfAggressive" class="btn" style="background:#3b260f;border-color:#a36a2f">🟠 Agressivo</button>
+          <button id="pfUltra" class="btn" style="background:#3b0f16;border-color:#a32f45">🔴 Ultra</button>
+          <button id="pfLoucura" class="btn" style="background:#4b0016;border-color:#ff2f63">🧨 Loucura</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="group-title">Ações</div>
+        <div class="button-row">
+          <button id="walletBtn" class="btn">Atualizar Wallet</button>
+          <button id="apiToggleBtn" class="btn" style="background:#1b1b35;border-color:#444a77">API</button>
+          <button id="paperResetBtn" class="btn" style="background:#09304a;border-color:#2f8fbf">♻️ Reset Paper</button>
+        </div>
+      </div>
     </div>
-    <div class="row" style="justify-content:flex-start;gap:6px;margin-top:6px">
-      <button id="pfConservative" style="background:#0f3b1f;color:#caffde;border:1px solid #2f8f58;border-radius:8px;padding:4px 8px;cursor:pointer">🟢 Conservador</button>
-      <button id="pfBalanced" style="background:#2f3b0f;color:#f2ffca;border:1px solid #8f8f2f;border-radius:8px;padding:4px 8px;cursor:pointer">🟡 Balanceado</button>
-      <button id="pfAggressive" style="background:#3b260f;color:#ffe3ca;border:1px solid #a36a2f;border-radius:8px;padding:4px 8px;cursor:pointer">🟠 Agressivo</button>
-      <button id="pfUltra" style="background:#3b0f16;color:#ffcfd7;border:1px solid #a32f45;border-radius:8px;padding:4px 8px;cursor:pointer">🔴 Ultra</button>
-      <button id="pfLoucura" style="background:#4b0016;color:#ffd2dc;border:1px solid #ff2f63;border-radius:8px;padding:4px 8px;cursor:pointer">🧨 Loucura (paper)</button>
-      <button id="paperResetBtn" style="background:#09304a;color:#d9f2ff;border:1px solid #2f8fbf;border-radius:8px;padding:4px 8px;cursor:pointer">♻️ Recarregar Paper</button>
-    </div>
-    <div id="profileDesc" style="font-size:11px;color:#9fb0ca;margin-top:4px"></div>
+
+    <div id="profileDesc" style="font-size:11px;color:#9fb0ca;margin-top:8px"></div>
     <div id="modeMsg" style="font-size:12px;color:#ff9f43;margin-top:6px;min-height:16px"></div>
+
     <div id="apiPanel" style="display:none;margin-top:8px;border:1px solid #263047;padding:8px;border-radius:8px">
       <div class="row"><div class="t">API Settings</div><div id="apiStatus" class="badge">Not Configured</div></div>
       <div class="api-grid">
-        <input id="apiKey" placeholder="BINANCE_API_KEY" style="background:#0b1320;color:#d8e6ff;border:1px solid #28405f;border-radius:8px;padding:6px;width:100%" />
-        <input id="apiSecret" placeholder="BINANCE_API_SECRET" style="background:#0b1320;color:#d8e6ff;border:1px solid #28405f;border-radius:8px;padding:6px;width:100%" />
+        <input id="apiKey" placeholder="BINANCE_API_KEY" />
+        <input id="apiSecret" placeholder="BINANCE_API_SECRET" />
         <label style="font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap"><input type="checkbox" id="realEnabled"/> habilitar real</label>
-        <button id="saveApiBtn" style="background:#133;color:#fff;border:1px solid #3a6;border-radius:8px;padding:6px 10px;cursor:pointer;width:100%">Salvar API</button>
+        <button id="saveApiBtn" class="btn">Salvar API</button>
       </div>
     </div>
   </div>
-  <div class="card kpi"><div class="t">Balance</div><div id="balance" class="v ok">-</div></div>
-  <div class="card kpi"><div class="t">Unrealized PnL</div><div id="upnl" class="v">-</div></div>
-  <div class="card kpi"><div class="t">Win Rate</div><div id="win" class="v cy">-</div></div>
-  <div class="card kpi"><div class="t">Profit Factor</div><div id="pf" class="v cy">-</div></div>
-  <div class="card kpi"><div class="t">Exposure</div><div id="exp" class="v">-</div></div>
-  <div class="card kpi"><div class="t">Mode</div><div id="mode" class="v cy">-</div></div>
 
-  <div class="card chart">
-    <div class="row"><div class="t">Market Chart</div><div><select id="pair"></select> <select id="int"><option>15m</option><option>1h</option><option>4h</option></select></div></div>
-    <div id="chart" style="margin-top:8px"></div>
-  </div>
-  <div class="card side">
-    <div class="row"><div class="t">Bot Activity</div></div>
-    <div style="font-size:13px;line-height:1.7;margin-top:6px">
-      <div>Regime: <span id="regime" class="cy">-</span></div>
-      <div>Last scan: <span id="last">-</span></div>
-      <div>Next scan: <span id="next" class="cy">-</span> sec</div>
-      <div>Consecutive losses: <span id="losses" class="bad">-</span></div>
-      <div>Circuit breaker: <span id="cb" class="bad">inactive</span></div>
-      <div>Wallet USDT: <span id="wallet" class="cy">-</span></div>
-      <div>Real ready: <span id="realReady" class="cy">-</span></div>
+  <div id="tab-summary" class="tab-pane active">
+    <div class="card banner">
+      <div class="row"><div class="t">Executive Status</div><div id="telemetryBadge" class="badge">-</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:8px;font-size:13px;line-height:1.6">
+        <div><span class="t">Execution</span><div id="execStatus" class="v cy" style="font-size:18px">-</div></div>
+        <div><span class="t">Profile</span><div id="topProfile" class="v" style="font-size:18px">-</div></div>
+        <div><span class="t">Block reason</span><div id="topBlockReason" style="color:#ffb86b">-</div></div>
+        <div><span class="t">Telemetry note</span><div id="telemetryWarning" style="color:#9fb0ca">-</div></div>
+      </div>
+    </div>
+
+    <div class="card kpi hero-kpi"><div class="t">Equity</div><div id="equity" class="v ok">-</div><div class="muted-note">Capital total estimado</div></div>
+    <div class="card kpi"><div class="t">Available</div><div id="available" class="v cy">-</div><div class="muted-note">Caixa livre</div></div>
+    <div class="card kpi"><div class="t">Allocated</div><div id="allocated" class="v">-</div><div class="muted-note">Capital em posições</div></div>
+    <div class="card kpi"><div class="t">Realized Today</div><div id="realizedToday" class="v">-</div><div class="muted-note">PnL fechado</div></div>
+    <div class="card kpi"><div class="t">Open Positions</div><div id="openCount" class="v">-</div><div class="muted-note">Trades ativos</div></div>
+    <div class="card kpi"><div class="t">Trades Today</div><div id="tradesToday" class="v cy">-</div><div class="muted-note">Volume diário</div></div>
+
+    <div class="card side">
+      <div class="panel-title"><div><div class="t">Bot Activity</div><div class="muted-note">Estado de operação</div></div></div>
+      <div style="font-size:13px;line-height:1.7;margin-top:6px">
+        <div>Regime: <span id="regime" class="cy">-</span></div>
+        <div>Last scan: <span id="last">-</span></div>
+        <div>Next scan: <span id="next" class="cy">-</span> sec</div>
+        <div>Consecutive losses: <span id="losses" class="bad">-</span></div>
+        <div>Circuit breaker: <span id="cb" class="bad">inactive</span></div>
+        <div>Wallet USDT: <span id="wallet" class="cy">-</span></div>
+        <div>Real ready: <span id="realReady" class="cy">-</span></div>
+        <div>PnL 24h: <span id="pnl24h" class="cy">-</span></div>
+        <div>PnL 7d: <span id="pnl7d" class="cy">-</span></div>
+      </div>
+    </div>
+
+    <div class="card side">
+      <div class="panel-title"><div><div class="t">Engine Health</div><div class="muted-note">Telemetria de ciclo e latência</div></div></div>
+      <div class="table-wrap"><table><tbody>
+        <tr><td>Status</td><td id="healthStatus">-</td></tr>
+        <tr><td>Cycle ms</td><td id="healthCycle">-</td></tr>
+        <tr><td>API latency</td><td id="healthLatency">-</td></tr>
+        <tr><td>Last cycle</td><td id="healthLastCycle">-</td></tr>
+        <tr><td>Last error</td><td id="healthError">-</td></tr>
+      </tbody></table></div>
     </div>
   </div>
 
-  <div class="card open"><div class="t">Open Positions (Quanto falta para vender)</div><table class="open-table"><thead><tr><th>Pair</th><th class="hide-sm">Entry</th><th>Atual</th><th class="hide-sm">SL</th><th class="hide-sm">TP1</th><th>TP2</th><th class="hide-sm">Qtd</th><th class="hide-sm">Falta TP1</th><th>Falta TP2</th><th>Distância SL</th></tr></thead><tbody id="positions"></tbody></table></div>
+  <div id="tab-trading" class="tab-pane">
+    <div class="card chart">
+      <div class="panel-title"><div><div class="t">Market Chart</div><div class="muted-note">Leitura principal com EMAs</div></div><div><select id="pair"></select> <select id="int"><option>15m</option><option>1h</option><option>4h</option></select></div></div>
+      <div id="chart" style="margin-top:8px"></div>
+    </div>
 
-  <div class="card perf"><div class="t">Performance por Estratégia</div><table><thead><tr><th>Strategy</th><th>Abertas</th><th>Fechadas</th><th>Win Rate</th><th>PnL</th></tr></thead><tbody id="stratPerf"></tbody></table></div>
+    <div class="card side">
+      <div class="panel-title"><div><div class="t">Performance por Estratégia</div><div class="muted-note">Resumo consolidado</div></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Strategy</th><th>Abertas</th><th>Fechadas</th><th>Win Rate</th><th>Avg PnL</th><th>PnL</th></tr></thead><tbody id="stratPerf"></tbody></table></div>
+    </div>
 
-  <div class="card full"><div class="t">Latest Signals</div><table><thead><tr><th style="width:12%">Pair</th><th style="width:10%">Entry</th><th style="width:14%">Exec</th><th style="width:8%">Score</th><th style="width:56%">Motivo</th></tr></thead><tbody id="sig"></tbody></table></div>
+    <div class="card open">
+      <div class="panel-title"><div><div class="t">Open Positions</div><div class="muted-note">Gestão das posições abertas</div></div></div>
+      <div class="table-wrap"><table class="open-table"><thead><tr><th>Pair</th><th class="hide-sm">Entry</th><th>Atual</th><th class="hide-sm">SL</th><th class="hide-sm">TP1</th><th>TP2</th><th class="hide-sm">Qtd</th><th class="hide-sm">Falta TP1</th><th>Falta TP2</th><th>Distância SL</th></tr></thead><tbody id="positions"></tbody></table></div>
+    </div>
+  </div>
 
-  <div class="card trio"><div class="t">Watchlist</div><table><thead><tr><th>Pair</th><th>Price</th><th>24h%</th><th>RSI</th><th>Bias</th><th>Action</th></tr></thead><tbody id="watch"></tbody></table></div>
+  <div id="tab-signals" class="tab-pane">
+    <div class="card full"><div class="row"><div class="t">Latest Signals</div><div style="font-size:11px;color:#9fb0ca">Telemetria interna do algoritmo; não é validação de edge</div></div><div class="table-wrap"><table><thead><tr><th>Pair</th><th>Setup</th><th>Status</th><th>Exec</th><th>Score</th><th>Conf.</th><th>RR</th><th>Entry</th><th>SL</th><th>TP2</th><th>Motivo</th></tr></thead><tbody id="sig"></tbody></table></div></div>
+    <div class="card trio"><div class="panel-title"><div><div class="t">Watchlist</div><div class="muted-note">Radar dos ativos monitorados</div></div></div><div class="table-wrap"><table><thead><tr><th>Pair</th><th>Price</th><th>24h%</th><th>RSI</th><th>Bias</th><th>Action</th></tr></thead><tbody id="watch"></tbody></table></div></div>
+    <div class="card trio"><div class="panel-title"><div><div class="t">Execution Card</div><div class="muted-note">Log operacional do engine</div></div></div><div class="table-wrap"><table><thead><tr><th>Hora</th><th>Tipo</th><th>Pair</th><th>Detalhes</th></tr></thead><tbody id="exec"></tbody></table></div></div>
+  </div>
 
-  <div class="card trio"><div class="t">Execution Card (Comprado / Vendido / Rejeitado)</div><table><thead><tr><th>Hora</th><th>Tipo</th><th>Pair</th><th>Detalhes</th></tr></thead><tbody id="exec"></tbody></table></div>
-
-  <div class="card trio"><div class="t">Raw Wallet Assets (Real)</div><table><thead><tr><th>Asset</th><th>Free</th><th>Locked</th><th>Total</th><th>USDT Value</th></tr></thead><tbody id="walletAssets"></tbody></table></div>
+  <div id="tab-wallet" class="tab-pane">
+    <div class="card full"><div class="panel-title"><div><div class="t">Raw Wallet Assets</div><div class="muted-note">Snapshot da wallet real</div></div></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Free</th><th>Locked</th><th>Total</th><th>USDT Value</th></tr></thead><tbody id="walletAssets"></tbody></table></div></div>
+  </div>
 </div>
 
 <script>
 const $=id=>document.getElementById(id); const fmt=n=>typeof n==='number'?n.toLocaleString(undefined,{maximumFractionDigits:2}):'-';
 let chart,candle,ema21,ema50,chartReady=false;
+
+function setupTabs(){
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tab=btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+      document.getElementById('tab-'+tab).classList.add('active');
+      if(tab==='trading' && chartReady){ setTimeout(()=>{try{ chart.resize($('chart').clientWidth, $('chart').clientHeight);}catch{}; loadChart();}, 60); }
+    });
+  });
+}
+
 function initChart(){
   if (!window.LightweightCharts) {
     $('chart').innerHTML = '<div style="padding:14px;color:#7f8ea3">Chart library blocked on this network/device. Metrics still update normally.</div>';
@@ -144,11 +248,30 @@ async function loadChart(){
   candle.setData(j.data||[]); ema21.setData(ema(j.data||[],21)); ema50.setData(ema(j.data||[],50));
 }
 function render(s){
-  const shownBalance = (s.mode === 'real' && s.wallet?.totalUSDT != null) ? s.wallet.totalUSDT : s.account.available;
-  $('balance').textContent=`$ ${fmt(shownBalance)}`;
-  $('upnl').textContent=`$ ${fmt(s.account.unrealizedPnL)}`; $('upnl').className='v '+(s.account.unrealizedPnL>=0?'ok':'bad');
-  $('win').textContent=`${fmt(s.account.winRate)}%`; $('pf').textContent=fmt(s.account.profitFactor); $('exp').textContent=`${fmt(s.risk.currentExposure*100)}%`;
-  $('mode').textContent=s.mode; $('regime').textContent=s.marketRegime;
+  const k = s.kpis || {};
+  const telemetry = s.telemetry || {};
+  $('equity').textContent=`$ ${fmt(k.equity ?? s.account.balance)}`;
+  $('available').textContent=`$ ${fmt(k.available ?? s.account.available)}`;
+  $('allocated').textContent=`$ ${fmt(k.allocated ?? s.account.allocated)}`;
+  $('realizedToday').textContent=`$ ${fmt(k.realizedToday ?? 0)}`; $('realizedToday').className='v '+((k.realizedToday ?? 0)>=0?'ok':'bad');
+  $('openCount').textContent=fmt(k.openPositions ?? (s.openPositions||[]).length);
+  $('tradesToday').textContent=fmt(k.tradesToday ?? s.risk.tradesToday);
+  $('regime').textContent=s.marketRegime;
+  $('pnl24h').textContent=`$ ${fmt(k.realized24h ?? 0)}`; $('pnl24h').className=(k.realized24h ?? 0)>=0?'cy':'bad';
+  $('pnl7d').textContent=`$ ${fmt(k.realized7d ?? 0)}`; $('pnl7d').className=(k.realized7d ?? 0)>=0?'cy':'bad';
+  $('healthStatus').textContent=(s.health?.status||'-').toUpperCase();
+  $('healthCycle').textContent=s.health?.cycleMs!=null?`${fmt(s.health.cycleMs)} ms`:'-';
+  $('healthLatency').textContent=s.health?.apiLatencyMs!=null?`${fmt(s.health.apiLatencyMs)} ms`:'-';
+  $('healthLastCycle').textContent=s.health?.lastCycleAt||'-';
+  $('healthError').textContent=s.health?.lastError ? `${s.health.lastErrorAt||''} ${s.health.lastError}` : 'none';
+  $('execStatus').textContent=(s.controls?.executionStatus || 'blocked').toUpperCase();
+  $('execStatus').className='v '+((s.controls?.executionStatus==='enabled')?'ok':'bad');
+  $('topProfile').textContent=String(s.controls?.tradeProfile || '-').toUpperCase();
+  $('topBlockReason').textContent=s.controls?.blockReason || 'Sem bloqueio operacional';
+  $('telemetryBadge').textContent = telemetry.simulated ? 'SIMULATED / PAPER' : 'LIVE EXECUTION';
+  $('telemetryWarning').textContent = (telemetry.warnings && telemetry.warnings[0]) ? telemetry.warnings[0] : 'Métricas operacionais em estado normal';
+  $('telemetryBadge').style.color = telemetry.simulated ? '#ffb86b' : '#00ffa3';
+  if (telemetry.metricsQuality === 'degraded') $('telemetryBadge').textContent += ' · DEGRADED METRICS';
   const isOnline = (s.status||'').toLowerCase()==='online';
   $('botText').textContent = isOnline ? 'ROBOT ONLINE' : 'ROBOT OFFLINE';
   $('botDot').className = 'dot ' + (isOnline ? 'green' : 'red');
@@ -157,10 +280,10 @@ function render(s){
   $('realReady').textContent = s.controls?.realReady ? 'YES' : 'NO';
   const profileLabel = (s.controls?.tradeProfile || 'conservative').toUpperCase();
   const pc = s.controls?.profileConfig || {};
-  const speedMap = { conservative:'Lento', balanced:'Médio', aggressive:'Rápido', ultra:'Muito rápido', loucura:'Extremo (1s/5s)' };
+  const speedMap = { conservative:'Lento', balanced:'Médio', aggressive:'Rápido', ultra:'Muito rápido', loucura:'Extremo (3s/5s)' };
   const sp = String((s.controls?.tradeProfile||'conservative')).toLowerCase();
   const mg = s.controls?.martingaleStep ?? 0;
-  const cadence = sp==='loucura' ? 'cadência BUY 1s / SELL 5s' : (sp==='ultra' ? 'cadência por scan (60s)' : 'cadência por scan');
+  const cadence = sp==='loucura' ? 'cadência BUY 3s / SELL 5s' : (sp==='ultra' ? 'cadência por scan (60s)' : 'cadência por scan');
   $('profileDesc').textContent = `${speedMap[sp]||'Custom'} • ${cadence} • score≥${pc.minScore ?? '-'} • TP1 ${pc.tp1Mul?((pc.tp1Mul-1)*100).toFixed(2):'-'}% • TP2 ${pc.tp2Mul?((pc.tp2Mul-1)*100).toFixed(2):'-'}% • SL ${pc.slMul?((1-pc.slMul)*100).toFixed(2):'-'}% • candidatos/ativo ${pc.maxCandidatesPerAsset ?? '-'} • max/dia ${pc.maxTradesPerDay ?? '-'} • martingale step ${mg}`;
   if (typeof s.controls?.realEnabled === 'boolean') $('realEnabled').checked = s.controls.realEnabled;
   const configured = !!s.controls?.hasApiKeys;
@@ -179,7 +302,7 @@ function render(s){
   const pairs=(s.watchlist||[]).map(x=>x.symbol); if($('pair').options.length===0){ pairs.forEach(p=>{const o=document.createElement('option');o.value=o.textContent=p;$('pair').appendChild(o)}); loadChart(); }
 
   $('sig').innerHTML=(s.signals||[]).slice(0,7).map(g=>{
-    const ready = g.action==='BUY' ? 'YES' : 'NO';
+    const ready = g.action==='BUY' ? 'READY' : 'NO';
     const why = (g.reason||'-').replace(/^Approved:\s*/,'').replace(/^Rejected:\s*/,'');
     const ex = (s.executionFeed||[]).find(e=>e.pair===g.pair);
     let execStatus = '-';
@@ -188,7 +311,9 @@ function render(s){
     else if (ex?.type === 'BUY') { execStatus = 'EXEC'; execClass='ok'; }
     else if (ex?.type === 'REJECTED' && String(ex.details||'').includes('Risk block')) { execStatus = 'RISK_BLOCK'; execClass='bad'; }
     else if (ex?.type === 'REJECTED') { execStatus = 'REJ'; execClass='bad'; }
-    return `<tr><td>${g.pair}</td><td class="${g.action==='BUY'?'ok':'bad'}">${ready==='YES'?'READY':'NO'}</td><td class="${execClass}">${execStatus}</td><td>${g.strength}</td><td>${why}</td></tr>`;
+    const life = String(g.lifecycle||'new').toUpperCase();
+    const lifeClass = life==='EXECUTED' || life==='CLOSED' ? 'ok' : (life==='EXPIRED' || life==='REJECTED' ? 'bad' : 'cy');
+    return `<tr><td>${g.pair}</td><td class="${g.action==='BUY'?'ok':'bad'}">${ready}<div style="font-size:10px;color:#9fb0ca">${g.timeframe||'-'} · ${g.direction||'-'}</div></td><td class="${lifeClass}">${life}</td><td class="${execClass}">${execStatus}</td><td>${g.strength}</td><td>${g.confidence||'-'}</td><td>${g.rr||'-'}</td><td>${fmt(g.entry)}</td><td>${fmt(g.stopLoss)}</td><td>${fmt(g.tp2)}</td><td>${why}</td></tr>`;
   }).join('');
   $('watch').innerHTML=(s.watchlist||[]).slice(0,12).map(w=>{
     const sg=(s.signals||[]).find(x=>x.pair===w.symbol); const bias=(w.tf1h?.e21>w.tf1h?.e50&&w.price>w.tf1h?.e200)?'bull':'mixed';
@@ -202,7 +327,7 @@ function render(s){
     const toTp1Pct = cur ? ((tp1/cur)-1)*100 : 0;
     const toTp2Pct = cur ? ((tp2/cur)-1)*100 : 0;
     const toSlPct = sl ? ((cur/sl)-1)*100 : 0;
-    return `<tr><td>${p.pair}</td><td class="hide-sm">${fmt(p.entry)}</td><td>${fmt(cur)}</td><td class="hide-sm">${fmt(sl)}</td><td class="hide-sm">${fmt(tp1)}</td><td>${fmt(tp2)}</td><td class="hide-sm">${fmt(p.qty)}</td><td class="cy hide-sm">${fmt(toTp1Abs)} (${fmt(toTp1Pct)}%)</td><td class="ok">${fmt(toTp2Abs)} (${fmt(toTp2Pct)}%)</td><td class="bad">${fmt(toSlPct)}%</td></tr>`;
+    return `<tr><td>${p.pair}<div style="font-size:10px;color:#9fb0ca">${p.strategy||'-'} · ${p.confidence||'-'} · ${p.timeframe||'-'}</div></td><td class="hide-sm">${fmt(p.entry)}</td><td>${fmt(cur)}</td><td class="hide-sm">${fmt(sl)}</td><td class="hide-sm">${fmt(tp1)}</td><td>${fmt(tp2)}</td><td class="hide-sm">${fmt(p.qty)}</td><td class="cy hide-sm">${fmt(toTp1Abs)} (${fmt(toTp1Pct)}%)</td><td class="ok">${fmt(toTp2Abs)} (${fmt(toTp2Pct)}%)</td><td class="bad">${fmt(toSlPct)}%</td></tr>`;
   }).join('') || '<tr><td colspan="10">Sem posições abertas</td></tr>';
 
   $('exec').innerHTML=(s.executionFeed||[]).slice(0,25).map(e=>`<tr><td>${e.ts}</td><td class="${e.type.includes('BUY')?'ok':(e.type.includes('SELL')?'cy':'bad')}">${e.type}</td><td>${e.pair||'-'}</td><td>${e.details||'-'}</td></tr>`).join('') || '<tr><td colspan="4">Sem execuções ainda</td></tr>';
@@ -212,9 +337,10 @@ function render(s){
   (s.openPositions||[]).forEach(p=>{ openByStrategy[p.strategy]=(openByStrategy[p.strategy]||0)+1; });
   const perfRows = (s.strategyPerformance||[]).map(p=>({strategy:p.strategy, open:openByStrategy[p.strategy]||0, closed:p.trades, winRate:p.winRate, pnl:p.pnl}));
   for (const [k,v] of Object.entries(openByStrategy)) if(!perfRows.find(r=>r.strategy===k)) perfRows.push({strategy:k, open:v, closed:0, winRate:0, pnl:0});
-  $('stratPerf').innerHTML=perfRows.map(p=>`<tr><td>${p.strategy}</td><td>${p.open}</td><td>${p.closed}</td><td>${fmt(p.winRate)}%</td><td class="${p.pnl>=0?'ok':'bad'}">${fmt(p.pnl)}</td></tr>`).join('') || '<tr><td colspan="5">Sem trades ainda</td></tr>';
+  $('stratPerf').innerHTML=perfRows.map(p=>`<tr><td>${p.strategy}</td><td>${p.open}</td><td>${p.closed}</td><td>${fmt(p.winRate)}%</td><td class="${p.avgPnL>=0?'ok':'bad'}">${fmt(p.avgPnL)}</td><td class="${p.pnl>=0?'ok':'bad'}">${fmt(p.pnl)}</td></tr>`).join('') || '<tr><td colspan="6">Sem trades ainda</td></tr>';
 }
 async function boot(){
+  setupTabs();
   initChart();
   $('pair').onchange=loadChart; $('int').onchange=loadChart;
 
@@ -225,13 +351,9 @@ async function boot(){
       const j = await r.json();
       if(!r.ok){ $('modeMsg').textContent = j.error || 'Erro ao mudar modo'; return; }
       $('modeMsg').textContent = `Modo ativo: ${j.mode}`;
-      if (j.mode === 'real') {
-        try { await fetch('/api/wallet',{cache:'no-store'}); } catch {}
-      }
+      if (j.mode === 'real') { try { await fetch('/api/wallet',{cache:'no-store'}); } catch {} }
       refreshState();
-    }catch{
-      $('modeMsg').textContent='Falha de conexão ao mudar modo';
-    }
+    }catch{ $('modeMsg').textContent='Falha de conexão ao mudar modo'; }
   }
   $('paperBtn').onclick=()=>setMode('paper');
   $('realBtn').onclick=()=>setMode('real');
@@ -303,7 +425,6 @@ async function boot(){
   ws.onerror=()=>{};
   ws.onclose=()=>{};
 
-  // Fallback polling to avoid 'frozen' UI when WS is blocked by network/browser.
   setInterval(refreshState, 3000);
   setInterval(()=>loadChart().catch(()=>{}),15000);
 }
